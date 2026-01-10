@@ -9,8 +9,12 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.SwerveDriveBrake;
+import com.ctre.phoenix6.swerve.SwerveRequest.SysIdSwerveTranslation;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,9 +26,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 
 public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements DriveIO {
+    // Signals
     private final BaseStatusSignal[] drivePositionSignals = new BaseStatusSignal[4];
     private final BaseStatusSignal[] driveVelocitySignals = new BaseStatusSignal[4];
     private final StatusSignal<Angle> gyroYaw;
+
+    // Requests
+    public static final ApplyRobotSpeeds APPLY_ROBOT_SPEEDS =
+        new ApplyRobotSpeeds()
+            .withCenterOfRotation(DriveConstants.centerOfRotation)
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+            .withDesaturateWheelSpeeds(true);
+
+    public static final SysIdSwerveTranslation RUN_CHARACTERIZATION = new SysIdSwerveTranslation();
 
     public DriveIOPhoenix(SwerveModuleConstants<?, ?, ?>... modules) {
         super(
@@ -99,13 +114,13 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
     @Override
     public void runVelocity(ChassisSpeeds speeds) {
-        super.setControl(DriveRequest.APPLY_ROBOT_SPEEDS.withSpeeds(speeds));
+        super.setControl(APPLY_ROBOT_SPEEDS.withSpeeds(speeds));
     }
 
     @Override
     public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
         super.setControl(
-            DriveRequest.APPLY_ROBOT_SPEEDS
+            APPLY_ROBOT_SPEEDS
                 .withSpeeds(speeds)
                 .withWheelForceFeedforwardsX(moduleForcesX)
                 .withWheelForceFeedforwardsY(moduleForcesY));
@@ -113,6 +128,6 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
     @Override
     public void runCharacterization(double output) {
-        super.setControl(DriveRequest.RUN_CHARACTERIZATION.withVolts(output));
+        super.setControl(RUN_CHARACTERIZATION.withVolts(output));
     }
 }

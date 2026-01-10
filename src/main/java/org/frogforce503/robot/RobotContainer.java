@@ -1,14 +1,19 @@
 package org.frogforce503.robot;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.DoublePressTracker;
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.util.ErrorUtil;
+import org.frogforce503.lib.util.FFSelectCommand;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
+import org.frogforce503.robot.commands.IntakeFuelFromGround;
+import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
+import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveIOMapleSim;
@@ -18,6 +23,7 @@ import org.frogforce503.robot.subsystems.leds.LedsIO;
 import org.frogforce503.robot.subsystems.leds.LedsIOCANdle;
 import org.frogforce503.robot.subsystems.leds.LedsRequest;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
+import org.frogforce503.robot.subsystems.superstructure.SuperstructureMode;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagIO;
@@ -135,6 +141,24 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
+        // Main controls
+        driver.leftTrigger().whileTrue(
+            new FFSelectCommand<>(
+                Map.of(
+                    SuperstructureMode.FUEL_GROUND, new IntakeFuelFromGround(),
+                    SuperstructureMode.FUEL_OUTPOST, new IntakeFuelFromOutpost()
+                ),
+                superstructure::getCurrentMode));
+
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub()); // auto aim + shoot, see past examples
+
+        driver.a().onTrue(Commands.runOnce(() -> superstructure.setCurrentMode(SuperstructureMode.FUEL_GROUND)));
+        driver.b().onTrue(Commands.runOnce(() -> superstructure.setCurrentMode(SuperstructureMode.FUEL_OUTPOST)));
+        
+        // shoot from flywheel
+        // intake from ground (+fetch), intake from outpost,
+        // eject from intake, eject from shooter
+        // batter shot & score from depot & outpost & trench & bump (maybe some more presets)
 
         // Overrides
         driver.back().onTrue(Commands.runOnce(drive::toggleSlowMode));

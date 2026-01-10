@@ -10,6 +10,9 @@ public abstract class RobotHardware {
     @Getter protected DriveConfig driveConfig;
     @Getter protected VisionConfig visionConfig;
 
+    @Getter protected FlywheelsConfig flywheelsConfig;
+    @Getter protected IntakeRollerConfig intakeRollerConfig;
+
     @Getter protected LedsConfig ledsConfig;
 
     // Other

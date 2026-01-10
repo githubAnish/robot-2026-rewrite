@@ -3,7 +3,6 @@ package org.frogforce503.robot.subsystems.drive;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.FieldInfo;
-import org.frogforce503.robot.subsystems.drive.DriveIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,13 +49,13 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Drive/Toggles/RobotRelative", robotRelative);
 
         // Inputs
-        Logger.recordOutput("Drive/Inputs/Pose", getPose());
-        Logger.recordOutput("Drive/Inputs/Velocity", getRobotVelocity());
-        Logger.recordOutput("Drive/Inputs/Velocity/Magnitude", Math.hypot(getRobotVelocity().vxMetersPerSecond, getRobotVelocity().vyMetersPerSecond));
+        Logger.recordOutput("Drive/Pose", getPose());
+        Logger.recordOutput("Drive/CurrentVelocity", getRobotVelocity());
+        Logger.recordOutput("Drive/CurrentVelocityMag", Math.hypot(getRobotVelocity().vxMetersPerSecond, getRobotVelocity().vyMetersPerSecond));
 
         // Status
-        Logger.recordOutput("Drive/State/AttainedWheelSpeed", Units.metersToInches(inputs.ModuleStates[0].speedMetersPerSecond));
-        Logger.recordOutput("Drive/State/Current Speeds", requestedSpeeds);
+        Logger.recordOutput("Drive/AttainedWheelSpeed", Units.metersToInches(inputs.ModuleStates[0].speedMetersPerSecond));
+        Logger.recordOutput("Drive/TargetVelocity", requestedSpeeds);
 
         SwerveModuleState[] states = inputs.ModuleStates;
         Logger.recordOutput("Drive/State/ModuleStates", states);
@@ -69,7 +68,6 @@ public class Drive extends SubsystemBase {
         }
 
         // Field
-        Logger.recordOutput("Drive/Current Global Pose", getPose());
         FieldInfo.setRobotPose(getPose());
     }
 

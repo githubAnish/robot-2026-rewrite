@@ -1,5 +1,6 @@
 package org.frogforce503.robot.constants.hardware;
 
+import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.robot.constants.hardware.subsystem_config.*;
 import org.frogforce503.robot.constants.tuner.TunerConstantsCompBot;
@@ -20,6 +21,23 @@ public class RobotHardwareCompBot extends RobotHardware {
             new VisionConfig();
             
         // Create superstructure configs
+        this.flywheelsConfig =
+            new FlywheelsConfig(
+                0,
+                0,
+                false,
+                80,
+                new PIDConfig(),
+                new FFConfig());
+
+        this.intakeRollerConfig =
+            new IntakeRollerConfig(
+                0,
+                0,
+                false,
+                80,
+                new PIDConfig(),
+                new FFConfig());
         
         // Create other configs
         this.ledsConfig =
