@@ -4,6 +4,7 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
+import org.frogforce503.robot.subsystems.drive.io.DriveIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;

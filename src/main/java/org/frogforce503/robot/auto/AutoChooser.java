@@ -7,6 +7,7 @@ import org.frogforce503.lib.auto.AutoFactoryConfigurator;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.rebuilt.ProximityUtil;
 import org.frogforce503.robot.FieldInfo;
+import org.frogforce503.robot.auto.autos.test.DriveStraightTest;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.vision.Vision;
@@ -63,6 +64,8 @@ public class AutoChooser {
                 }
             
         });
+
+        routineChooser.addDefaultOption("Drive Straight Test", new DriveStraightTest(drive, vision, superstructure));
     }
 
     private void logTrajectory(Pose2d... trajectory) {

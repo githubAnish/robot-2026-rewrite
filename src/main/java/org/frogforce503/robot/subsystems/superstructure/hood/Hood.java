@@ -15,6 +15,7 @@ import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
+import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOInputsAutoLogged;
 
 public class Hood extends FFSubsystemBase {
     private final HoodIO io;

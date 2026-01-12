@@ -27,7 +27,7 @@ public class RobotHardwareCompBot extends RobotHardware {
         this.intakeRollerConfig =
             new IntakeRollerConfig(
                 0,
-                0,
+                1,
                 false,
                 80,
                 new PIDConfig(),
@@ -35,8 +35,8 @@ public class RobotHardwareCompBot extends RobotHardware {
 
         this.flywheelsConfig =
             new FlywheelsConfig(
-                0,
-                0,
+                1,
+                1,
                 false,
                 80,
                 new PIDConfig(),
@@ -44,8 +44,8 @@ public class RobotHardwareCompBot extends RobotHardware {
 
         this.hoodConfig =
             new HoodConfig(
-                0,
-                0,
+                2,
+                1,
                 false,
                 80,
                 0,

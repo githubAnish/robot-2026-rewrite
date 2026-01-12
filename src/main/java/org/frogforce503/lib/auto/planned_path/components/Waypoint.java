@@ -9,7 +9,6 @@ import lombok.Getter;
 
 import java.util.Optional;
 
-import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.lib.auto.planned_path.PlannedPath.HolonomicState;
 
 /** A trajectory waypoint, including a translation and optional drive/holonomic rotations. */
@@ -17,11 +16,6 @@ public class Waypoint {
     @Getter private final Translation2d translation;
     private Rotation2d driveRotation;
     private Rotation2d holonomicRotation;
-
-    /** Constructs a Waypoint at the origin and without a drive or holonomic rotation. */
-    public Waypoint() {
-        this(Translation2d.kZero);
-    }
 
     /**
      * Constructs a Waypoint with a translation, drive rotation, and holonomic rotation.
@@ -49,6 +43,11 @@ public class Waypoint {
         this.translation = requireNonNullParam(translation, "translation", "Waypoint");
         this.driveRotation = null;
         this.holonomicRotation = null;
+    }
+
+    /** Constructs a Waypoint at the origin and without a drive or holonomic rotation. */
+    public Waypoint() {
+        this(Translation2d.kZero);
     }
 
     /**

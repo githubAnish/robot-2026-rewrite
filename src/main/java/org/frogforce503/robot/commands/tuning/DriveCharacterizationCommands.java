@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;
@@ -87,7 +88,7 @@ public final class DriveCharacterizationCommands {
     }
 
     /** Measures the robot's wheel radius by spinning in a circle. */
-    public static Command wheelRadiusCharacterization(Drive drive) {
+    public static Command wheelRadiusCharacterization6328(Drive drive) {
         SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
@@ -169,4 +170,58 @@ public final class DriveCharacterizationCommands {
         Rotation2d lastAngle = Rotation2d.kZero;
         double gyroDelta = 0.0;
     }
+
+    /** Measures the robot's wheel radius by driving straight and comparing actual vs reported distance. See https://www.frc5712.com/swerve-calibration. */
+    public static Command wheelRadiusCharacterizationDriveStraight(Drive drive) {
+        LoggedTunableNumber actualDistanceInches = new LoggedTunableNumber("Tuning/WheelRadius/ActualDistanceInches", 0.0); // Type the actual measured distance
+        WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
+
+        return Commands.sequence(
+            // Record starting wheel positions
+            Commands.runOnce(() -> {
+                state.positions = drive.getWheelRadiusCharacterizationPositions();
+            }),
+
+            // Drive straight slowly
+            Commands.run(
+                () -> drive.runVelocity(new ChassisSpeeds(0.5, 0.0, 0.0)), // slow, straight
+                drive
+            )
+
+            // When cancelled, calculate wheel radius
+            .finallyDo(() -> {
+                double[] endPositions = drive.getWheelRadiusCharacterizationPositions();
+
+                // Average wheel rotation (radians)
+                double wheelDelta = 0.0;
+                for (int i = 0; i < 4; i++) {
+                    wheelDelta += Math.abs(endPositions[i] - state.positions[i]) / 4.0;
+                }
+
+                double actualDistance = Units.inchesToMeters(actualDistanceInches.get());
+
+                if (actualDistance <= 0.0 || wheelDelta <= 0.0) {
+                    System.out.println("Wheel radius characterization failed: invalid distance or wheel delta");
+                    return;
+                }
+
+                // Effective wheel radius
+                double newWheelRadius = actualDistance / wheelDelta;
+
+                NumberFormat formatter = new DecimalFormat("#0.000000");
+                System.out.println("********** Wheel Radius Drive-Forward Results **********");
+                System.out.println(
+                    "\tActual Distance: " + formatter.format(actualDistance) + " meters");
+                System.out.println(
+                    "\tWheel Delta: " + formatter.format(wheelDelta) + " radians");
+                System.out.println(
+                    "\tNew Wheel Radius: "
+                        + formatter.format(newWheelRadius)
+                        + " meters ("
+                        + formatter.format(Units.metersToInches(newWheelRadius))
+                        + " inches)");
+            })
+        );
+    }
+
 }

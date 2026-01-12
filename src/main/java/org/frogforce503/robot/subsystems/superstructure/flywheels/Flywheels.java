@@ -4,6 +4,7 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
