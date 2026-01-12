@@ -15,6 +15,8 @@ import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
+// Notes:
+// Need to figure out best values for rate limiters, heading hold (aka stabilization), and any feedforward assists if needed
 public class TeleopDriveCommand extends Command {
     // Requirements
     private final Drive drive;

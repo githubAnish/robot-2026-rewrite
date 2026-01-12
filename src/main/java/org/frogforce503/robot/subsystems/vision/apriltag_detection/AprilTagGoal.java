@@ -52,6 +52,32 @@ public enum AprilTagGoal {
         (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
 
         Optional.empty()
+    ),
+
+    HUB_TARGETING(
+        EnumSet.noneOf(CameraName.class),
+
+        poseObservation -> {
+            TrackedAprilTag[] tags = poseObservation.usedAprilTags();
+            
+            double ambiguity = VisionUtils.getLowestAmbiguity(tags);
+            double distance = VisionUtils.getLowestDistanceToCamera(tags);
+
+            double maxAmbiguity = tags.length > 1 ? 0.15 : 0.10;
+            double maxDistance = tags.length > 1 ? Units.feetToMeters(15) : Units.feetToMeters(10);
+
+            return ambiguity <= maxAmbiguity && distance <= maxDistance;
+        },
+
+        aprilTagIO -> {
+            if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
+                aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
+            }
+        },
+
+        (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
+
+        Optional.empty()
     );
     
     @Getter private EnumSet<CameraName> camerasToUse;

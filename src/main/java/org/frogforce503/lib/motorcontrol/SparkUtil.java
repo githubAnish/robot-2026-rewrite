@@ -4,8 +4,8 @@ import org.frogforce503.lib.util.ErrorUtil;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig;
 
 /** Helper class for Spark IO implementations */

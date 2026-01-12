@@ -6,6 +6,7 @@ import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class FieldConstants {
     public static final AprilTagFieldLayout aprilTagFieldLayout = Constants.fieldVenue.getAprilTagFieldLayout();
@@ -22,28 +23,24 @@ public class FieldConstants {
     }
 
     public static class Lines {
-        public static final double blueInitLineX = 0.0;
-        public static final double redInitLineX = 0.0;
+        public static final double blueInitLineX;
 
         static {
-            // final double BlueInitLineToLeftCage = FieldConstantsUtil.getFieldValueMeters("BlueInitLineToLeftCage");
-            // blueInitLineX = fieldLength / 2 - BlueInitLineToLeftCage;
-
-            // final double RedInitLineToLeftCage = FieldConstantsUtil.getFieldValueMeters("RedInitLineToLeftCage");
-            // redInitLineX = fieldLength / 2 + RedInitLineToLeftCage;
+            final double CenterLineToBlueInitLine = FieldConstantsUtil.getFieldValueMeters("CenterLineToBlueInitLine");
+            blueInitLineX = fieldLength / 2 - CenterLineToBlueInitLine;
         }
     }
 
     public static class Hub {
+        // blue hub center translation2d, x coord id 18 y coord id 26
+        public static final Translation2d blueCenter;
 
+        static {
+            blueCenter = new Translation2d(getTagPose2d(18).getX(), getTagPose2d(26).getY());
+        }
     }
 
     public static class Outpost {
-        // center line to trench center
-        // trench center to init line
-        
-        static {
-            
-        }
+        public static final Pose2d blue = getTagPose2d(29);
     }
 }

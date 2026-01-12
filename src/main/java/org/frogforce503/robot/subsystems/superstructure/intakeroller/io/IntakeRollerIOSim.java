@@ -1,37 +1,41 @@
-package org.frogforce503.robot.subsystems.superstructure.flywheels;
+package org.frogforce503.robot.subsystems.superstructure.intakeroller.io;
 
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FlywheelsConfig;
+import org.frogforce503.robot.constants.hardware.subsystem_config.IntakeRollerConfig;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 
 import com.revrobotics.spark.SparkSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-public class FlywheelsIOSim extends FlywheelsIOSpark {
+public class IntakeRollerIOSim extends IntakeRollerIOSpark {
     // Control
     private final SparkSim motorSim;
-    private final DCMotorSim rollerSim;
+    private final FlywheelSim rollerSim;
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.0001;
+    private final double moi = 0.001;
 
-    public FlywheelsIOSim() {
-        final FlywheelsConfig rollerConfig = Robot.bot.getFlywheelsConfig();
+    public IntakeRollerIOSim() {
+        final IntakeRollerConfig rollerConfig = Robot.bot.getIntakeRollerConfig();
 
         motorSim = new SparkSim(super.getMotor(), motorModel);
-        rollerSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, rollerConfig.mechanismRatio()), motorModel);
+        rollerSim =
+            new FlywheelSim(
+                LinearSystemId.createFlywheelSystem(motorModel, moi, rollerConfig.mechanismRatio()),
+                motorModel);
 
         // Sync physics and motor sim positions
-        motorSim.setVelocity(FlywheelsConstants.START);
+        motorSim.setVelocity(IntakeRollerConstants.START);
     }
 
     @Override
-    public void updateInputs(FlywheelsIOInputs inputs) {
+    public void updateInputs(IntakeRollerIOInputs inputs) {
         double appliedVolts = motorSim.getAppliedOutput() * RobotController.getBatteryVoltage();
         
         // Apply physics
@@ -43,7 +47,7 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
         motorSim.setVelocity(rollerSim.getAngularVelocityRadPerSec());
         
         inputs.data =
-            new FlywheelsIOData(
+            new IntakeRollerIOData(
                 true,
                 motorSim.getVelocity(),
                 appliedVolts,

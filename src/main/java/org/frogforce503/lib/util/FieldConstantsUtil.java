@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 public final class FieldConstantsUtil {
     private static JSONObject fieldJson;
 
+    private FieldConstantsUtil() {}
+
     static {
         try {
             fieldJson =

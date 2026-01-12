@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 /** Utility class to handle BooleanSuppliers. */
-public class Logic {
+public final class Logic {
+    private Logic() {}
+
     public static BooleanSupplier and(BooleanSupplier... conditions) {
         return
             () ->

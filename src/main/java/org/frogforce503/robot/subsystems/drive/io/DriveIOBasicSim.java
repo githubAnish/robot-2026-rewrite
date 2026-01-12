@@ -1,4 +1,6 @@
-package org.frogforce503.robot.subsystems.drive;
+package org.frogforce503.robot.subsystems.drive.io;
+
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 

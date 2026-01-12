@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotBase;
 
-/** This class contains global configuration variables describing the current robot, runtime mode, and field venue. */
+/** Class containing global configuration variables describing current robot, runtime mode, & field venue. */
 public final class Constants {
   public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
   public static final boolean useAllianceFlipping = false;

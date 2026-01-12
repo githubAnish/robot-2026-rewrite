@@ -3,11 +3,11 @@ package org.frogforce503.robot.subsystems.superstructure.intakeroller;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Robot;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Setter;
 
@@ -17,7 +17,6 @@ public class IntakeRoller extends FFSubsystemBase {
 
     // Constants
     @Setter private SimpleMotorFeedforward feedforward;
-    private final Debouncer algaeDebouncer = new Debouncer(0.5);
 
     // Control
     private double targetVelocityRadPerSec = IntakeRollerConstants.START;
@@ -63,11 +62,6 @@ public class IntakeRoller extends FFSubsystemBase {
 
     public double getVelocityRadPerSec() {
         return inputs.data.velocityRadPerSec();
-    }
-
-    public boolean algaeCurrentThresholdForHoldMet() {
-        return algaeDebouncer.calculate(
-            inputs.data.statorCurrentAmps() > 15);
     }
 
     // Actions

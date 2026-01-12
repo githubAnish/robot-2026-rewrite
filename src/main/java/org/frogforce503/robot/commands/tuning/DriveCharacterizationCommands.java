@@ -20,11 +20,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 /** <p> Commands to run wheel radius characterization & FF characterization (measures kS and kV). </p>
  *  <p> Use the {@link SysIdExecutor} if you want to run SysId on the drivetrain. </p>
  */
-public class DriveCharacterizationCommands {
-    private final double FF_START_DELAY = 2.0; // Secs
-    private final double FF_RAMP_RATE = 0.1; // Volts/Sec
-    private final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
-    private final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+public final class DriveCharacterizationCommands {
+    private static final double FF_START_DELAY = 2.0; // Secs
+    private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
+    private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
+    private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
     private DriveCharacterizationCommands() {}
 
@@ -33,7 +33,7 @@ public class DriveCharacterizationCommands {
      *
      * <p>This command should only be used in voltage control mode.
      */
-    public Command feedforwardCharacterization(Drive drive) {
+    public static Command feedforwardCharacterization(Drive drive) {
         List<Double> velocitySamples = new LinkedList<>();
         List<Double> voltageSamples = new LinkedList<>();
         Timer timer = new Timer();
@@ -54,13 +54,13 @@ public class DriveCharacterizationCommands {
 
             // Accelerate and gather data
             Commands.run(
-                () -> {
-                    double voltage = timer.get() * FF_RAMP_RATE;
-                    drive.runCharacterization(voltage);
-                    velocitySamples.add(drive.getFFCharacterizationVelocity());
-                    voltageSamples.add(voltage);
-                },
-                drive)
+                    () -> {
+                        double voltage = timer.get() * FF_RAMP_RATE;
+                        drive.runCharacterization(voltage);
+                        velocitySamples.add(drive.getFFCharacterizationVelocity());
+                        voltageSamples.add(voltage);
+                    },
+                    drive)
 
                 // When cancelled, calculate and print results
                 .finallyDo(
@@ -87,7 +87,7 @@ public class DriveCharacterizationCommands {
     }
 
     /** Measures the robot's wheel radius by spinning in a circle. */
-    public Command wheelRadiusCharacterization(Drive drive) {
+    public static Command wheelRadiusCharacterization(Drive drive) {
         SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
@@ -120,22 +120,22 @@ public class DriveCharacterizationCommands {
 
                 // Update gyro delta
                 Commands.run(
-                    () -> {
-                        var rotation = drive.getGyroRotation();
-                        state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
-                        state.lastAngle = rotation;
+                        () -> {
+                            var rotation = drive.getGyroRotation();
+                            state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
+                            state.lastAngle = rotation;
 
-                        double[] positions = drive.getWheelRadiusCharacterizationPositions();
-                        double wheelDelta = 0.0;
-                        for (int i = 0; i < 4; i++) {
-                            wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
-                        }
-                        double wheelRadius =
-                            (state.gyroDelta * DriveConstants.driveBaseRadius) / wheelDelta;
+                            double[] positions = drive.getWheelRadiusCharacterizationPositions();
+                            double wheelDelta = 0.0;
+                            for (int i = 0; i < 4; i++) {
+                                wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
+                            }
+                            double wheelRadius =
+                                (state.gyroDelta * DriveConstants.driveBaseRadius) / wheelDelta;
 
-                        Logger.recordOutput("Drive/WheelDelta", wheelDelta);
-                        Logger.recordOutput("Drive/WheelRadius", wheelRadius);
-                    })
+                            Logger.recordOutput("Drive/WheelDelta", wheelDelta);
+                            Logger.recordOutput("Drive/WheelRadius", wheelRadius);
+                        })
 
                     // When cancelled, calculate and print results
                     .finallyDo(
@@ -164,7 +164,7 @@ public class DriveCharacterizationCommands {
                         })));
     }
 
-    private class WheelRadiusCharacterizationState {
+    private static class WheelRadiusCharacterizationState {
         double[] positions = new double[4];
         Rotation2d lastAngle = Rotation2d.kZero;
         double gyroDelta = 0.0;

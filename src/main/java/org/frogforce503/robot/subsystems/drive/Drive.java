@@ -3,12 +3,12 @@ package org.frogforce503.robot.subsystems.drive;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.FieldInfo;
+import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lombok.Getter;
@@ -18,8 +18,11 @@ public class Drive extends SubsystemBase {
     private final DriveIO io;
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
 
+    // Viz
+    @Getter private final DriveViz viz = new DriveViz();
+
     // State
-    private ChassisSpeeds requestedSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds targetSpeeds = new ChassisSpeeds();
 
     // Toggles
     @Getter private boolean robotRelative = false;
@@ -37,38 +40,14 @@ public class Drive extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Drive", inputs);
 
-        this.outputTelemetry();
+        viz.update(inputs);
 
-        // Record cycle time
-        LoggedTracer.record("Drive");
-    }
-
-    private void outputTelemetry() {
-        // Toggles
+        Logger.recordOutput("Drive/TargetVelocity", targetSpeeds);
         Logger.recordOutput("Drive/Toggles/SlowModeEnabled", slowMode);
         Logger.recordOutput("Drive/Toggles/RobotRelative", robotRelative);
 
-        // Inputs
-        Logger.recordOutput("Drive/Pose", getPose());
-        Logger.recordOutput("Drive/CurrentVelocity", getRobotVelocity());
-        Logger.recordOutput("Drive/CurrentVelocityMag", Math.hypot(getRobotVelocity().vxMetersPerSecond, getRobotVelocity().vyMetersPerSecond));
-
-        // Status
-        Logger.recordOutput("Drive/AttainedWheelSpeed", Units.metersToInches(inputs.ModuleStates[0].speedMetersPerSecond));
-        Logger.recordOutput("Drive/TargetVelocity", requestedSpeeds);
-
-        SwerveModuleState[] states = inputs.ModuleStates;
-        Logger.recordOutput("Drive/State/ModuleStates", states);
-
-        for (int i = 0; i < states.length; i++) {
-            SwerveModuleState state = states[i];
-
-            Logger.recordOutput("Drive/Module/" + ModuleName.values()[i] + "/Angle", state.angle.getDegrees());
-            Logger.recordOutput("Drive/Module/" + ModuleName.values()[i] + "/Velocity", state.speedMetersPerSecond);
-        }
-
-        // Field
-        FieldInfo.setRobotPose(getPose());
+        // Record cycle time
+        LoggedTracer.record("Drive");
     }
 
     // Toggles
@@ -160,13 +139,13 @@ public class Drive extends SubsystemBase {
     /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
     public void runVelocity(ChassisSpeeds speeds) {
         io.runVelocity(speeds);
-        this.requestedSpeeds = speeds;
+        this.targetSpeeds = speeds;
     }
 
     /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
     public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
         io.runVelocity(speeds, moduleForcesX, moduleForcesY);
-        this.requestedSpeeds = speeds;
+        this.targetSpeeds = speeds;
     }
 
     /** Runs the drive in a straight line with the specified drive output. */
@@ -176,12 +155,5 @@ public class Drive extends SubsystemBase {
 
     public void stop() {
         runVelocity(new ChassisSpeeds());
-    }
-
-    private enum ModuleName {
-        FrontLeft,
-        FrontRight,
-        BackLeft,
-        BackRight
     }
 }

@@ -2,7 +2,7 @@ package org.frogforce503.robot.subsystems.leds;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.LoggerUtil;
-import org.frogforce503.robot.subsystems.leds.LedsIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.leds.io.LedsIO;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.controls.ControlRequest;

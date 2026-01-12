@@ -33,7 +33,7 @@ public class SuperstructureViz {
         // Setup 2D Viz
     }
 
-    public void update() {
+    public void update(double intakeRollerSpeedRadPerSec, double flywheelsSpeedRadPerSec, double hoodAngleRad) {
         Pose3d drivePose3d = new Pose3d(robotPoseSupplier.get());
 
         update2dViz(drivePose3d);

@@ -1,13 +1,10 @@
-package org.frogforce503.robot.commands.tuning;
+package org.frogforce503.robot.commands;
 
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
-
 import edu.wpi.first.wpilibj2.command.Command;
 
-// Notes:
-// Command to tune shotmap (if there) and tune presets (batter, trench, outpost, depot, etc)
-public class TuneShot extends Command {
-    public TuneShot(Superstructure superstructure) {
+public class EjectFuelFromFlywheels extends Command {
+    public EjectFuelFromFlywheels(Superstructure superstructure) {
 
     }
 
@@ -29,5 +26,5 @@ public class TuneShot extends Command {
     @Override
     public void end(boolean interrupted) {
 
-    }   
+    }
 }

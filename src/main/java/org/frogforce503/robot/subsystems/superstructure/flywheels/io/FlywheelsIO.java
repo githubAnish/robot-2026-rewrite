@@ -1,21 +1,21 @@
-package org.frogforce503.robot.subsystems.superstructure.intakeroller;
+package org.frogforce503.robot.subsystems.superstructure.flywheels.io;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface IntakeRollerIO {
+public interface FlywheelsIO {
     @AutoLog
-    class IntakeRollerIOInputs {
-        public IntakeRollerIOData data = new IntakeRollerIOData(false, 0.0, 0.0, 0.0, 0.0);
+    class FlywheelsIOInputs {
+        public FlywheelsIOData data = new FlywheelsIOData(false, 0.0, 0.0, 0.0, 0.0);
     }
 
-    record IntakeRollerIOData(
+    record FlywheelsIOData(
         boolean motorConnected,
         double velocityRadPerSec,
         double appliedVolts,
         double statorCurrentAmps,
         double tempCelsius) {}
 
-    default void updateInputs(IntakeRollerIOInputs inputs) {}
+    default void updateInputs(FlywheelsIOInputs inputs) {}
 
     default void runOpenLoop(double output) {}
 

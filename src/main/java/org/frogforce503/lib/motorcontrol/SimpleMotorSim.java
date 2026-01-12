@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class SimpleMotorSim {
     private final double timeForOne; // Number of seconds to complete a full revolution
-    private final double timeConstantFactor; // MOTOR IS MODELED AS LOGARITHMIC GROWTH, LIKE A CHARGING CAPACITOR
+    private final double timeConstantFactor; // Motor is modeled as logarithmic growth (like a charging capacitor)
     private final double CPR;
 
     private double currentPosition = 0;

@@ -1,29 +1,42 @@
 package org.frogforce503.robot;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.DoublePressTracker;
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.lib.util.FFSelectCommand;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
+import org.frogforce503.robot.commands.EjectFuelFromFlywheels;
+import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
+import org.frogforce503.robot.commands.LobFuelIntoAlliance;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.drive.DriveIOMapleSim;
-import org.frogforce503.robot.subsystems.drive.DriveIOPhoenix;
+import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
+import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
 import org.frogforce503.robot.subsystems.leds.Leds;
-import org.frogforce503.robot.subsystems.leds.LedsIO;
-import org.frogforce503.robot.subsystems.leds.LedsIOCANdle;
 import org.frogforce503.robot.subsystems.leds.LedsRequest;
+import org.frogforce503.robot.subsystems.leds.io.LedsIO;
+import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
+import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
-import org.frogforce503.robot.subsystems.superstructure.SuperstructureMode;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSpark;
+import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
+import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSim;
+import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSpark;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagIO;
@@ -50,6 +63,7 @@ public class RobotContainer {
 
     // Auto
     private final AutoChooser autoChooser;
+    private final WarmupExecutor warmupExecutor;
 
     // Sim
     private final GameViz gameViz;
@@ -61,21 +75,21 @@ public class RobotContainer {
     private final Trigger driverLeftPaddle = driver.leftPaddle();
     private final Trigger driverRightPaddle = driver.rightPaddle();
 
-    // Other
-    private final WarmupExecutor warmupExecutor;
+    // Overrides
+    private final LoggedNetworkBoolean autoAssistEnabled = // Includes auto-aligning and auto-aiming
+        new LoggedNetworkBoolean("Auto Assist Enabled", true);
 
+    // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer =
         visionMeasurement ->
             drive.acceptVisionMeasurement(visionMeasurement);
 
     private final LoggedJVM loggedJVM = new LoggedJVM();
-
-    // Overrides
-    private final LoggedNetworkBoolean autoDrivingEnabled =
-        new LoggedNetworkBoolean("Auto Driving Enabled", true);
     
     public RobotContainer() {
-        // Define subsystems
+        IntakeRoller intakeRoller = null;
+        Flywheels flywheels = null;
+        Hood hood = null;
 
         // Initialize subsystems based on robot type
         switch (Constants.getRobot()) {
@@ -87,6 +101,9 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+                intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                flywheels = new Flywheels(new FlywheelsIOSpark());
+                hood = new Hood(new HoodIOSpark());
                 leds = new Leds(new LedsIOCANdle());
             }
             case PracticeBot -> {
@@ -97,6 +114,9 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+                intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                flywheels = new Flywheels(new FlywheelsIOSpark());
+                hood = new Hood(new HoodIOSpark());
                 leds = new Leds(new LedsIOCANdle());
             }
             case SimBot -> {
@@ -107,6 +127,9 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+                intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+                flywheels = new Flywheels(new FlywheelsIOSim());
+                hood = new Hood(new HoodIOSim());
                 leds = new Leds(new LedsIO() {});
             }
             case ProgrammingBot -> {
@@ -117,6 +140,9 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+                intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+                flywheels = new Flywheels(new FlywheelsIO() {});
+                hood = new Hood(new HoodIO() {});
                 leds = new Leds(new LedsIO() {});
             }
             default -> {
@@ -126,10 +152,14 @@ public class RobotContainer {
 
         // Create virtual subsystems
         superstructure =
-            new Superstructure(drive::getPose);
+            new Superstructure(
+                intakeRoller,
+                flywheels,
+                hood,
+                drive::getPose);
 
         // Create auto requirements
-        autoChooser = new AutoChooser(drive, superstructure);
+        autoChooser = new AutoChooser(drive, vision, superstructure);
         warmupExecutor = new WarmupExecutor(drive, autoChooser);
 
         // Create sim requirements
@@ -142,23 +172,19 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         // Main controls
-        driver.leftTrigger().whileTrue(
-            new FFSelectCommand<>(
-                Map.of(
-                    SuperstructureMode.FUEL_GROUND, new IntakeFuelFromGround(),
-                    SuperstructureMode.FUEL_OUTPOST, new IntakeFuelFromOutpost()
-                ),
-                superstructure::getCurrentMode));
+        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, autoAssistEnabled::get));
+        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnabled::get));
 
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub()); // auto aim + shoot, see past examples
-
-        driver.a().onTrue(Commands.runOnce(() -> superstructure.setCurrentMode(SuperstructureMode.FUEL_GROUND)));
-        driver.b().onTrue(Commands.runOnce(() -> superstructure.setCurrentMode(SuperstructureMode.FUEL_OUTPOST)));
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled::get)); // auto aim + shoot, see past examples
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnabled::get));
         
-        // shoot from flywheel
-        // intake from ground (+fetch), intake from outpost,
-        // eject from intake, eject from shooter
-        // batter shot & score from depot & outpost & trench & bump (maybe some more presets)
+        driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
+        driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
+
+        bindPresets(driver.y(), ShotPreset.BATTER);
+        bindPresets(driver.b(), ShotPreset.DEPOT);
+        bindPresets(driver.a(), ShotPreset.OUTPOST);
+        bindPresets(driver.x(), ShotPreset.TRENCH);
 
         // Overrides
         driver.back().onTrue(Commands.runOnce(drive::toggleSlowMode));
@@ -181,14 +207,15 @@ public class RobotContainer {
                     () -> leds.setCameraDisconnected(true))
                         .ignoringDisable(true));
 
-        Trigger gotPiece = new Trigger(() -> true);
+        Trigger shotFeasible = new Trigger(() -> false);
 
-        // If piece got, rumbles driver for 0.25 sec and blinks LEDs
-        gotPiece
+        // If shot is feasible and driver knows they can take shot, then rumbles driver for 0.25 sec and blinks LEDs
+        // Rumbling logic can change in the future
+        shotFeasible
             .onTrue(
                 Commands.parallel(
                     setDriverRumble(0.75, 0.25),
-                    Commands.runOnce(() -> leds.runPattern(LedsRequest.GOT_PIECE))
+                    Commands.runOnce(() -> leds.runPattern(LedsRequest.READY_TO_SHOOT))
             ));
     }
 
@@ -203,6 +230,12 @@ public class RobotContainer {
                 .withTimeout(duration)
                 .finallyDo(() -> driver.setRumble(RumbleType.kBothRumble, 0))
                 .withName("setDriverRumble");
+    }
+
+    private void bindPresets(Trigger trigger, ShotPreset shotPreset) {
+        trigger
+            .onTrue(Commands.runOnce(() -> superstructure.setShotPreset(shotPreset)))
+            .onFalse(Commands.runOnce(() -> superstructure.setShotPreset(ShotPreset.NONE)));
     }
 
     public void robotPeriodic() {

@@ -1,27 +1,28 @@
-package org.frogforce503.robot.subsystems.superstructure.flywheels;
+package org.frogforce503.robot.subsystems.superstructure.hood.io;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface FlywheelsIO {
+public interface HoodIO {
     @AutoLog
-    class FlywheelsIOInputs {
-        public FlywheelsIOData data = new FlywheelsIOData(false, 0.0, 0.0, 0.0, 0.0);
+    class HoodIOInputs {
+        public HoodIOData data = new HoodIOData(false, 0.0, 0.0, 0.0, 0.0, 0.0);
     }
 
-    record FlywheelsIOData(
+    record HoodIOData(
         boolean motorConnected,
+        double positionRad,
         double velocityRadPerSec,
         double appliedVolts,
         double statorCurrentAmps,
         double tempCelsius) {}
 
-    default void updateInputs(FlywheelsIOInputs inputs) {}
+    default void updateInputs(HoodIOInputs inputs) {}
 
     default void runOpenLoop(double output) {}
 
     default void runVolts(double volts) {}
 
-    default void runVelocity(double velocityRadPerSec, double feedforward) {}
+    default void runPosition(double positionRad, double feedforward) {}
 
     default void stop() {}
 

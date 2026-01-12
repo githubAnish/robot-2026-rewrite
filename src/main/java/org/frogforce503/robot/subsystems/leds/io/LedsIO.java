@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.leds;
+package org.frogforce503.robot.subsystems.leds.io;
 
 import org.littletonrobotics.junction.AutoLog;
 

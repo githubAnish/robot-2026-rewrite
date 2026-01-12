@@ -8,15 +8,13 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-// Notes:
-// involves some sort of fetching (no need of a separate fetching cmd, just needs to natural enough for the good driver, see orbit intake assist)
-public class IntakeFuelFromGround extends Command {
+public class LobFuelIntoAlliance extends Command {
     private final Drive drive;
     private final Vision vision;
 
     private final BooleanSupplier autoAssistEnabled;
 
-    public IntakeFuelFromGround(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
+    public LobFuelIntoAlliance(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
         this.drive = drive;
         this.vision = vision;
         this.autoAssistEnabled = autoAssistEnabled;

@@ -9,6 +9,7 @@ import org.frogforce503.lib.rebuilt.ProximityUtil;
 import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
+import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -23,6 +24,7 @@ import lombok.Getter;
 public class AutoChooser {
     // Requirements
     private final Drive drive;
+    private final Vision vision;
     private final Superstructure superstructure;
     private final AutoFactory autoFactory;
 
@@ -33,8 +35,9 @@ public class AutoChooser {
     private Command autoCommand;
     private AutoMode lastSelectedAuto;
 
-    public AutoChooser(Drive drive, Superstructure superstructure) {
+    public AutoChooser(Drive drive, Vision vision, Superstructure superstructure) {
         this.drive = drive;
+        this.vision = vision;
         this.superstructure = superstructure;
 
         this.autoFactory = AutoFactoryConfigurator.configureChoreo(drive);
@@ -47,7 +50,7 @@ public class AutoChooser {
         // Random test auto
         routineChooser.addDefaultOption(
             "Test",
-            new AutoMode(drive, superstructure) {
+            new AutoMode(drive, vision, superstructure) {
 
                 @Override
                 public Command getCommand() {
