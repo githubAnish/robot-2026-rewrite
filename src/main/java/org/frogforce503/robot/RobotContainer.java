@@ -25,6 +25,10 @@ import org.frogforce503.robot.subsystems.leds.io.LedsIO;
 import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
+import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSim;
+import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
@@ -33,10 +37,22 @@ import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSim;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSpark;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIO;
+import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOSim;
+import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOSpark;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIO;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOSim;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSpark;
+import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
+import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIO;
+import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSim;
+import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagIO;
@@ -87,7 +103,11 @@ public class RobotContainer {
     private final LoggedJVM loggedJVM = new LoggedJVM();
     
     public RobotContainer() {
+        IntakePivot intakePivot = null;
         IntakeRoller intakeRoller = null;
+        Indexer indexer = null;
+        Feeder feeder = null;
+        Turret turret = null;
         Flywheels flywheels = null;
         Hood hood = null;
 
@@ -101,9 +121,15 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+
+                intakePivot = new IntakePivot(new IntakePivotIOSpark());
                 intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                indexer = new Indexer(new IndexerIOSpark());
+                feeder = new Feeder(new FeederIOSpark());
+                turret = new Turret(new TurretIOSpark());
                 flywheels = new Flywheels(new FlywheelsIOSpark());
                 hood = new Hood(new HoodIOSpark());
+
                 leds = new Leds(new LedsIOCANdle());
             }
             case PracticeBot -> {
@@ -114,9 +140,15 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+
+                intakePivot = new IntakePivot(new IntakePivotIOSpark());
                 intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                indexer = new Indexer(new IndexerIOSpark());
+                feeder = new Feeder(new FeederIOSpark());
+                turret = new Turret(new TurretIOSpark());
                 flywheels = new Flywheels(new FlywheelsIOSpark());
                 hood = new Hood(new HoodIOSpark());
+                
                 leds = new Leds(new LedsIOCANdle());
             }
             case SimBot -> {
@@ -127,9 +159,15 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+
+                intakePivot = new IntakePivot(new IntakePivotIOSim());
                 intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+                indexer = new Indexer(new IndexerIOSim());
+                feeder = new Feeder(new FeederIOSim());
+                turret = new Turret(new TurretIOSim());
                 flywheels = new Flywheels(new FlywheelsIOSim());
                 hood = new Hood(new HoodIOSim());
+                
                 leds = new Leds(new LedsIO() {});
             }
             case ProgrammingBot -> {
@@ -140,9 +178,15 @@ public class RobotContainer {
                         drive::getPose,
                         new AprilTagIO[] {},
                         new ObjectDetectionIO[] {});
+
+                intakePivot = new IntakePivot(new IntakePivotIO() {});
                 intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+                indexer = new Indexer(new IndexerIO() {});
+                feeder = new Feeder(new FeederIO() {});
+                turret = new Turret(new TurretIO() {});
                 flywheels = new Flywheels(new FlywheelsIO() {});
                 hood = new Hood(new HoodIO() {});
+                
                 leds = new Leds(new LedsIO() {});
             }
             default -> {
@@ -153,7 +197,11 @@ public class RobotContainer {
         // Create virtual subsystems
         superstructure =
             new Superstructure(
+                intakePivot,
                 intakeRoller,
+                indexer,
+                feeder,
+                turret,
                 flywheels,
                 hood,
                 drive::getPose);
@@ -266,6 +314,8 @@ public class RobotContainer {
     public void disabledPeriodic() {
         autoChooser.periodic();
         warmupExecutor.disabledPeriodic();
+        
+        superstructure.seedTurretRelativePosition();
     }
 
     public void test() {

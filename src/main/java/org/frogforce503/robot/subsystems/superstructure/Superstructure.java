@@ -4,9 +4,13 @@ import java.util.function.Supplier;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.VirtualSubsystem;
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
@@ -20,9 +24,13 @@ import lombok.Setter;
 // assume no turret, until block cad comes out or more talk comes out or most of this code is done
 public class Superstructure extends VirtualSubsystem {
     // Subsystems
-    private final IntakeRoller intakeRoller;
-    private final Flywheels flywheels;
-    private final Hood hood;
+    @Getter private final IntakePivot intakePivot;
+    @Getter private final IntakeRoller intakeRoller;
+    @Getter private final Indexer indexer;
+    @Getter private final Feeder feeder;
+    @Getter private final Turret turret;
+    @Getter private final Flywheels flywheels;
+    @Getter private final Hood hood;
 
     // Inputs
     @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
@@ -37,12 +45,20 @@ public class Superstructure extends VirtualSubsystem {
     private boolean inCoast = false;
 
     public Superstructure(
+        IntakePivot intakePivot,
         IntakeRoller intakeRoller,
+        Indexer indexer,
+        Feeder feeder,
+        Turret turret,
         Flywheels flywheels,
         Hood hood,
         Supplier<Pose2d> robotPoseSupplier
     ) {
+        this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
+        this.indexer = indexer;
+        this.feeder = feeder;
+        this.turret = turret;
         this.flywheels = flywheels;
         this.hood = hood;
 
@@ -77,6 +93,10 @@ public class Superstructure extends VirtualSubsystem {
         intakeRoller.getCoastOverride().set(enabled);
         flywheels.getCoastOverride().set(enabled);
         hood.getCoastOverride().set(enabled);
+    }
+
+    public void seedTurretRelativePosition() {
+        turret.seedRelativePosition();
     }
 
     public void stop() {

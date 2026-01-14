@@ -40,7 +40,7 @@ public class IntakeRoller extends FFSubsystemBase {
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, IntakeRollerConstants.kRollerTolerance);
+            atGoal = isAtVelocity(targetVelocityRadPerSec, IntakeRollerConstants.kTolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state

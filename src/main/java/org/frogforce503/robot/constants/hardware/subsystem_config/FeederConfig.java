@@ -3,18 +3,12 @@ package org.frogforce503.robot.constants.hardware.subsystem_config;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-
-public record HoodConfig(
+public record FeederConfig(
     int id,
     double mechanismRatio,
 
     boolean inverted,
     int statorCurrentLimit,
-
-    PIDConfig kPID,
-    FFConfig kFF,
-    Constraints kConstraints,
     
-    double minAngle,
-    double maxAngle) {}
+    PIDConfig kPID,
+    FFConfig kFF) {}

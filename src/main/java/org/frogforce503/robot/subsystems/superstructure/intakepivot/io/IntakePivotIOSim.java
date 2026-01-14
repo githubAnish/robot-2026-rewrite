@@ -1,9 +1,9 @@
-package org.frogforce503.robot.subsystems.superstructure.hood.io;
+package org.frogforce503.robot.subsystems.superstructure.intakepivot.io;
 
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.HoodConfig;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.constants.hardware.subsystem_config.IntakePivotConfig;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
 
@@ -12,38 +12,38 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
-public class HoodIOSim extends HoodIOSpark {
+public class IntakePivotIOSim extends IntakePivotIOSpark {
     // Control
     private final SparkMaxSim motorSim;
     private final SingleJointedArmSim physicsSim;
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double length = Units.inchesToMeters(19);
-    private final double moi = 0.85; // kg * m^2
+    private final double length = Units.inchesToMeters(14.75); // TODO measure the length from the pivot point to the center of mass of the 4-bar intake
+    private final double moi = 0.62; // kg * m^2, TODO measure the moi from the pivot point
 
-    public HoodIOSim() {
-        final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
+    public IntakePivotIOSim() {
+        final IntakePivotConfig pivotConfig = Robot.bot.getIntakePivotConfig();
 
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new SingleJointedArmSim(
                 motorModel,
-                hoodConfig.mechanismRatio(),
+                pivotConfig.mechanismRatio(),
                 moi,
                 length,
-                hoodConfig.minAngle(),
-                hoodConfig.maxAngle(),
+                pivotConfig.minAngle(),
+                pivotConfig.maxAngle(),
                 true,
-                HoodConstants.START);
+                IntakePivotConstants.START);
 
         // Sync physics and motor sim positions
-        motorSim.setPosition(HoodConstants.START);
+        motorSim.setPosition(IntakePivotConstants.START);
         motorSim.setVelocity(0.0);
     }
 
     @Override
-    public void updateInputs(HoodIOInputs inputs) {
+    public void updateInputs(IntakePivotIOInputs inputs) {
         double appliedVolts = motorSim.getAppliedOutput() * RobotController.getBatteryVoltage();
         
         // Apply physics
@@ -56,12 +56,12 @@ public class HoodIOSim extends HoodIOSpark {
         motorSim.setVelocity(physicsSim.getVelocityRadPerSec());
 
         inputs.data =
-            new HoodIOData(
+            new IntakePivotIOData(
                 true,
                 motorSim.getPosition(),
                 motorSim.getVelocity(),
                 appliedVolts,
                 motorSim.getMotorCurrent(),
                 24.0);
-    }
+    } 
 }

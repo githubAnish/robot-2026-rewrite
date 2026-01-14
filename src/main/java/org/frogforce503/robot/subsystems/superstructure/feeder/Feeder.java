@@ -1,10 +1,10 @@
-package org.frogforce503.robot.subsystems.superstructure.flywheels;
+package org.frogforce503.robot.subsystems.superstructure.feeder;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
+import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
@@ -12,23 +12,23 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Setter;
 
-public class Flywheels extends FFSubsystemBase {
-    private final FlywheelsIO io;
-    private final FlywheelsIOInputsAutoLogged inputs = new FlywheelsIOInputsAutoLogged();
+public class Feeder extends FFSubsystemBase {
+    private final FeederIO io;
+    private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();
 
     // Constants
     @Setter private SimpleMotorFeedforward feedforward;
 
     // Control
-    private double targetVelocityRadPerSec = FlywheelsConstants.START;
+    private double targetVelocityRadPerSec = FeederConstants.START;
 
     private boolean shouldRunVelocity = false;
     private boolean atGoal = false;
 
-    public Flywheels(FlywheelsIO io) {
+    public Feeder(FeederIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getFlywheelsConfig().kFF().getSimpleMotorFF();
+        feedforward = Robot.bot.getFeederConfig().kFF().getSimpleMotorFF();
     }
 
     @Override
@@ -36,29 +36,29 @@ public class Flywheels extends FFSubsystemBase {
         super.periodic();
 
         io.updateInputs(inputs);
-        Logger.processInputs("Flywheels", inputs);
+        Logger.processInputs("Feeder", inputs);
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, FlywheelsConstants.kTolerance);
+            atGoal = isAtVelocity(targetVelocityRadPerSec, FeederConstants.kTolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state
-            Logger.recordOutput("Flywheels/SetpointVelocityRadPerSec", targetVelocityRadPerSec);
-            Logger.recordOutput("Flywheels/AtGoal", atGoal);
+            Logger.recordOutput("Feeder/SetpointVelocityRadPerSec", targetVelocityRadPerSec);
+            Logger.recordOutput("Feeder/AtGoal", atGoal);
         } else {
             // Reset setpoint
             targetVelocityRadPerSec = 0.0;
 
             // Clear logs
-            Logger.recordOutput("Flywheels/SetpointVelocityRadPerSec", 0.0);
-            Logger.recordOutput("Flywheels/AtGoal", true);
+            Logger.recordOutput("Feeder/SetpointVelocityRadPerSec", 0.0);
+            Logger.recordOutput("Feeder/AtGoal", true);
         }
 
-        Logger.recordOutput("Flywheels/CurrentVelocityRadPerSec", getVelocityRadPerSec());
+        Logger.recordOutput("Feeder/CurrentVelocityRadPerSec", getVelocityRadPerSec());
 
         // Record cycle time
-        LoggedTracer.record("Flywheels");
+        LoggedTracer.record("Feeder");
     }
 
     public double getVelocityRadPerSec() {

@@ -1,13 +1,13 @@
-package org.frogforce503.robot.subsystems.superstructure.hood.io;
+package org.frogforce503.robot.subsystems.superstructure.intakepivot.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
 import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.HoodConfig;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.constants.hardware.subsystem_config.IntakePivotConfig;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 
 import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -19,10 +19,10 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.filter.Debouncer;
 import lombok.Getter;
 
-public class HoodIOSpark implements HoodIO {
+public class IntakePivotIOSpark implements IntakePivotIO {
     // Hardware
     @Getter private final SparkMax motor;
-    private final RelativeEncoder encoder;
+    private final SparkAbsoluteEncoder encoder;
 
     // Control
     private final SparkClosedLoopController controller;
@@ -33,40 +33,42 @@ public class HoodIOSpark implements HoodIO {
     // Filters
     private final Debouncer connectedDebouncer = new Debouncer(.5);
 
-    public HoodIOSpark() {
-        final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
+    public IntakePivotIOSpark() {
+        final IntakePivotConfig pivotConfig = Robot.bot.getIntakePivotConfig();
 
         // Initialize motor
-        motor = new SparkMax(hoodConfig.id(), MotorType.kBrushless);
-        encoder = motor.getEncoder();
+        motor = new SparkMax(pivotConfig.id(), MotorType.kBrushless);
+        encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(hoodConfig.inverted());
+        config.inverted(pivotConfig.inverted());
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(hoodConfig.statorCurrentLimit());
+        config.smartCurrentLimit(pivotConfig.statorCurrentLimit());
         config.voltageCompensation(12.0);
 
         config
-            .encoder
-                .positionConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+            .absoluteEncoder
+                .zeroOffset(pivotConfig.zeroOffset())
+                .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .zeroCentered(true)
+                .averageDepth(2)
+                .setSparkMaxDataPortConfig();
 
         config
             .closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(hoodConfig.kPID().kP(), hoodConfig.kPID().kI(), hoodConfig.kPID().kD());
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                .pid(pivotConfig.kPID().kP(), pivotConfig.kPID().kI(), pivotConfig.kPID().kD());
 
         config
             .softLimit
                 .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(HoodConstants.maxAngle)
+                .forwardSoftLimit(IntakePivotConstants.maxAngle)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(HoodConstants.minAngle);
+                .reverseSoftLimit(IntakePivotConstants.minAngle);
 
-        SparkUtil.optimizeSignals(config, false, false);
+        SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();
 
@@ -75,9 +77,9 @@ public class HoodIOSpark implements HoodIO {
     }
 
     @Override
-    public void updateInputs(HoodIOInputs inputs) {
+    public void updateInputs(IntakePivotIOInputs inputs) {
         inputs.data =
-            new HoodIOData(
+            new IntakePivotIOData(
                 connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
                 encoder.getPosition(),
                 encoder.getVelocity(),

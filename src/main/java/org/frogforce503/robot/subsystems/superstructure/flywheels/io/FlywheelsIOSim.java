@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 public class FlywheelsIOSim extends FlywheelsIOSpark {
     // Control
     private final SparkSim motorSim;
-    private final FlywheelSim flywheelsSim;
+    private final FlywheelSim physicsSim;
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
@@ -25,7 +25,7 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
         final FlywheelsConfig flywheelsConfig = Robot.bot.getFlywheelsConfig();
 
         motorSim = new SparkSim(super.getMotor(), motorModel);
-        flywheelsSim =
+        physicsSim =
             new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(motorModel, moi, flywheelsConfig.mechanismRatio()),
                 motorModel);
@@ -39,12 +39,12 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
         double appliedVolts = motorSim.getAppliedOutput() * RobotController.getBatteryVoltage();
         
         // Apply physics
-        flywheelsSim.setInputVoltage(appliedVolts);
-        flywheelsSim.update(Constants.loopPeriodSecs);
+        physicsSim.setInputVoltage(appliedVolts);
+        physicsSim.update(Constants.loopPeriodSecs);
 
         // Update motor simulation
-        motorSim.iterate(flywheelsSim.getAngularVelocityRadPerSec(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
-        motorSim.setVelocity(flywheelsSim.getAngularVelocityRadPerSec());
+        motorSim.iterate(physicsSim.getAngularVelocityRadPerSec(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
+        motorSim.setVelocity(physicsSim.getAngularVelocityRadPerSec());
         
         inputs.data =
             new FlywheelsIOData(

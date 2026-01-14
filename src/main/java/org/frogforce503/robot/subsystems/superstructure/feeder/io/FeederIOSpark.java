@@ -1,27 +1,27 @@
-package org.frogforce503.robot.subsystems.superstructure.hood.io;
+package org.frogforce503.robot.subsystems.superstructure.feeder.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
 import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.HoodConfig;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.constants.hardware.subsystem_config.FeederConfig;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.filter.Debouncer;
 import lombok.Getter;
 
-public class HoodIOSpark implements HoodIO {
+public class FeederIOSpark implements FeederIO {
     // Hardware
-    @Getter private final SparkMax motor;
+    @Getter private final SparkBase motor;
     private final RelativeEncoder encoder;
 
     // Control
@@ -32,54 +32,46 @@ public class HoodIOSpark implements HoodIO {
 
     // Filters
     private final Debouncer connectedDebouncer = new Debouncer(.5);
-
-    public HoodIOSpark() {
-        final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
+    
+    public FeederIOSpark() {
+        final FeederConfig feederConfig = Robot.bot.getFeederConfig();
 
         // Initialize motor
-        motor = new SparkMax(hoodConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(feederConfig.id(), MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(hoodConfig.inverted());
+        config.inverted(feederConfig.inverted());
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(hoodConfig.statorCurrentLimit());
+        config.smartCurrentLimit(feederConfig.statorCurrentLimit());
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / feederConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / feederConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(hoodConfig.kPID().kP(), hoodConfig.kPID().kI(), hoodConfig.kPID().kD());
-
-        config
-            .softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(HoodConstants.maxAngle)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(HoodConstants.minAngle);
+                .pid(feederConfig.kPID().kP(), feederConfig.kPID().kI(), feederConfig.kPID().kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 
         motor.clearFaults();
 
-        // Apply configuration
+        // Apply config
         SparkUtil.configure(motor, config, true);
     }
 
     @Override
-    public void updateInputs(HoodIOInputs inputs) {
+    public void updateInputs(FeederIOInputs inputs) {
         inputs.data =
-            new HoodIOData(
+            new FeederIOData(
                 connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getPosition(),
                 encoder.getVelocity(),
                 motor.getAppliedOutput() * motor.getBusVoltage(),
                 motor.getOutputCurrent(),
@@ -97,8 +89,8 @@ public class HoodIOSpark implements HoodIO {
     }
 
     @Override
-    public void runPosition(double positionRad, double feedforward) {
-        controller.setSetpoint(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
+    public void runVelocity(double velocityRadPerSec, double feedforward) {
+        controller.setSetpoint(velocityRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedforward);
     }
 
     @Override

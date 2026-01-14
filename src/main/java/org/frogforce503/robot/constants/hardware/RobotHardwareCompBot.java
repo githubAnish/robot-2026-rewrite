@@ -24,18 +24,62 @@ public class RobotHardwareCompBot extends RobotHardware {
             new VisionConfig();
             
         // Create superstructure configs
+        this.intakePivotConfig =
+            new IntakePivotConfig(
+                0,
+                1,
+                false,
+                80,
+                0.0,
+                new PIDConfig(),
+                new FFConfig(),
+                new Constraints(0, 0),
+                Units.degreesToRadians(0), // TODO Can't say main linkage bar is 0 deg, but can change once block CAD / real CAD comes out
+                Units.degreesToRadians(90)); // TODO basically when the 4-bar intake is stowed, the main linkage bar is at 90 deg
+
         this.intakeRollerConfig =
             new IntakeRollerConfig(
-                0,
+                1,
                 1,
                 false,
                 80,
                 new PIDConfig(),
                 new FFConfig());
 
+        this.indexerConfig =
+            new IndexerConfig(
+                2,
+                1,
+                false,
+                80,
+                new PIDConfig(),
+                new FFConfig());;
+
+        this.feederConfig =
+            new FeederConfig(
+                3,
+                1,
+                false,
+                80,
+                new PIDConfig(),
+                new FFConfig());
+
+        this.turretConfig =
+            new TurretConfig(
+                4,
+                1,
+                false,
+                80,
+                0.0,
+                new PIDConfig(),
+                new FFConfig(),
+                new Constraints(0, 0),
+                Units.degreesToRadians(-180), // TODO assume for now
+                Units.degreesToRadians(180)); // TODO assume for now
+
         this.flywheelsConfig =
             new FlywheelsConfig(
-                1,
+                5,
                 1,
                 false,
                 80,
@@ -44,16 +88,15 @@ public class RobotHardwareCompBot extends RobotHardware {
 
         this.hoodConfig =
             new HoodConfig(
-                2,
+                6,
                 1,
                 false,
                 80,
-                0,
                 new PIDConfig(),
                 new FFConfig(),
                 new Constraints(0, 0),
-                Units.degreesToRadians(0), // 0 deg is when hood horizontal (ball shoots horizontally)
-                Units.degreesToRadians(90)); // 90 deg is when hood vertical (ball shoots verticalally)
+                Units.degreesToRadians(0), // TODO 0 deg is when hood horizontal (ball shoots horizontally)
+                Units.degreesToRadians(90)); // TODO 90 deg is when hood vertical (ball shoots verticalally)
         
         // Create other configs
         this.ledsConfig =
