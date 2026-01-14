@@ -1,7 +1,7 @@
 package org.frogforce503.lib.rebuilt;
 
-// assume no turret until further updates, look in superstructure.java javadocs
-// therefore don't do shoot on move and just use interpolating double tree map / physics like 604 shotcalculator
+// assume turret until further updates, look in superstructure.java javadocs
+// therefore first just use simple just use interpolating double tree map, then shoot on move & physics like 604 shotcalculator (have to integrate turret rotation & drivetrain rotation, both have to move)
 // take into account the drivetrain pose and velocity
 public final class ShotCalculator {
     private ShotCalculator() {}
