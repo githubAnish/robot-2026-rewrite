@@ -53,7 +53,7 @@ public class RobotHardwareCompBot extends RobotHardware {
                 false,
                 80,
                 new PIDConfig(),
-                new FFConfig());;
+                new FFConfig());
 
         this.feederConfig =
             new FeederConfig(
@@ -99,6 +99,22 @@ public class RobotHardwareCompBot extends RobotHardware {
                 Units.degreesToRadians(90)); // TODO 90 deg is when hood vertical (ball shoots verticalally)
         
         // Create other configs
+        this.climberConfig =
+            new ClimberConfig(
+                7,
+                1,
+                Units.inchesToMeters(2),
+                false,
+                80,
+                new PIDConfig(),
+                new FFConfig(),
+                new Constraints(0, 0),
+                Units.inchesToMeters(0),
+                Units.inchesToMeters(0));
+
+        this.sensorConfig =
+            new SensorConfig(0);
+
         this.ledsConfig =
             new LedsConfig(11);
 

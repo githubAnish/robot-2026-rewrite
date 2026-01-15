@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Setter;
 
+// Assume the feeder is just a bunch of rollers connected to each other
 public class Feeder extends FFSubsystemBase {
     private final FeederIO io;
     private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();

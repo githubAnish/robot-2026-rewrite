@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import lombok.Setter;
 
 // need velocity control, but need some sort of pulsing mechanism to get the balls into feeder correctly according to ri3d videos
+// Assume the indexer is just a spindexer that rotates around
 public class Indexer extends FFSubsystemBase {
     private final IndexerIO io;
     private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
@@ -64,6 +65,14 @@ public class Indexer extends FFSubsystemBase {
 
     public double getVelocityRadPerSec() {
         return inputs.data.velocityRadPerSec();
+    }
+
+    public boolean isCompressed() {
+        return
+            shouldRunVelocity &&
+            Math.abs(targetVelocityRadPerSec) > 1e-3 &&
+            getVelocityRadPerSec() < IndexerConstants.MIN_FREE_SPEED &&
+            inputs.data.statorCurrentAmps() > IndexerConstants.COMPRESSION_CURRENT;
     }
 
     // Actions

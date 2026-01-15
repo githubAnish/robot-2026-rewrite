@@ -9,6 +9,7 @@ import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
+import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromFlywheels;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
@@ -16,6 +17,10 @@ import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
 import org.frogforce503.robot.commands.LobFuelIntoAlliance;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.subsystems.climber.Climber;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
@@ -65,6 +70,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
@@ -75,6 +81,7 @@ public class RobotContainer {
     private Drive drive;
     private Vision vision;
     private final Superstructure superstructure;
+    private Climber climber;
     private Leds leds;
 
     // Auto
@@ -130,6 +137,8 @@ public class RobotContainer {
                 flywheels = new Flywheels(new FlywheelsIOSpark());
                 hood = new Hood(new HoodIOSpark());
 
+                climber = new Climber(new ClimberIOSpark());
+
                 leds = new Leds(new LedsIOCANdle());
             }
             case PracticeBot -> {
@@ -148,6 +157,8 @@ public class RobotContainer {
                 turret = new Turret(new TurretIOSpark());
                 flywheels = new Flywheels(new FlywheelsIOSpark());
                 hood = new Hood(new HoodIOSpark());
+
+                climber = new Climber(new ClimberIOSpark());
                 
                 leds = new Leds(new LedsIOCANdle());
             }
@@ -167,6 +178,8 @@ public class RobotContainer {
                 turret = new Turret(new TurretIOSim());
                 flywheels = new Flywheels(new FlywheelsIOSim());
                 hood = new Hood(new HoodIOSim());
+
+                climber = new Climber(new ClimberIOSim());
                 
                 leds = new Leds(new LedsIO() {});
             }
@@ -186,6 +199,8 @@ public class RobotContainer {
                 turret = new Turret(new TurretIO() {});
                 flywheels = new Flywheels(new FlywheelsIO() {});
                 hood = new Hood(new HoodIO() {});
+
+                climber = new Climber(new ClimberIO() {});
                 
                 leds = new Leds(new LedsIO() {});
             }
@@ -215,12 +230,13 @@ public class RobotContainer {
 
         configureButtonBindings();
         configureTriggers();
-        configureOther();
     }
 
     private void configureButtonBindings() {
         // Main controls
-        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, autoAssistEnabled::get));
+        drive.setDefaultCommand(new TeleopDriveCommand(drive, driver));
+
+        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnabled::get));
         driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnabled::get));
 
         driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled::get)); // auto aim + shoot, see past examples
@@ -233,6 +249,19 @@ public class RobotContainer {
         bindPresets(driver.b(), ShotPreset.DEPOT);
         bindPresets(driver.a(), ShotPreset.OUTPOST);
         bindPresets(driver.x(), ShotPreset.TRENCH);
+
+        driver.povDown().onTrue(
+            new ClimbSequence(
+                drive,
+                vision,
+                superstructure,
+                climber,
+                driver.povUp())
+            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        // TODO fix it so that when you press the button, the cmd activates, ideally the climber shouldnt have a default cmd like this
+        // It cancels incoming since you don't do anything after climbing (like shooting or intaking or any other undesirable behavior)
+
+        operator.a().onTrue(Commands.runOnce(() -> drive.brake())); // Stop drivebase with X wheels
 
         // Overrides
         driver.back().onTrue(Commands.runOnce(drive::toggleSlowMode));
@@ -265,11 +294,6 @@ public class RobotContainer {
                     setDriverRumble(0.75, 0.25),
                     Commands.runOnce(() -> leds.runPattern(LedsRequest.READY_TO_SHOOT))
             ));
-    }
-
-    private void configureOther() {
-        // Set default commands
-        drive.setDefaultCommand(new TeleopDriveCommand(drive, driver));
     }
 
     private Command setDriverRumble(double value, double duration) {

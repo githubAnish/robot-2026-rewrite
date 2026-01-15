@@ -17,6 +17,7 @@ import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIO;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOInputsAutoLogged;
 
+// Assume the intakepivot is just a 4-bar intake that stows inward & deploys out
 public class IntakePivot extends FFSubsystemBase {
     private final IntakePivotIO io;
     private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();

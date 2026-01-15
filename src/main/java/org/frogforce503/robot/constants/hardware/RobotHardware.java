@@ -18,6 +18,9 @@ public abstract class RobotHardware {
     @Getter protected FlywheelsConfig flywheelsConfig;
     @Getter protected HoodConfig hoodConfig;
 
+    @Getter protected ClimberConfig climberConfig;
+
+    @Getter protected SensorConfig sensorConfig;
     @Getter protected LedsConfig ledsConfig;
 
     // Other

@@ -11,4 +11,6 @@ public class IntakePivotConstants {
     public static final double maxAngle = Robot.bot.getIntakePivotConfig().maxAngle();
 
     public static final double START = maxAngle;
+
+    public static final double INTAKE = Units.degreesToRadians(45);
 }

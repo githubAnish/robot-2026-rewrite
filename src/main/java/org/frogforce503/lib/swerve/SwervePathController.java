@@ -111,7 +111,7 @@ public class SwervePathController {
         Pose2d currentPose,
         Pose2d targetPose,
         Rotation2d targetAngle,
-        double driveVelocityFF,
+        double linearFF,
         double thetaFF
     ) {
         return
@@ -119,8 +119,8 @@ public class SwervePathController {
                 currentPose,
                 targetPose,
                 targetAngle,
-                driveVelocityFF * targetPose.getRotation().getCos(),
-                driveVelocityFF * targetPose.getRotation().getSin(),
+                linearFF * targetPose.getRotation().getCos(),
+                linearFF * targetPose.getRotation().getSin(),
                 thetaFF);
     }
 
