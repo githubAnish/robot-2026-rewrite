@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
@@ -213,5 +214,9 @@ public class Vision extends SubsystemBase {
 
     public void setDesiredAprilTagGoal(AprilTagGoal goal) {
         this.desiredAprilTagGoal = goal;
+    }
+
+    public Pose2d getBestBallPose() {
+        return new Pose2d(8.7, 4.4, new Rotation2d()); // need to implement using object detection, just a placeholder for IntakeFuelFromGorund to work
     }
 }

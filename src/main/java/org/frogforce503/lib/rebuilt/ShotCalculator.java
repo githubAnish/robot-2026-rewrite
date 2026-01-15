@@ -6,17 +6,23 @@ package org.frogforce503.lib.rebuilt;
 public final class ShotCalculator {
     private ShotCalculator() {}
 
+    // Basically preps the robot in alliance zone to shoot
+    public static ShotInfo calculatePrepShotInfo() {
+        return new ShotInfo();
+    }
+
     public static ShotInfo calculateShotInfo() {
         return new ShotInfo();
     }
 
     public static record ShotInfo(
-        double flywheelsSpeed,
+        double turretAngleRad,
+        double flywheelsSpeedRadPerSec,
         double hoodAngleRad,
         boolean feasibleShot
     ) {
         public ShotInfo() {
-            this(0.0, 0.0, false);
+            this(0.0, 0.0, 0.0, false);
         }
     }
 }

@@ -2,7 +2,6 @@ package org.frogforce503.robot;
 
 import java.util.function.Consumer;
 
-import org.frogforce503.lib.io.DoublePressTracker;
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.util.ErrorUtil;
@@ -75,7 +74,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod({DoublePressTracker.class, TriggerUtil.class})
+@ExtensionMethod({TriggerUtil.class})
 public class RobotContainer {
     // Subsystems
     private Drive drive;

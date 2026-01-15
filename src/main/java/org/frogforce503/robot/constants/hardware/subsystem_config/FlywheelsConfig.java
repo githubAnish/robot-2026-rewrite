@@ -11,4 +11,5 @@ public record FlywheelsConfig(
     int statorCurrentLimit,
     
     PIDConfig kPID,
-    FFConfig kFF) {}
+    FFConfig kFF,
+    double kRateLimit) {}

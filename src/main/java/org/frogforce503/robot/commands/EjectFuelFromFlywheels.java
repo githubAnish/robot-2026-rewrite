@@ -1,11 +1,15 @@
 package org.frogforce503.robot.commands;
 
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class EjectFuelFromFlywheels extends Command {
-    public EjectFuelFromFlywheels(Superstructure superstructure) {
+    private final Flywheels flywheels;
 
+    public EjectFuelFromFlywheels(Superstructure superstructure) {
+        this.flywheels = superstructure.getFlywheels();
     }
 
     @Override

@@ -84,7 +84,8 @@ public class RobotHardwareCompBot extends RobotHardware {
                 false,
                 80,
                 new PIDConfig(),
-                new FFConfig());
+                new FFConfig(),
+                Units.rotationsPerMinuteToRadiansPerSecond(10000)); // Maybe a high rate limit, it is 10000 rpm/sec^2, so generally will speed up flywheel in 0.5 sec if max speed is 5000 rpm
 
         this.hoodConfig =
             new HoodConfig(

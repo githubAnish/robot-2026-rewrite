@@ -21,7 +21,6 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -77,7 +76,7 @@ public class IntakeFuelFromGround extends Command {
 
         // Initialize path to fuel
         Pose2d robotPose = drive.getFuturePose(lookaheadTimeSec);
-        Pose2d targetPose = new Pose2d(3,3,new Rotation2d()); // TODO get from vision
+        Pose2d targetPose = vision.getBestBallPose(); // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
 
         double linearVelocity =
             Math.hypot(
