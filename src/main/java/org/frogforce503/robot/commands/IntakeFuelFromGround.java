@@ -6,8 +6,10 @@ import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.lib.auto.planned_path.PlannedPath.HolonomicState;
 import org.frogforce503.lib.auto.planned_path.PlannedPathFactory;
 import org.frogforce503.lib.auto.planned_path.components.Waypoint;
-import org.frogforce503.lib.io.JoystickUtil;
+import org.frogforce503.lib.rebuilt.ProximityUtil;
+import org.frogforce503.lib.swerve.TeleopDriveController;
 import org.frogforce503.lib.swerve.SwervePathController;
+import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -20,8 +22,13 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,7 +36,6 @@ import lombok.experimental.ExtensionMethod;
 
 // Notes:
 // involves some sort of fetching (no need of a separate fetching cmd, just needs to natural enough for the good driver, see orbit intake assist)
-@ExtensionMethod({JoystickUtil.class})
 public class IntakeFuelFromGround extends Command {
     // Requirements
     private final Drive drive;
@@ -39,8 +45,6 @@ public class IntakeFuelFromGround extends Command {
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
 
-    private final CommandXboxController xboxController;
-
     private final BooleanSupplier autoAssistEnabled;
 
     // Constants
@@ -48,10 +52,9 @@ public class IntakeFuelFromGround extends Command {
     private final double maxFetchingLinearAcceleration = DriveConstants.maxLinearSpeed * 0.7; // TODO rough guess
     private final double lookaheadTimeSec = 0.15;
 
-    // Trajectory
-    private final SwervePathController trajectoryController = DriveConstants.pathFollower;
-    private final Timer trajectoryTimer = new Timer();
-    private PlannedPath trajectory;
+    // Controllers
+    private final TeleopDriveController teleopController;
+    private final PIDController assistController = new PIDController(1.0, 0.0, 0.0);
 
     public IntakeFuelFromGround(Drive drive, Vision vision, Superstructure superstructure, CommandXboxController xboxController, BooleanSupplier autoAssistEnabled) {
         this.drive = drive;
@@ -61,7 +64,7 @@ public class IntakeFuelFromGround extends Command {
         this.intakeRoller = superstructure.getIntakeRoller();
         this.indexer = superstructure.getIndexer();
 
-        this.xboxController = xboxController;
+        this.teleopController = new TeleopDriveController(drive, xboxController);
 
         this.autoAssistEnabled = autoAssistEnabled;
 
@@ -73,31 +76,14 @@ public class IntakeFuelFromGround extends Command {
         intakePivot.setAngle(IntakePivotConstants.INTAKE);
         intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
         indexer.setVelocity(IndexerConstants.INTAKE);
-
-        // Initialize path to fuel
-        Pose2d robotPose = drive.getFuturePose(lookaheadTimeSec);
-        Pose2d targetPose = vision.getBestBallPose(); // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
-
-        double linearVelocity =
-            Math.hypot(
-                drive.getRobotVelocity().vxMetersPerSecond,
-                drive.getRobotVelocity().vyMetersPerSecond);
-
-        trajectory =
-            PlannedPathFactory.generate(
-                maxFetchingLinearSpeed,
-                maxFetchingLinearAcceleration,
-                linearVelocity,
-                0,
-                Waypoint.fromHolonomicPose(robotPose),
-                Waypoint.fromHolonomicPose(targetPose));
-
-        trajectoryController.reset();
-        trajectoryTimer.restart();
     }
 
     @Override
     public void execute() {
+        // Get inputs
+        Pose2d robotPose = drive.getFuturePose(lookaheadTimeSec);
+        Pose2d targetPose = vision.getBestBallPose(); // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
+
         // If compressed, back off indexer speed
         if (indexer.isCompressed()) {
             indexer.setVelocity(IndexerConstants.SLOW_MIX);
@@ -105,21 +91,40 @@ public class IntakeFuelFromGround extends Command {
             indexer.setVelocity(IndexerConstants.INTAKE);
         }
 
-        // If fetching not wanted, skip fetching logic
-        if (!autoAssistEnabled.getAsBoolean()) {
+        // If fetching not wanted, skip fetching logic and do normal teleop drive
+        if (!autoAssistEnabled.getAsBoolean() ||
+            ProximityUtil.getDistanceBetweenPoses(robotPose, targetPose) < Units.inchesToMeters(40)
+        ) {
+            teleopController.update();
             return;
         }
 
-        // Fetching logic (TODO currently not an driver-assist, just following a on-the-fly trajectory)
-        double currentTime = trajectoryTimer.get();
-        HolonomicState desiredState = trajectory.sample(currentTime);
-        ChassisSpeeds targetChassisSpeeds = trajectoryController.calculate(drive.getPose(), desiredState);
-        drive.runVelocity(targetChassisSpeeds);
+        // Fetching logic (a basic driver-assist currently)
+        // Get driver velocity
+        Translation2d driverLinearVelocity = teleopController.getLinearVelocityFromJoysticks();
+        double driverOmega = teleopController.getOmegaFromJoysticks();
+
+        // Calculate speeds
+        double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed;
+        double yVelocity = driverLinearVelocity.getY() * DriveConstants.maxLinearSpeed;
+        double omega = driverOmega * DriveConstants.maxOmega;
+
+        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
+
+        // Apply assist
+        double yError = robotPose.getTranslation().minus(targetPose.getTranslation()).getY();
+        double yOutput = assistController.calculate(yError, 0);
+        speeds.vyMetersPerSecond += yOutput;
+
+        // Apply speeds
+        drive.runVelocity(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                drive.getAngle()));
 
         // Log data
-        Logger.recordOutput("IntakeFuelFromGround/Timestamp", currentTime);
-        Logger.recordOutput("IntakeFuelFromGround/Drive Error", trajectoryController.getPoseError().getTranslation());
-        Logger.recordOutput("IntakeFuelFromGround/Theta Error", trajectoryController.getRotationError());
+        Logger.recordOutput("IntakeFuelFromGround/Y Error", yError);
+        Logger.recordOutput("IntakeFuelFromGround/Y Controller Output", yOutput);
     }
 
     @Override

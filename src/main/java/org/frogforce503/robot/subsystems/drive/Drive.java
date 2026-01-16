@@ -28,8 +28,6 @@ public class Drive extends SubsystemBase {
     // Toggles
     @Getter private boolean robotRelative = false;
     @Getter private boolean slowMode = false;
-    @Setter @Getter private double teleopTranslationScalar = 1.0;
-    @Setter @Getter private double teleopRotationScalar = 1.0;
     @Setter @Getter private boolean coastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {

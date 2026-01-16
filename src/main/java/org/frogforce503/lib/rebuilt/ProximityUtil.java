@@ -10,7 +10,7 @@ public final class ProximityUtil {
     private ProximityUtil() {}
 
     // General-purpose proximity methods
-    private static double getDistanceBetweenPoses(Pose2d first, Pose2d second) {
+    public static double getDistanceBetweenPoses(Pose2d first, Pose2d second) {
         return first.minus(second).getTranslation().getNorm();
     }
 
