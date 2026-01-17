@@ -34,6 +34,7 @@ public class Superstructure extends VirtualSubsystem {
 
     // Inputs
     @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
+    @Setter @Getter private boolean feasibleShot;
 
     // Viz
     @Getter private final SuperstructureViz viz;
@@ -82,9 +83,14 @@ public class Superstructure extends VirtualSubsystem {
         }
 
         Logger.recordOutput("Superstructure/ShotPreset", shotPreset);
+        Logger.recordOutput("Superstructure/Is Shot Feasible?", feasibleShot);
 
         // Record cycle time
         LoggedTracer.record("Superstructure");
+    }
+
+    public boolean isFull() {
+        return indexer.isCompressed();
     }
 
     // Actions
@@ -99,7 +105,21 @@ public class Superstructure extends VirtualSubsystem {
     }
 
     public void stop() {
+        intakePivot.stop();
         intakeRoller.stop();
+        indexer.stop();
+        feeder.stop();
+        turret.stop();
+        flywheels.stop();
+        hood.stop();
+    }
+
+    public void idle() {
+        intakePivot.stop();
+        intakeRoller.stop();
+        indexer.stop();
+        feeder.stop();
+        turret.stop();
         flywheels.stop();
         hood.stop();
     }

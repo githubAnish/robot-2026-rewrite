@@ -14,8 +14,11 @@ import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
 import org.frogforce503.robot.commands.LobFuelIntoAlliance;
+import org.frogforce503.robot.commands.PrepForLobFuelIntoAlliance;
+import org.frogforce503.robot.commands.PrepForShootFuelIntoHub;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
@@ -65,6 +68,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -260,6 +265,17 @@ public class RobotContainer {
     }
 
     private void configureTriggers() {
+        Trigger inAllianceZone =
+            new Trigger(() ->
+                FieldInfo.isRed()
+                    ? drive.getPose().getX() > FieldConstants.Lines.redInitLineX
+                    : drive.getPose().getX() < FieldConstants.Lines.blueInitLineX
+            );
+
+        inAllianceZone
+            .onTrue(new PrepForShootFuelIntoHub(drive, vision, superstructure))
+            .onFalse(new PrepForLobFuelIntoAlliance(drive, vision, superstructure));
+
         Trigger camerasConnected = new Trigger(() -> true); // TODO: Make a method for this in Vision.java
 
         // If cameras disconnected for 5 seconds, then leds will blink red until cameras re-connected
@@ -274,7 +290,7 @@ public class RobotContainer {
                     () -> leds.setCameraDisconnected(true))
                         .ignoringDisable(true));
 
-        Trigger shotFeasible = new Trigger(() -> false);
+        Trigger shotFeasible = new Trigger(superstructure::isFeasibleShot);
 
         // If shot is feasible and driver knows they can take shot, then rumbles driver for 0.25 sec and blinks LEDs
         // Rumbling logic can change in the future

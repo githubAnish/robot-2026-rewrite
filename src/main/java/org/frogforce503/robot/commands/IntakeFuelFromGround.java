@@ -41,6 +41,7 @@ public class IntakeFuelFromGround extends Command {
     private final Drive drive;
     private final Vision vision;
 
+    private final Superstructure superstructure;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
@@ -60,6 +61,7 @@ public class IntakeFuelFromGround extends Command {
         this.drive = drive;
         this.vision = vision;
 
+        this.superstructure = superstructure;
         this.intakePivot = superstructure.getIntakePivot();
         this.intakeRoller = superstructure.getIntakeRoller();
         this.indexer = superstructure.getIndexer();
@@ -73,6 +75,10 @@ public class IntakeFuelFromGround extends Command {
 
     @Override
     public void initialize() {
+        if (superstructure.isFull()) {
+            return;
+        }
+
         intakePivot.setAngle(IntakePivotConstants.INTAKE);
         intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
         indexer.setVelocity(IndexerConstants.INTAKE);
@@ -129,7 +135,7 @@ public class IntakeFuelFromGround extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        return superstructure.isFull();
     }
 
     @Override

@@ -15,10 +15,7 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-// Notes:
-// shoot on move (auto aim + future pose prediction + shooting)
-// Use the ShotCalculator.java to predict shots, and use the superstructure shotpresets to determine if calculating the turret angle, flywheels speed, hood angle, etc is needed
-public class ShootFuelIntoHub extends Command {
+public class PrepForLobFuelIntoAlliance extends Command {
     private final Drive drive;
     private final Vision vision;
 
@@ -31,9 +28,7 @@ public class ShootFuelIntoHub extends Command {
     private final Flywheels flywheels;
     private final Hood hood;
 
-    private final BooleanSupplier autoAssistEnabled;
-
-    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
+    public PrepForLobFuelIntoAlliance(Drive drive, Vision vision, Superstructure superstructure) {
         this.drive = drive;
         this.vision = vision;
 
@@ -45,8 +40,6 @@ public class ShootFuelIntoHub extends Command {
         this.turret = superstructure.getTurret();
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
-
-        this.autoAssistEnabled = autoAssistEnabled;
     }
 
     @Override
