@@ -67,15 +67,15 @@ public class RobotHardwareCompBot extends RobotHardware {
         this.turretConfig =
             new TurretConfig(
                 4,
-                1,
+                100, // currently 6328 turret gear ratio
                 false,
                 80,
                 0.0,
-                new PIDConfig(),
+                new PIDConfig(1, 0, 0), // some basic pid value
                 new FFConfig(),
-                new Constraints(0, 0),
-                Units.degreesToRadians(-180), // TODO assume for now
-                Units.degreesToRadians(180)); // TODO assume for now
+                Units.degreesToRadians(360), // assume 360 deg/sec for now
+                Units.degreesToRadians(-210), // TODO assume 6328 min angle for now
+                Units.degreesToRadians(210)); // TODO assume 6328 min angle for now
 
         this.flywheelsConfig =
             new FlywheelsConfig(

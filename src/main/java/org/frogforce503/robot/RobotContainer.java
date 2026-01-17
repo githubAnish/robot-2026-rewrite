@@ -249,23 +249,14 @@ public class RobotContainer {
         bindPresets(driver.a(), ShotPreset.OUTPOST);
         bindPresets(driver.x(), ShotPreset.TRENCH);
 
-        driver.povDown().onTrue(
-            new ClimbSequence(
-                drive,
-                vision,
-                superstructure,
-                climber,
-                driver.povUp())
-            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-        // TODO fix it so that when you press the button, the cmd activates, ideally the climber shouldnt have a default cmd like this
-        // It cancels incoming since you don't do anything after climbing (like shooting or intaking or any other undesirable behavior)
-
-        operator.a().onTrue(Commands.runOnce(() -> drive.brake())); // Stop drivebase with X wheels
+        bindClimbing(driver.povUp(), true);
 
         // Overrides
         driver.back().onTrue(Commands.runOnce(drive::toggleSlowMode));
         driver.start().onTrue(Commands.runOnce(drive::toggleRobotRelative));
         operator.povUp().onTrue(Commands.runOnce(drive::resetRotation));
+
+        operator.a().onTrue(Commands.runOnce(() -> drive.brake())); // Stop drivebase with X wheels
     }
 
     private void configureTriggers() {
@@ -295,10 +286,10 @@ public class RobotContainer {
             ));
     }
 
-    private Command setDriverRumble(double value, double duration) {
+    private Command setDriverRumble(double value, double durationSec) {
         return
             Commands.run(() -> driver.setRumble(RumbleType.kBothRumble, value))
-                .withTimeout(duration)
+                .withTimeout(durationSec)
                 .finallyDo(() -> driver.setRumble(RumbleType.kBothRumble, 0))
                 .withName("setDriverRumble");
     }
@@ -309,12 +300,22 @@ public class RobotContainer {
             .onFalse(Commands.runOnce(() -> superstructure.setShotPreset(ShotPreset.NONE)));
     }
 
+    // Cancel incoming commands to ensure no unintended / undesirable behaior occurs outside of the climb sequence
+    private void bindClimbing(Trigger advanceTrigger, boolean cancelIncomingCommands) {
+        Command climbSequence = new ClimbSequence(superstructure, climber, advanceTrigger);
+
+        advanceTrigger.onTrue(
+            cancelIncomingCommands
+                ? climbSequence.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                : climbSequence);
+    }
+
     public void robotPeriodic() {
+        loggedJVM.update();
+
         if (RobotBase.isSimulation()) {
             gameViz.update();
         }
-
-        loggedJVM.update();
 
         Logger.recordOutput("Alliance Color", FieldInfo.getAlliance());
     }

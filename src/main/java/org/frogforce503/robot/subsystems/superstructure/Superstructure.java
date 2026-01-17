@@ -77,8 +77,7 @@ public class Superstructure extends VirtualSubsystem {
         // Update viz
         if (RobotBase.isSimulation()) {
             viz.update(
-                intakeRoller.getVelocityRadPerSec(),
-                flywheels.getVelocityRadPerSec(),
+                turret.getAngleRad(),
                 hood.getAngleRad());
         }
 

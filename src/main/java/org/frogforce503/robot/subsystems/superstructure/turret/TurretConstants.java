@@ -11,4 +11,6 @@ public final class TurretConstants {
     public static final double maxAngle = Robot.bot.getTurretConfig().maxAngle();
 
     public static final double START = Units.degreesToRadians(0);
+
+    public static final double CLIMB = Units.degreesToRadians(180); // faces backwards
 }

@@ -6,13 +6,11 @@ import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOInputsAutoLogged;
-import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;

@@ -8,7 +8,6 @@ import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import com.revrobotics.sim.SparkMaxSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
@@ -19,8 +18,8 @@ public class HoodIOSim extends HoodIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double length = Units.inchesToMeters(19);
-    private final double moi = 0.85; // kg * m^2
+    private final double length = 0.33; // in meters, from https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/subsystems/hood/HoodIOSim.java
+    private final double moi = 0.004; // kg * m^2, from https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/subsystems/hood/HoodIOSim.java
 
     public HoodIOSim() {
         final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
@@ -34,7 +33,7 @@ public class HoodIOSim extends HoodIOSpark {
                 length,
                 hoodConfig.minAngle(),
                 hoodConfig.maxAngle(),
-                true,
+                false,
                 HoodConstants.START);
 
         // Sync physics and motor sim positions

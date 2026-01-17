@@ -19,7 +19,7 @@ public class TurretIOSim extends TurretIOSpark {
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.01;
+    private final double moi = 0.001;
 
     public TurretIOSim() {
         final TurretConfig turretConfig = Robot.bot.getTurretConfig();
@@ -49,7 +49,7 @@ public class TurretIOSim extends TurretIOSpark {
             new TurretIOData(
                 true,
                 motorSim.getPosition(),
-                motorSim.getPosition(), // assume relative & absolute encoders have same position
+                motorSim.getPosition() % (2 * Math.PI), // Since absolute encoder wraps around, do relative pos mod 360 deg
                 motorSim.getVelocity(),
                 appliedVolts,
                 motorSim.getMotorCurrent(),

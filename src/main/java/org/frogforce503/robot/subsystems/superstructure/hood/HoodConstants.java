@@ -10,5 +10,7 @@ public final class HoodConstants {
     public static final double minAngle = Robot.bot.getHoodConfig().minAngle();
     public static final double maxAngle = Robot.bot.getHoodConfig().maxAngle();
 
-    public static final double START = Units.degreesToRadians(45);
+    public static final double START = Units.degreesToRadians(0);
+
+    public static final double CLIMB = Units.degreesToRadians(0);
 }

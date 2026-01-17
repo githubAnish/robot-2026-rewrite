@@ -91,12 +91,12 @@ public class Drive extends SubsystemBase {
         return getPose().exp(getRobotVelocity().toTwist2d(lookaheadTimeSec));
     }
 
-    public ChassisSpeeds getRobotVelocity() {
-        return inputs.Speeds;
-    }
-
     public Rotation2d getAngle() {
         return getPose().getRotation();
+    }
+
+    public ChassisSpeeds getRobotVelocity() {
+        return inputs.Speeds;
     }
 
     public ChassisSpeeds getFieldVelocity() {

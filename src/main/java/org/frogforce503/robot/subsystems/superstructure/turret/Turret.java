@@ -4,8 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,15 +27,15 @@ public class Turret extends FFSubsystemBase {
     private double targetAngleRad = TurretConstants.START;
 
     private boolean shouldRunProfile = true;
-    @Setter private TrapezoidProfile profile;
-    @Getter private State setpoint = new State();
+    @Setter private SlewRateLimiter profile;
+    @Getter private double setpoint = 0.0;
     private boolean atGoal = false;
 
     public Turret(TurretIO io) {
         this.io = io;
 
         feedforward = Robot.bot.getTurretConfig().kFF().getSimpleMotorFF();
-        profile = new TrapezoidProfile(Robot.bot.getTurretConfig().kConstraints());
+        profile = new SlewRateLimiter(Robot.bot.getTurretConfig().kRateLimit());
     }
 
     @Override
@@ -48,30 +47,28 @@ public class Turret extends FFSubsystemBase {
 
         // Update profile
         if (shouldRunProfile && RobotState.isEnabled()) {
-            var goalState =
-                new State(
-                    MathUtil.clamp(targetAngleRad, TurretConstants.minAngle, TurretConstants.maxAngle),
-                    0.0);
+            double goalAngleRad = MathUtil.clamp(targetAngleRad, TurretConstants.minAngle, TurretConstants.maxAngle);
 
-            double previousVelocity = setpoint.velocity;
+            double previousSetpoint = setpoint;
 
-            setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, TurretConstants.kTolerance);
+            setpoint = profile.calculate(goalAngleRad);
+            atGoal = isAtAngle(goalAngleRad, TurretConstants.kTolerance);
 
-            double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
-            io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
+            double velocity = (setpoint - previousSetpoint) / Constants.loopPeriodSecs;
+            io.runPosition(setpoint, feedforward.calculate(velocity));
 
             // Log state
-            Logger.recordOutput("Turret/Profile/SetpointPositionRad", setpoint.position);
-            Logger.recordOutput("Turret/Profile/SetpointVelocityRadPerSec", setpoint.velocity);
-            Logger.recordOutput("Turret/Profile/GoalPositionRad", goalState.position);
+            Logger.recordOutput("Turret/Profile/SetpointPositionRad", setpoint);
+            Logger.recordOutput("Turret/Profile/SetpointVelocityRadPerSec", velocity);
+            Logger.recordOutput("Turret/Profile/GoalPositionRad", goalAngleRad);
             Logger.recordOutput("Turret/AtGoal", atGoal);
         } else {
             // Reset setpoint
-            setpoint = new State(getAngleRad(), 0.0);
+            setpoint = getAngleRad();
+            profile.reset(setpoint);
       
             // Clear logs
-            Logger.recordOutput("Turret/Profile/SetpointPositionRad", 0.0);
+            Logger.recordOutput("Turret/Profile/SetpointPositionRad", setpoint);
             Logger.recordOutput("Turret/Profile/SetpointVelocityRadPerSec", 0.0);
             Logger.recordOutput("Turret/Profile/GoalPositionRad", 0.0);
             Logger.recordOutput("Turret/AtGoal", true);
