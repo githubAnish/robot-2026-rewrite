@@ -6,7 +6,8 @@ import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 
 public class FieldConstants {
     public static final AprilTagFieldLayout aprilTagFieldLayout = Constants.fieldVenue.getAprilTagFieldLayout();
@@ -32,15 +33,48 @@ public class FieldConstants {
     }
 
     public static class Hub {
-        // blue hub center translation2d, x coord id 18 y coord id 26
-        public static final Translation2d blueCenter;
+        public static final Translation3d blueCenter;
+        public static final Translation3d redCenter;
+
+        public static final Translation3d blueShotPose;
+        public static final Translation3d redShotPose;
 
         static {
-            blueCenter = new Translation2d(getTagPose2d(18).getX(), getTagPose2d(26).getY());
+            final double hubHeight = Units.inchesToMeters(72.0); // account for shot pose to be 10 inches below
+            final double hubHeightToShotHeight = Units.inchesToMeters(10.0);
+
+            blueCenter = new Translation3d(getTagPose2d(18).getX(), getTagPose2d(26).getY(), hubHeight);
+            redCenter = new Translation3d(getTagPose2d(2).getX(), getTagPose2d(10).getY(), hubHeight);
+
+            blueShotPose = blueCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
+            redShotPose = redCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
         }
     }
 
     public static class Outpost {
         public static final Pose2d blue = getTagPose2d(29);
+        public static final Pose2d red = getTagPose2d(13);
+    }
+
+    public static class Depot {
+        // public static final Pose2d blue = getTagPose2d(29);
+        // public static final Pose2d red = getTagPose2d(13);
+        // basically get a reference pose (maybe a certain dist from the right wall) so you can apply a few offsets for auto
+    }
+
+    public static class Tower {
+        // get the tag ids and add some offset to get a close enough position to align to
+    }
+
+    public static class Trench {
+        // get the center waypoint of the trench
+    }
+
+    public static class Bump {
+        // get the vertices and define the region of the bumps
+    }
+
+    public static class NeutralZone {
+        // define the regions of balls in neutral zone
     }
 }

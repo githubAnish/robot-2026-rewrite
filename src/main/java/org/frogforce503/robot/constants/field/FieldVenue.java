@@ -5,7 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import lombok.Getter;
 
 public enum FieldVenue {
-    Shop("Shop.json", AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded));
+    Shop("Shop.json", AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded));
 
     @Getter private final String filePath;
     @Getter private final AprilTagFieldLayout aprilTagFieldLayout;
