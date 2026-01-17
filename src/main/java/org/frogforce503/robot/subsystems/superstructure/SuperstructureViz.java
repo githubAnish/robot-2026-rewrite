@@ -48,6 +48,15 @@ public class SuperstructureViz {
         Logger.recordOutput("SuperstructureViz/2D", mechanism2d);
     }
 
+    // Copyright (c) 2025-2026 Littleton Robotics
+    // http://github.com/Mechanical-Advantage
+    //
+    // Use of this source code is governed by an MIT-style
+    // license that can be found in the LICENSE file at
+    // the root directory of this project.
+    //
+    // Credits to FRC 6328 for their alpha bot model & 3d viz pose calculations
+    // Will switch to 3d model from FF once block cad looks good or cad model comes out
     private void update3dViz(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
         var turretPose =
             new Pose3d(-0.197, 0.0, 0.44, new Rotation3d(0.0, 0.0, turretAngleRad));
