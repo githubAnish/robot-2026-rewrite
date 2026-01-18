@@ -94,7 +94,7 @@ public class FieldConstants {
     }
 
     /**
-     * <p> Defines the bounding box that all fuel is corralled into before start of match. </p> 
+     * <p> Defines the bounding box that all fuel (only in neutral zone) is corralled into before start of match. </p> 
      * <b> All corners should be viewed from the blue alliance. </b>
      */
     public static class NeutralZone {
@@ -182,7 +182,7 @@ public class FieldConstants {
             final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
             final double frontLeftToFrontRight = Units.inchesToMeters(73.0);
 
-            final double leftWallToBlueLeftBumpBackLeft = FieldConstantsUtil.getFieldValueMeters("LeftWallToBlueLeftBumpBackLeft");
+            final double leftWallToBlueLeftBumpBackLeft = Units.inchesToMeters(63.0);
             final double rightWallToBlueRightBumpBackRight = leftWallToBlueLeftBumpBackLeft;
 
             // Blue Left Bump
@@ -197,7 +197,7 @@ public class FieldConstants {
             blueRightBumpFrontLeftCorner = blueRightBumpFrontRightCorner.plus(new Translation2d(0, frontLeftToFrontRight));
             blueRightBumpBackLeftCorner = blueRightBumpFrontLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
 
-            final double rightWallToRedLeftBumpBackLeft = FieldConstantsUtil.getFieldValueMeters("RightWallToRedLeftBumpBackLeft");
+            final double rightWallToRedLeftBumpBackLeft = Units.inchesToMeters(63.0);
             final double leftWallToRedRightBumpBackRight = rightWallToRedLeftBumpBackLeft;
 
             // Red Left Bump

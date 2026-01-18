@@ -14,6 +14,8 @@ import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.vision.Vision;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import swervelib.simulation.ironmaple.simulation.SimulatedArena;
+import swervelib.simulation.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 
 // Notes:
 // shoot on move (auto aim + future pose prediction + shooting)
@@ -51,12 +53,12 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void initialize() {
-        
+
     }
 
     @Override
     public void execute() {
-
+        
     }
 
     @Override
