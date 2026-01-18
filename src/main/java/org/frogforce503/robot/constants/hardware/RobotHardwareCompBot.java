@@ -43,8 +43,8 @@ public class RobotHardwareCompBot extends RobotHardware {
                 1,
                 false,
                 80,
-                new PIDConfig(),
-                new FFConfig());
+                new PIDConfig(0.00001, 0, 0),
+                new FFConfig(0, 0, 0.0225, 0));
 
         this.indexerConfig =
             new IndexerConfig(
@@ -52,8 +52,8 @@ public class RobotHardwareCompBot extends RobotHardware {
                 1,
                 false,
                 80,
-                new PIDConfig(),
-                new FFConfig());
+                new PIDConfig(0.00001, 0, 0),
+                new FFConfig(0, 0, 0.0225, 0));
 
         this.feederConfig =
             new FeederConfig(
@@ -61,8 +61,8 @@ public class RobotHardwareCompBot extends RobotHardware {
                 1,
                 false,
                 80,
-                new PIDConfig(),
-                new FFConfig());
+                new PIDConfig(0.00001, 0, 0),
+                new FFConfig(0, 0, 0.0225, 0));
 
         this.turretConfig =
             new TurretConfig(
@@ -71,9 +71,9 @@ public class RobotHardwareCompBot extends RobotHardware {
                 false,
                 80,
                 0.0,
-                new PIDConfig(1, 0, 0), // some basic pid value
-                new FFConfig(),
-                Units.degreesToRadians(360), // assume 360 deg/sec for now
+                new PIDConfig(2, 0, 0), // some basic pid value
+                new FFConfig(0, 0, 2, 0),
+                new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(2700)), // TODO assume 6328 constraints for now
                 Units.degreesToRadians(-210), // TODO assume 6328 min angle for now
                 Units.degreesToRadians(210)); // TODO assume 6328 min angle for now
 
@@ -83,9 +83,9 @@ public class RobotHardwareCompBot extends RobotHardware {
                 1,
                 false,
                 80,
-                new PIDConfig(),
-                new FFConfig(),
-                Units.rotationsPerMinuteToRadiansPerSecond(10000)); // Maybe a high rate limit, it is 10000 rpm/sec^2, so generally will speed up flywheel in 0.5 sec if max speed is 5000 rpm
+                new PIDConfig(0.1, 0, 0),
+                new FFConfig(0, 0, 0.0224, 0),
+                Units.rotationsPerMinuteToRadiansPerSecond(6000));
 
         this.hoodConfig =
             new HoodConfig(
@@ -93,9 +93,9 @@ public class RobotHardwareCompBot extends RobotHardware {
                 1,
                 false,
                 80,
-                new PIDConfig(),
+                new PIDConfig(0.007, 0, 0.0058),
                 new FFConfig(),
-                new Constraints(0, 0),
+                new Constraints(Units.degreesToRadians(480), Units.degreesToRadians(960)),
                 Units.degreesToRadians(0), // TODO 0 deg is when hood horizontal (ball shoots horizontally)
                 Units.degreesToRadians(90)); // TODO 90 deg is when hood vertical (ball shoots verticalally)
         

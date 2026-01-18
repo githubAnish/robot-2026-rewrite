@@ -42,7 +42,7 @@ public class WarmupExecutor {
     }
 
     private void warmupPaths() {
-        var autoMap = autoChooser.getRoutineChooser();
+        
     }
 
     private void warmupDrive() {

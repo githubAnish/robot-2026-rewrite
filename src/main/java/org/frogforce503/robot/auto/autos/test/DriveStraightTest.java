@@ -40,5 +40,4 @@ public class DriveStraightTest extends AutoMode {
     public List<Pose2d> getPoses() {
         return driveStraightPath.getPathPoses();
     }
-    
 }

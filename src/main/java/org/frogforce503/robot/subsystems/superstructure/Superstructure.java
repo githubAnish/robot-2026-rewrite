@@ -95,7 +95,11 @@ public class Superstructure extends VirtualSubsystem {
 
     // Actions
     public void setCoastMode(boolean enabled) {
+        intakePivot.getCoastOverride().set(enabled);
         intakeRoller.getCoastOverride().set(enabled);
+        indexer.getCoastOverride().set(enabled);
+        feeder.getCoastOverride().set(enabled);
+        turret.getCoastOverride().set(enabled);
         flywheels.getCoastOverride().set(enabled);
         hood.getCoastOverride().set(enabled);
     }
@@ -105,16 +109,6 @@ public class Superstructure extends VirtualSubsystem {
     }
 
     public void stop() {
-        intakePivot.stop();
-        intakeRoller.stop();
-        indexer.stop();
-        feeder.stop();
-        turret.stop();
-        flywheels.stop();
-        hood.stop();
-    }
-
-    public void idle() {
         intakePivot.stop();
         intakeRoller.stop();
         indexer.stop();

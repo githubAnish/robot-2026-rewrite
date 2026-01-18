@@ -27,7 +27,7 @@ public class AutoChooser {
     private final Drive drive;
     private final Vision vision;
     private final Superstructure superstructure;
-    private final AutoFactory autoFactory;
+    private final AutoFactory choreoAutoFactory;
 
     // Dashboard
     @Getter private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
@@ -41,7 +41,7 @@ public class AutoChooser {
         this.vision = vision;
         this.superstructure = superstructure;
 
-        this.autoFactory = AutoFactoryConfigurator.configureChoreo(drive);
+        this.choreoAutoFactory = AutoFactoryConfigurator.configureChoreo(drive);
         AutoFactoryConfigurator.configurePathPlanner(drive);
 
         configureAutos();
@@ -65,7 +65,7 @@ public class AutoChooser {
             
         });
 
-        routineChooser.addDefaultOption("Drive Straight Test", new DriveStraightTest(drive, vision, superstructure));
+        // routineChooser.addDefaultOption("Drive Straight Test", new DriveStraightTest(drive, vision, superstructure));
     }
 
     private void logTrajectory(Pose2d... trajectory) {
@@ -110,7 +110,7 @@ public class AutoChooser {
     }
 
     public void close() {
-        logTrajectory();
+        logTrajectory(); // Clear poses
 
         if (autoCommand != null) {
             autoCommand.cancel();

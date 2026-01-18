@@ -9,7 +9,8 @@ import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -23,6 +24,7 @@ public class TuneTurret extends Command {
     private final LoggedTunableNumber kV;
     private final LoggedTunableNumber kA;
     private final LoggedTunableNumber maxVelocityDegPerSec;
+    private final LoggedTunableNumber maxAccelerationDegPerSec2;
 
     private final LoggedTunableNumber setpointAngleDeg;
 
@@ -34,7 +36,7 @@ public class TuneTurret extends Command {
 
         final PIDConfig initialPID = turretConfig.kPID();
         final FFConfig initialFF = turretConfig.kFF();
-        final double initialRateLimit = turretConfig.kRateLimit();
+        final Constraints initialConstraints = turretConfig.kConstraints();
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Turret/kP", initialPID.kP());
@@ -44,7 +46,8 @@ public class TuneTurret extends Command {
         this.kV = new LoggedTunableNumber("Turret/kV", initialFF.kV());
         this.kA = new LoggedTunableNumber("Turret/kA", initialFF.kA());
 
-        this.maxVelocityDegPerSec = new LoggedTunableNumber("Turret/RateLimitDegPerSec", Units.radiansToDegrees(initialRateLimit));
+        this.maxVelocityDegPerSec = new LoggedTunableNumber("Turret/MaxVelocityDegPerSec", Units.radiansToDegrees(initialConstraints.maxVelocity));
+        this.maxAccelerationDegPerSec2 = new LoggedTunableNumber("Turret/MaxAccelerationDegPerSec2", Units.radiansToDegrees(initialConstraints.maxAcceleration));
 
         this.setpointAngleDeg = new LoggedTunableNumber("Turret/SetpointDeg", Units.radiansToDegrees(TurretConstants.START));
 
@@ -61,6 +64,7 @@ public class TuneTurret extends Command {
         this.kV.setTuningMode(true);
         this.kA.setTuningMode(true);
         this.maxVelocityDegPerSec.setTuningMode(true);
+        this.maxAccelerationDegPerSec2.setTuningMode(true);
         this.setpointAngleDeg.setTuningMode(true);
     }
 
@@ -81,8 +85,8 @@ public class TuneTurret extends Command {
         // Update trapezoid profile only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> turret.setProfile(new SlewRateLimiter(Units.degreesToRadians(maxVelocityDegPerSec.get()))),
-            maxVelocityDegPerSec);
+            () -> turret.setProfile(new TrapezoidProfile(new Constraints(Units.degreesToRadians(maxVelocityDegPerSec.get()), Units.degreesToRadians(maxAccelerationDegPerSec2.get())))),
+            maxVelocityDegPerSec, maxAccelerationDegPerSec2);
 
         // Update setpoint only if changed
         LoggedTunableNumber.ifChanged(

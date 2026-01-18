@@ -19,7 +19,7 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.01;
+    private final double moi = 0.025;
 
     public FlywheelsIOSim() {
         final FlywheelsConfig flywheelsConfig = Robot.bot.getFlywheelsConfig();

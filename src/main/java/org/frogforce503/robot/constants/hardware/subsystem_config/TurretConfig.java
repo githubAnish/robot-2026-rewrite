@@ -3,6 +3,8 @@ package org.frogforce503.robot.constants.hardware.subsystem_config;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+
 public record TurretConfig(
     int id,
     double mechanismRatio,
@@ -13,7 +15,7 @@ public record TurretConfig(
 
     PIDConfig kPID,
     FFConfig kFF,
-    double kRateLimit,
+    Constraints kConstraints,
     
     double minAngle,
     double maxAngle) {}

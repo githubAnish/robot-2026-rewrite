@@ -9,6 +9,7 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -21,6 +22,7 @@ public class TuneFlywheels extends Command {
     private final LoggedTunableNumber kS;
     private final LoggedTunableNumber kV;
     private final LoggedTunableNumber kA;
+    private final LoggedTunableNumber maxAccelerationRpmPerSec;
 
     private final LoggedTunableNumber setpointVelocityRpm;
 
@@ -32,6 +34,7 @@ public class TuneFlywheels extends Command {
 
         final PIDConfig initialPID = flywheelsConfig.kPID();
         final FFConfig initialFF = flywheelsConfig.kFF();
+        final double initialRateLimit = flywheelsConfig.kRateLimit();
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Flywheels/kP", initialPID.kP());
@@ -40,6 +43,8 @@ public class TuneFlywheels extends Command {
         this.kS = new LoggedTunableNumber("Flywheels/kS", initialFF.kS());
         this.kV = new LoggedTunableNumber("Flywheels/kV", initialFF.kV());
         this.kA = new LoggedTunableNumber("Flywheels/kA", initialFF.kA());
+
+        this.maxAccelerationRpmPerSec = new LoggedTunableNumber("Flywheels/MaxVelocityRpmPerSec", Units.radiansPerSecondToRotationsPerMinute(initialRateLimit));
 
         this.setpointVelocityRpm = new LoggedTunableNumber("Flywheels/SetpointRpm", Units.radiansPerSecondToRotationsPerMinute(FlywheelsConstants.START));
 
@@ -55,6 +60,7 @@ public class TuneFlywheels extends Command {
         this.kS.setTuningMode(true);
         this.kV.setTuningMode(true);
         this.kA.setTuningMode(true);
+        this.maxAccelerationRpmPerSec.setTuningMode(true);
         this.setpointVelocityRpm.setTuningMode(true);
     }
 
@@ -71,6 +77,12 @@ public class TuneFlywheels extends Command {
             hashCode(),
             () -> flywheels.setFeedforward(new SimpleMotorFeedforward(kS.get(), kV.get(), kA.get())),
             kS, kV, kA);
+
+        // Update slew rate limiter only if changed
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            () -> flywheels.setProfile(new SlewRateLimiter(Units.rotationsPerMinuteToRadiansPerSecond(maxAccelerationRpmPerSec.get()))),
+            maxAccelerationRpmPerSec);
 
         // Update setpoint only if changed
         LoggedTunableNumber.ifChanged(

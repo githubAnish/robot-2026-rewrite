@@ -10,7 +10,7 @@ public abstract class RobotHardware {
     @Getter protected DriveConfig driveConfig;
     @Getter protected VisionConfig visionConfig;
 
-    @Getter protected IntakePivotConfig intakePivotConfig;
+    @Getter protected IntakePivotConfig intakePivotConfig; // Don't tune intake pivot, as we may / may not have it (write all the logic, but don't tune)
     @Getter protected IntakeRollerConfig intakeRollerConfig;
     @Getter protected IndexerConfig indexerConfig;
     @Getter protected FeederConfig feederConfig;
