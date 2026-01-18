@@ -2,14 +2,8 @@ package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
-import org.frogforce503.lib.auto.planned_path.PlannedPath;
-import org.frogforce503.lib.auto.planned_path.PlannedPath.HolonomicState;
-import org.frogforce503.lib.auto.planned_path.PlannedPathFactory;
-import org.frogforce503.lib.auto.planned_path.components.Waypoint;
 import org.frogforce503.lib.rebuilt.ProximityUtil;
 import org.frogforce503.lib.swerve.TeleopDriveController;
-import org.frogforce503.lib.swerve.SwervePathController;
-import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -22,17 +16,13 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import lombok.experimental.ExtensionMethod;
 
 // Notes:
 // involves some sort of fetching (no need of a separate fetching cmd, just needs to natural enough for the good driver, see orbit intake assist)
@@ -87,7 +77,7 @@ public class IntakeFuelFromGround extends Command {
     @Override
     public void execute() {
         // Get inputs
-        Pose2d robotPose = drive.getFuturePose(lookaheadTimeSec);
+        Pose2d robotPose = drive.getLookaheadPose(lookaheadTimeSec);
         Pose2d targetPose = vision.getBestBallPose(); // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
 
         // If compressed, back off indexer speed

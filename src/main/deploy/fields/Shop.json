@@ -1,4 +1,10 @@
 {
     "AllianceWallToBlueInitLine": "156.8",
-    "AllianceWallToRedInitLine": "156.8"
+    "AllianceWallToRedInitLine": "156.8",
+
+    "LeftWallToBlueBackLeft": "61.5",
+    "RightWallToRedBackLeft": "61.5",
+
+    "LeftWallToBlueLeftBumpBackLeft": "63.0",
+    "RightWallToRedLeftBumpBackLeft": "63.0"
 }

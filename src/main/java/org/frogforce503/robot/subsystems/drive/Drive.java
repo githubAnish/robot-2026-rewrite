@@ -87,7 +87,7 @@ public class Drive extends SubsystemBase {
         return inputs.Pose;
     }
 
-    public Pose2d getFuturePose(double lookaheadTimeSec) {
+    public Pose2d getLookaheadPose(double lookaheadTimeSec) {
         return getPose().exp(getRobotVelocity().toTwist2d(lookaheadTimeSec));
     }
 
@@ -131,8 +131,13 @@ public class Drive extends SubsystemBase {
         io.coast();
     }
 
+    /** Stops the drivetrain by aligning the modules in X manner. */
     public void brake() {
         io.brake();
+    }
+
+    public void stop() {
+        runVelocity(new ChassisSpeeds());
     }
 
     /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
@@ -150,9 +155,5 @@ public class Drive extends SubsystemBase {
     /** Runs the drive in a straight line with the specified drive output. */
     public void runCharacterization(double output) {
         io.runCharacterization(output);
-    }
-
-    public void stop() {
-        runVelocity(new ChassisSpeeds());
     }
 }

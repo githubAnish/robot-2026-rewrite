@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import swervelib.simulation.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltHub;
 
 public class FieldConstants {
     public static final AprilTagFieldLayout aprilTagFieldLayout = Constants.fieldVenue.getAprilTagFieldLayout();
@@ -35,7 +34,7 @@ public class FieldConstants {
             blueInitLineX = allianceWallToBlueInitLine;
 
             final double allianceWallToRedInitLine = FieldConstantsUtil.getFieldValueMeters("AllianceWallToRedInitLine");
-            redInitLineX = allianceWallToRedInitLine;
+            redInitLineX = fieldLength - allianceWallToRedInitLine;
         }
     }
 
@@ -47,7 +46,7 @@ public class FieldConstants {
         public static final Translation3d redShotPose;
 
         static {
-            final double hubHeight = Units.inchesToMeters(72.0); // account for shot pose to be 10 inches below
+            final double hubHeight = Units.inchesToMeters(72.0);
             final double hubHeightToShotHeight = Units.inchesToMeters(10.0);
 
             blueCenter = new Translation3d(getTagPose2d(18).getX(), getTagPose2d(26).getY(), hubHeight);
@@ -64,22 +63,56 @@ public class FieldConstants {
     }
 
     public static class Depot {
-        // public static final Pose2d blue = getTagPose2d(29);
-        // public static final Pose2d red = getTagPose2d(13);
-        // basically get a reference pose (maybe a certain dist from the right wall) so you can apply a few offsets for auto
-        // get corners
         public static final Translation2d blueFrontLeftCorner;
         public static final Translation2d blueFrontRightCorner;
         public static final Translation2d blueBackLeftCorner;
         public static final Translation2d blueBackRightCorner;
 
+        public static final Translation2d redFrontLeftCorner;
+        public static final Translation2d redFrontRightCorner;
+        public static final Translation2d redBackLeftCorner;
+        public static final Translation2d redBackRightCorner;
+
         static {
+            final double backLeftToFrontLeft = Units.inchesToMeters(26.7);
+            final double frontLeftToFrontRight = Units.inchesToMeters(42.0);
+
             final double leftWallToBlueBackLeft = FieldConstantsUtil.getFieldValueMeters("LeftWallToBlueBackLeft");
 
             blueBackLeftCorner = new Translation2d(0, fieldWidth - leftWallToBlueBackLeft);
-            blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(0, 0));
-            blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, 0));
-            blueBackRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, 0));
+            blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
+            blueBackRightCorner = blueFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+
+            final double rightWallToRedBackLeft = FieldConstantsUtil.getFieldValueMeters("RightWallToRedBackLeft");
+            
+            redBackLeftCorner = new Translation2d(fieldLength, rightWallToRedBackLeft);
+            redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            redFrontRightCorner = redFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
+            redBackRightCorner = redFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+        }
+    }
+
+    /**
+     * <p> Defines the bounding box that all fuel is corralled into before start of match. </p> 
+     * <b> All corners should be viewed from the blue alliance. </b>
+     */
+    public static class NeutralZone {
+        public static final Translation2d frontLeftCorner;
+        public static final Translation2d frontRightCorner;
+        public static final Translation2d backLeftCorner;
+        public static final Translation2d backRightCorner;
+
+        static {
+            final double boundingBoxWidth = Units.inchesToMeters(206.0); // From game manual, see https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
+            final double boundingBoxDepth = Units.inchesToMeters(72.0); // From game manual, see https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
+
+            final Translation2d fieldCenter = new Translation2d(fieldLength / 2, fieldWidth / 2);
+            
+            frontLeftCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, boundingBoxWidth / 2));
+            frontRightCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, -boundingBoxWidth / 2));
+            backLeftCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, boundingBoxWidth / 2));
+            backRightCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, -boundingBoxWidth / 2));
         }
     }
 
@@ -101,8 +134,8 @@ public class FieldConstants {
             blueRight = blueCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
 
             redCenter = getTagPose2d(15).plus(GeomUtil.toTransform2d(centerTagToTowerX, 0));
-            redLeft = redCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
-            redRight = redCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
+            redLeft = redCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
+            redRight = redCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
         }
 
         /** Interpolated climb pose between blueLeft (t = 0) and blueRight (t = 1). */
@@ -117,7 +150,6 @@ public class FieldConstants {
     }
 
     public static class Trench {
-        // get the center waypoint of the trench
         public static final Translation2d blueLeftTrenchCenter = getTagPose2d(23).getTranslation();
         public static final Translation2d blueRightTrenchCenter = getTagPose2d(28).getTranslation();
 
@@ -126,11 +158,59 @@ public class FieldConstants {
     }
 
     public static class Bump {
-        // get the vertices and define the region of the bumps
+        public static final Translation2d blueLeftBumpFrontLeftCorner;
+        public static final Translation2d blueLeftBumpFrontRightCorner;
+        public static final Translation2d blueLeftBumpBackLeftCorner;
+        public static final Translation2d blueLeftBumpBackRightCorner;
 
-    }
+        public static final Translation2d blueRightBumpFrontLeftCorner;
+        public static final Translation2d blueRightBumpFrontRightCorner;
+        public static final Translation2d blueRightBumpBackLeftCorner;
+        public static final Translation2d blueRightBumpBackRightCorner;
 
-    public static class NeutralZone {
-        // define the regions of balls in neutral zone
+        public static final Translation2d redLeftBumpFrontLeftCorner;
+        public static final Translation2d redLeftBumpFrontRightCorner;
+        public static final Translation2d redLeftBumpBackLeftCorner;
+        public static final Translation2d redLeftBumpBackRightCorner;
+
+        public static final Translation2d redRightBumpFrontLeftCorner;
+        public static final Translation2d redRightBumpFrontRightCorner;
+        public static final Translation2d redRightBumpBackLeftCorner;
+        public static final Translation2d redRightBumpBackRightCorner;
+
+        static {
+            final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
+            final double frontLeftToFrontRight = Units.inchesToMeters(73.0);
+
+            final double leftWallToBlueLeftBumpBackLeft = FieldConstantsUtil.getFieldValueMeters("LeftWallToBlueLeftBumpBackLeft");
+            final double rightWallToBlueRightBumpBackRight = leftWallToBlueLeftBumpBackLeft;
+
+            // Blue Left Bump
+            blueLeftBumpBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - leftWallToBlueLeftBumpBackLeft);
+            blueLeftBumpFrontLeftCorner = blueLeftBumpBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            blueLeftBumpFrontRightCorner = blueLeftBumpFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
+            blueLeftBumpBackRightCorner = blueLeftBumpFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+
+            // Blue Right Bump
+            blueRightBumpBackRightCorner = new Translation2d(Lines.blueInitLineX, rightWallToBlueRightBumpBackRight);
+            blueRightBumpFrontRightCorner = blueRightBumpBackRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            blueRightBumpFrontLeftCorner = blueRightBumpFrontRightCorner.plus(new Translation2d(0, frontLeftToFrontRight));
+            blueRightBumpBackLeftCorner = blueRightBumpFrontLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+
+            final double rightWallToRedLeftBumpBackLeft = FieldConstantsUtil.getFieldValueMeters("RightWallToRedLeftBumpBackLeft");
+            final double leftWallToRedRightBumpBackRight = rightWallToRedLeftBumpBackLeft;
+
+            // Red Left Bump
+            redLeftBumpBackLeftCorner = new Translation2d(Lines.redInitLineX, rightWallToRedLeftBumpBackLeft);
+            redLeftBumpFrontLeftCorner = redLeftBumpBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            redLeftBumpFrontRightCorner = redLeftBumpFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
+            redLeftBumpBackRightCorner = redLeftBumpFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+
+            // Red Right Bump
+            redRightBumpBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - leftWallToRedRightBumpBackRight);
+            redRightBumpFrontRightCorner = redRightBumpBackRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            redRightBumpFrontLeftCorner = redRightBumpFrontRightCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
+            redRightBumpBackLeftCorner = redRightBumpFrontLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+        }
     }
 }

@@ -68,8 +68,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -261,7 +259,7 @@ public class RobotContainer {
         driver.start().onTrue(Commands.runOnce(drive::toggleRobotRelative));
         operator.povUp().onTrue(Commands.runOnce(drive::resetRotation));
 
-        operator.a().onTrue(Commands.runOnce(() -> drive.brake())); // Stop drivebase with X wheels
+        operator.a().onTrue(Commands.runOnce(() -> drive.brake()));
     }
 
     private void configureTriggers() {
