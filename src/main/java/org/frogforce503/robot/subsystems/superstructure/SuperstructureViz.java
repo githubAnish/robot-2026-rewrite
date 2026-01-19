@@ -2,50 +2,36 @@ package org.frogforce503.robot.subsystems.superstructure;
 
 import java.util.function.Supplier;
 
+import org.frogforce503.lib.math.GeomUtil;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod({GeomUtil.class})
 public class SuperstructureViz {
     // Requirements
-    private final Superstructure superstructure;
     private final Supplier<Pose2d> robotPoseSupplier;
 
-    // 2D Viz Constants
-
-    // 2D Viz Mechanisms
-    private final LoggedMechanism2d mechanism2d =
-        new LoggedMechanism2d(
-            Units.inchesToMeters(50),
-            Units.inchesToMeters(80));
-
     // 3D Viz Constants
-
-    // 3D Viz Poses
+    public static Transform3d robotToTurret = new Transform3d(-0.19685, 0.0, 0.44, Rotation3d.kZero);
+    public static Transform3d turretToCamera =
+        new Transform3d(
+            -0.1314196, 0.0, 0.2770674, new Rotation3d(0.0, Units.degreesToRadians(-22.5), 0.0));
     
-    public SuperstructureViz(Superstructure superstructure, Supplier<Pose2d> robotPoseSupplier) {
-        this.superstructure = superstructure;
+    public SuperstructureViz(Supplier<Pose2d> robotPoseSupplier) {
         this.robotPoseSupplier = robotPoseSupplier;
-
-        // Setup 2D Viz
     }
 
     public void update(double turretAngleRad, double hoodAngleRad) {
         Pose3d drivePose3d = new Pose3d(robotPoseSupplier.get());
 
-        update2dViz(drivePose3d);
         update3dViz(drivePose3d, turretAngleRad, hoodAngleRad);
-    }
-
-    private void update2dViz(Pose3d drivePose3d) {
-        // Update Ligaments
-
-        Logger.recordOutput("SuperstructureViz/2D", mechanism2d);
     }
 
     // Copyright (c) 2025-2026 Littleton Robotics
@@ -59,7 +45,11 @@ public class SuperstructureViz {
     // Will switch to 3d model from FF once block cad looks good or cad model comes out
     private void update3dViz(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
         var turretPose =
-            new Pose3d(-0.197, 0.0, 0.44, new Rotation3d(0.0, 0.0, turretAngleRad));
+            robotToTurret
+                .toPose3d()
+                .transformBy(
+                    new Transform3d(
+                        Translation3d.kZero, new Rotation3d(0.0, 0.0, turretAngleRad)));
 
         var hoodPose =
             turretPose.transformBy(
@@ -67,5 +57,12 @@ public class SuperstructureViz {
                     0.105, 0.0, 0.092, new Rotation3d(0.0, -hoodAngleRad, Math.PI)));
 
         Logger.recordOutput("SuperstructureViz/3D/Components", turretPose, hoodPose);
+
+        var cameraPose =
+            drivePose3d
+                .transformBy(turretPose.toTransform3d())
+                .transformBy(turretToCamera);
+
+        Logger.recordOutput("SuperstructureViz/3D/CameraPose", cameraPose);
     }
 }

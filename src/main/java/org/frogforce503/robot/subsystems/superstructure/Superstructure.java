@@ -63,7 +63,7 @@ public class Superstructure extends VirtualSubsystem {
         this.flywheels = flywheels;
         this.hood = hood;
 
-        this.viz = new SuperstructureViz(this, robotPoseSupplier);
+        this.viz = new SuperstructureViz(robotPoseSupplier);
     }
 
     @Override

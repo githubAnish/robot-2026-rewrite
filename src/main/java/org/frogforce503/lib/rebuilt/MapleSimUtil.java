@@ -13,11 +13,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import swervelib.simulation.ironmaple.simulation.SimulatedArena;
+import swervelib.simulation.ironmaple.simulation.gamepieces.GamePiece;
 import swervelib.simulation.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
-import swervelib.simulation.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt.RebuiltFieldObstaclesMap;
 
-public final class MapleSimUtils {
-    private MapleSimUtils() {}
+public final class MapleSimUtil {
+    private MapleSimUtil() {}
     
     public static void scoreFuelIntoHub(
         Pose2d robotPose,
@@ -25,6 +25,16 @@ public final class MapleSimUtils {
         double turretFieldRelativeAngleRad,
         double hoodAngleRad
     ) {
+        var x =
+            SimulatedArena.getInstance()
+                .getGamePiecesByType("Fuel")
+                .stream()
+                .filter(g -> !g.isGrounded())
+                .map(GamePiece::getPose3d)
+                .toArray(Pose3d[]::new);
+                
+        Logger.recordOutput("SuperstructureViz/3D/AllMovingFuel", x);
+
         SimulatedArena.getInstance()
             .addGamePieceProjectile(
                 new RebuiltFuelOnFly(
