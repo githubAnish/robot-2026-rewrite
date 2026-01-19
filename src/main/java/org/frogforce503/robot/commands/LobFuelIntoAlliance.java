@@ -44,6 +44,8 @@ public class LobFuelIntoAlliance extends Command {
         this.hood = superstructure.getHood();
 
         this.autoAssistEnabled = autoAssistEnabled;
+
+        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override

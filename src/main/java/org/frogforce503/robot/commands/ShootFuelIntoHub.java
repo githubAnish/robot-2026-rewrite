@@ -2,6 +2,8 @@ package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import org.frogforce503.lib.logging.LoggedTunableNumber;
+import org.frogforce503.lib.rebuilt.MapleSimUtils;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -12,10 +14,15 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.vision.Vision;
+import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import swervelib.simulation.ironmaple.simulation.SimulatedArena;
 import swervelib.simulation.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
+import swervelib.simulation.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 
 // Notes:
 // shoot on move (auto aim + future pose prediction + shooting)
@@ -49,16 +56,24 @@ public class ShootFuelIntoHub extends Command {
         this.hood = superstructure.getHood();
 
         this.autoAssistEnabled = autoAssistEnabled;
+
+        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override
     public void initialize() {
-
+        
     }
 
     @Override
     public void execute() {
-        
+        if (RobotBase.isSimulation()) {
+            MapleSimUtils.scoreFuelIntoHub(
+                drive.getPose(),
+                drive.getFieldVelocity(),
+                0,
+                Units.degreesToRadians(80));
+        }
     }
 
     @Override

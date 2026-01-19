@@ -42,6 +42,8 @@ public class PrepForShootFuelIntoHub extends Command {
         this.turret = superstructure.getTurret();
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
+
+        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override
