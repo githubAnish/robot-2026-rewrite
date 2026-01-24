@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
+import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
 import org.frogforce503.robot.commands.ClimbSequence;
@@ -61,19 +61,24 @@ import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIO;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSim;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
-import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.object_detection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIOPhotonSim;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
@@ -128,8 +133,35 @@ public class RobotContainer {
                     new Vision(
                         visionEstimateConsumer,
                         drive::getPose,
-                        new AprilTagIO[] {},
-                        new ObjectDetectionIO[] {});
+                        new AprilTagIO[] {
+                            new AprilTagIOPhotonSim(
+                                CameraName.CLOSE_TURRET_CAMERA,
+                                new Transform3d(),
+                                visionViz
+                            ),
+                            new AprilTagIOPhotonSim(
+                                CameraName.FAR_TURRET_CAMERA,
+                                new Transform3d(),
+                                visionViz
+                            ),
+                            new AprilTagIOPhotonSim(
+                                CameraName.INTAKE_LEFT_CAMERA,
+                                new Transform3d(),
+                                visionViz
+                            ),
+                            new AprilTagIOPhotonSim(
+                                CameraName.INTAKE_RIGHT_CAMERA,
+                                new Transform3d(),
+                                visionViz
+                            ),
+                        },
+                        new ObjectDetectionIO[] {
+                            new ObjectDetectionIOPhotonSim(
+                                CameraName.FUEL_CAMERA,
+                                new Transform3d(),
+                                visionViz
+                            )
+                        });
 
                 intakePivot = new IntakePivot(new IntakePivotIOSpark());
                 intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
@@ -236,7 +268,8 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         // Main controls
-        drive.setDefaultCommand(new TeleopDriveCommand(drive, driver));
+        TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driver);
+        drive.setDefaultCommand(teleopDriveCommand);
 
         driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnabled::get));
         driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnabled::get));
@@ -255,17 +288,18 @@ public class RobotContainer {
         bindClimbing(driver.povUp(), true);
 
         // Overrides
-        driver.back().onTrue(Commands.runOnce(drive::toggleSlowMode));
-        driver.start().onTrue(Commands.runOnce(drive::toggleRobotRelative));
+        driver.back().onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
+        driver.start().onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
         operator.povUp().onTrue(Commands.runOnce(drive::resetRotation));
+        operator.b().onTrue(Commands.runOnce(drive::brake));
 
-        operator.a().onTrue(Commands.runOnce(() -> drive.brake()));
+        operator.a().onTrue(Commands.runOnce(superstructure::seedTurretRelativePosition));
     }
 
     private void configureTriggers() {
         Trigger inAllianceZone =
             new Trigger(() ->
-                FieldInfo.isRed()
+                FieldConstants.isRed()
                     ? drive.getPose().getX() > FieldConstants.Lines.redInitLineX
                     : drive.getPose().getX() < FieldConstants.Lines.blueInitLineX
             );
@@ -331,7 +365,7 @@ public class RobotContainer {
             gameViz.update();
         }
 
-        Logger.recordOutput("Alliance Color", FieldInfo.getAlliance());
+        Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
     }
 
     public void autonomousInit() {
@@ -357,6 +391,10 @@ public class RobotContainer {
     }
 
     public void test() {
-        
+        RobotModeTriggers.teleop().whileTrue(
+            Commands.sequence(
+                new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled::get)
+            )
+        );
     }
 }

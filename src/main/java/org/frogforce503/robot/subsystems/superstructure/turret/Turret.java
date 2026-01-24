@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.Robot;
@@ -89,7 +90,9 @@ public class Turret extends FFSubsystemBase {
 
     // Actions
     public void seedRelativePosition() {
-        io.setRelativePosition(inputs.data.absolutePositionRad());
+        if (MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI)) { // only if relative encoder in range -180 deg to 180 deg
+            io.setRelativePosition(inputs.data.absolutePositionRad());
+        }
     }
 
     public void setPID(double kP, double kI, double kD) {

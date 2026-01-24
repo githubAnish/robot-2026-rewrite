@@ -93,5 +93,5 @@ public class DriveIOBasicSim implements DriveIO {
         currentState.OdometryPeriod = 0.02;
 
         return currentState;
-    }  
+    }
 }

@@ -2,8 +2,8 @@ package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import org.frogforce503.lib.io.JoystickUtil;
 import org.frogforce503.lib.rebuilt.ProximityUtil;
-import org.frogforce503.lib.swerve.TeleopDriveController;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -23,9 +23,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import lombok.experimental.ExtensionMethod;
 
 // Notes:
 // involves some sort of fetching (no need of a separate fetching cmd, just needs to natural enough for the good driver, see orbit intake assist)
+@ExtensionMethod(JoystickUtil.class)
 public class IntakeFuelFromGround extends Command {
     // Requirements
     private final Drive drive;
@@ -36,15 +38,17 @@ public class IntakeFuelFromGround extends Command {
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
 
+    private final CommandXboxController xboxController;
+
     private final BooleanSupplier autoAssistEnabled;
 
     // Constants
     private final double maxFetchingLinearSpeed = DriveConstants.maxLinearSpeed * 0.6; // TODO rough guess
     private final double maxFetchingLinearAcceleration = DriveConstants.maxLinearSpeed * 0.7; // TODO rough guess
     private final double lookaheadTimeSec = 0.15;
+    private final double kRobotPoseCloseToTargetDistThresh = Units.inchesToMeters(40);
 
     // Controllers
-    private final TeleopDriveController teleopController;
     private final PIDController assistController = new PIDController(1.0, 0.0, 0.0);
 
     public IntakeFuelFromGround(Drive drive, Vision vision, Superstructure superstructure, CommandXboxController xboxController, BooleanSupplier autoAssistEnabled) {
@@ -56,7 +60,7 @@ public class IntakeFuelFromGround extends Command {
         this.intakeRoller = superstructure.getIntakeRoller();
         this.indexer = superstructure.getIndexer();
 
-        this.teleopController = new TeleopDriveController(drive, xboxController);
+        this.xboxController = xboxController;
 
         this.autoAssistEnabled = autoAssistEnabled;
 
@@ -78,7 +82,7 @@ public class IntakeFuelFromGround extends Command {
     public void execute() {
         // Get inputs
         Pose2d robotPose = drive.getLookaheadPose(lookaheadTimeSec);
-        Pose2d targetPose = vision.getBestBallPose(); // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
+        Pose2d targetPose = Pose2d.kZero; // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
 
         // If compressed, back off indexer speed
         if (indexer.isCompressed()) {
@@ -87,18 +91,9 @@ public class IntakeFuelFromGround extends Command {
             indexer.setVelocity(IndexerConstants.INTAKE);
         }
 
-        // If fetching not wanted, skip fetching logic and do normal teleop drive
-        if (!autoAssistEnabled.getAsBoolean() ||
-            ProximityUtil.getDistanceBetweenPoses(robotPose, targetPose) < Units.inchesToMeters(40)
-        ) {
-            teleopController.update();
-            return;
-        }
-
-        // Fetching logic (a basic driver-assist currently)
         // Get driver velocity
-        Translation2d driverLinearVelocity = teleopController.getLinearVelocityFromJoysticks();
-        double driverOmega = teleopController.getOmegaFromJoysticks();
+        Translation2d driverLinearVelocity = xboxController.getLinearVelocityFromJoysticks();
+        double driverOmega = xboxController.getOmegaFromJoysticks();
 
         // Calculate speeds
         double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed;
@@ -108,9 +103,16 @@ public class IntakeFuelFromGround extends Command {
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
 
         // Apply assist
-        double yError = robotPose.getTranslation().minus(targetPose.getTranslation()).getY();
-        double yOutput = assistController.calculate(yError, 0);
-        speeds.vyMetersPerSecond += yOutput;
+        double yError = 0;
+        double yOutput = 0;
+
+        boolean robotPoseCloseToTarget = ProximityUtil.getDistanceBetweenPoses(robotPose, targetPose) < kRobotPoseCloseToTargetDistThresh;
+
+        if (autoAssistEnabled.getAsBoolean() && robotPoseCloseToTarget) {
+            yError = robotPose.getTranslation().minus(targetPose.getTranslation()).getY();
+            yOutput = assistController.calculate(yError, 0);
+            speeds.vyMetersPerSecond += yOutput;
+        }
 
         // Apply speeds
         drive.runVelocity(

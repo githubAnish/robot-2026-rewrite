@@ -9,11 +9,12 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 /** Class containing global configuration variables describing current robot, runtime mode, & field venue. */
 public final class Constants {
-  public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
-  public static final boolean useAllianceFlipping = false;
-
   private static RobotType robotType = RobotType.SimBot;
   public static final FieldVenue fieldVenue = FieldVenue.Shop;
+
+  public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
+  public static final double loopPeriodWatchdogSecs = 0.2;
+  public static final boolean useAllianceFlipping = false;
 
   @SuppressWarnings("resource")
   public static RobotType getRobot() {

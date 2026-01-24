@@ -36,6 +36,8 @@ public class ShootFuelIntoHub extends Command {
 
     private final BooleanSupplier autoAssistEnabled;
 
+    private final double kShotFireRateBallsPerSec = 1; // How many balls can you fire within 1 sec?
+
     public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
         this.drive = drive;
         this.vision = vision;
@@ -51,12 +53,12 @@ public class ShootFuelIntoHub extends Command {
 
         this.autoAssistEnabled = autoAssistEnabled;
 
-        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
+        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override
     public void initialize() {
-        
+
     }
 
     @Override
@@ -66,7 +68,8 @@ public class ShootFuelIntoHub extends Command {
                 drive.getPose(),
                 drive.getFieldVelocity(),
                 0,
-                Units.degreesToRadians(80));
+                Units.degreesToRadians(80),
+                kShotFireRateBallsPerSec);
         }
     }
 

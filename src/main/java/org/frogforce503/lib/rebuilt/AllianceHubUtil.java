@@ -1,10 +1,10 @@
 package org.frogforce503.lib.rebuilt;
 
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.robot.FieldInfo;
+import org.frogforce503.robot.constants.field.FieldConstants;
 
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /** Utility class to check if a hub is active. */
 public final class AllianceHubUtil {
@@ -38,6 +38,6 @@ public final class AllianceHubUtil {
      * See {@link https://docs.wpilib.org/en/stable/docs/yearly-overview/2026-game-data.html} for more.
      */
     public static boolean isHubActive() {
-        return isHubActive(FieldInfo.getAlliance());
+        return isHubActive(FieldConstants.getAlliance());
     }
 }

@@ -1,6 +1,6 @@
 package org.frogforce503.lib.vision;
 
-import org.frogforce503.lib.vision.apriltag_detection.TrackedAprilTag;
+import org.frogforce503.lib.vision.apriltagdetection.TrackedAprilTag;
 import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;

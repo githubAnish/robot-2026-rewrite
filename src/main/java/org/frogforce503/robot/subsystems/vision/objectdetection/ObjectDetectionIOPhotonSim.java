@@ -1,11 +1,11 @@
-package org.frogforce503.robot.subsystems.vision.object_detection;
+package org.frogforce503.robot.subsystems.vision.objectdetection;
 
 import java.util.Comparator;
 import java.util.List;
 
-import org.frogforce503.lib.vision.object_detection.TrackedObject;
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
+import org.frogforce503.lib.vision.objectdetection.TrackedObject;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
+import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;

@@ -1,7 +1,7 @@
-package org.frogforce503.robot.subsystems.vision.apriltag_detection;
+package org.frogforce503.robot.subsystems.vision.apriltagdetection;
 
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
+import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;

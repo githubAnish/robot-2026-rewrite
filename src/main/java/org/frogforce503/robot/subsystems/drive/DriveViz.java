@@ -4,15 +4,20 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
-import org.frogforce503.robot.FieldInfo;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
 public class DriveViz {
+    // Requirements
+    private final Field2d fieldViz = new Field2d();
+
     // Constants
     private final boolean logModules = true;
     private final double maxSpeed = DriveConstants.maxLinearSpeed;
@@ -23,6 +28,8 @@ public class DriveViz {
     private final LoggedMechanismLigament2d[] moduleDirections;
 
     public DriveViz() {
+        SmartDashboard.putData("Field", fieldViz);
+
         moduleMechanisms =
             new LoggedMechanism2d[] {
                 new LoggedMechanism2d(1, 1),
@@ -48,18 +55,9 @@ public class DriveViz {
             };
     }
 
-    private LoggedMechanismLigament2d createModuleSpeedLigament(int moduleIndex) {
-        return
-            moduleMechanisms[moduleIndex]
-                .getRoot("RootSpeed", 0.5, 0.5)
-                .append(new LoggedMechanismLigament2d("Speed", 0.5, 0));
-    }
-
-    private LoggedMechanismLigament2d createModuleDirectionLigament(int moduleIndex) {
-        return
-            moduleMechanisms[moduleIndex]
-                .getRoot("RootDirection", 0.5, 0.5)
-                .append(new LoggedMechanismLigament2d("Direction", 0.1, 0, 0, new Color8Bit(Color.kWhite)));
+    /** Gets the field object on Field2d, creating it if needed. */
+    public FieldObject2d getObject(String name) {
+        return fieldViz.getObject(name);
     }
 
     public void update(SwerveDriveState state) {
@@ -74,7 +72,7 @@ public class DriveViz {
 
         // Log robot pose
         Logger.recordOutput("Drive/Pose", pose);
-        FieldInfo.setRobotPose(pose);
+        fieldViz.setRobotPose(pose);
 
         // Log robot velocities
         Translation2d robotRelativeVelocity = new Translation2d(robotRelativeSpeeds.vxMetersPerSecond, robotRelativeSpeeds.vyMetersPerSecond);
@@ -103,5 +101,19 @@ public class DriveViz {
 
         // Log other important info
         Logger.recordOutput("Drive/OdomPeriod", state.OdometryPeriod);
+    }
+
+    private LoggedMechanismLigament2d createModuleSpeedLigament(int moduleIndex) {
+        return
+            moduleMechanisms[moduleIndex]
+                .getRoot("RootSpeed", 0.5, 0.5)
+                .append(new LoggedMechanismLigament2d("Speed", 0.5, 0));
+    }
+
+    private LoggedMechanismLigament2d createModuleDirectionLigament(int moduleIndex) {
+        return
+            moduleMechanisms[moduleIndex]
+                .getRoot("RootDirection", 0.5, 0.5)
+                .append(new LoggedMechanismLigament2d("Direction", 0.1, 0, 0, new Color8Bit(Color.kWhite)));
     }
 }

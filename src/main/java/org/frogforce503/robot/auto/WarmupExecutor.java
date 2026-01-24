@@ -1,8 +1,11 @@
 package org.frogforce503.robot.auto;
 
+import java.nio.channels.ShutdownChannelGroupException;
+
 import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.lib.auto.planned_path.PlannedPathFactory;
 import org.frogforce503.lib.auto.planned_path.components.Waypoint;
+import org.frogforce503.lib.rebuilt.ShotCalculator;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
@@ -17,6 +20,18 @@ public class WarmupExecutor {
     public WarmupExecutor(Drive drive, AutoChooser autoChooser) {
         this.drive = drive;
         this.autoChooser = autoChooser;
+    }
+
+    public void disabledInit() {
+        // NetworkTableInstance.getDefault().flush();
+        // System.gc();
+    }
+
+    public void disabledPeriodic() {
+        warmupPlannedPathGenerator();
+        warmupPaths();
+        warmupDrive();
+        warumpShotCalculator();
     }
 
     /** Wrap this method over another method to find its warmup time. */
@@ -55,15 +70,7 @@ public class WarmupExecutor {
             0.1);
     }
 
-    // Public methods
-    public void disabledInit() {
-        // NetworkTableInstance.getDefault().flush();
-        // System.gc();
-    }
-
-    public void disabledPeriodic() {
-        warmupPlannedPathGenerator();
-        warmupPaths();
-        warmupDrive();
+    private void warumpShotCalculator() {
+        ShotCalculator.calculateHubShotInfo();
     }
 }

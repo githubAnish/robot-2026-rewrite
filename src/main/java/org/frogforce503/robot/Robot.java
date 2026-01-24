@@ -4,10 +4,14 @@
 
 package org.frogforce503.robot;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Watchdog;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -36,8 +40,6 @@ import com.ctre.phoenix6.SignalLogger;
  * project.
  */
 public class Robot extends LoggedRobot {
-  private final double loopOverrunWarningTimeout = 0.2;
-
   public static RobotHardware bot;
   private RobotContainer robotContainer;
   
@@ -77,13 +79,14 @@ public class Robot extends LoggedRobot {
       case REPLAY:
         // Replaying a log, set up replay source
         setUseTiming(false); // Run as fast as possible
-        String logPath = LogFileUtil.findReplayLog();
-        Logger.setReplaySource(new WPILOGReader(logPath));
-        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        String inPath = LogFileUtil.findReplayLog();
+        String outPath = LogFileUtil.addPathSuffix(inPath, "_sim");
+        Logger.setReplaySource(new WPILOGReader(inPath));
+        Logger.addDataReceiver(new WPILOGWriter(outPath));
         break;
     }
 
-    // Disable Unnecessary logging
+    // Disable unnecessary logging
     SignalLogger.enableAutoLogging(false);
 
     // Start AdvantageKit logger
@@ -94,16 +97,26 @@ public class Robot extends LoggedRobot {
       Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
       watchdogField.setAccessible(true);
       Watchdog watchdog = (Watchdog) watchdogField.get(this);
-      watchdog.setTimeout(loopOverrunWarningTimeout);
+      watchdog.setTimeout(Constants.loopPeriodWatchdogSecs);
     } catch (Exception e) {
       DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
     }
+    CommandScheduler.getInstance().setPeriod(Constants.loopPeriodWatchdogSecs);
 
     // Disable alerts for disconnected controllers
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Configure brownout voltage
     RobotController.setBrownoutVoltage(6.0);
+
+    // Configure DriverStation for sim
+    RoboRioSim.setTeamNumber(503);
+
+    if (RobotBase.isSimulation()) {
+      DriverStationSim.setDsAttached(true);
+      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+      DriverStationSim.notifyNewData();
+    }
 
     // Initialize RobotContainer
     robotContainer = new RobotContainer();
@@ -119,9 +132,9 @@ public class Robot extends LoggedRobot {
 
     // Run command scheduler
     CommandScheduler.getInstance().run();
-    LoggedTracer.record("CommandScheduler");
-
     SmartDashboard.putData(CommandScheduler.getInstance());
+
+    LoggedTracer.record("CommandScheduler");
 
     // Log NT client list
     NTClientLogger.log();
@@ -159,7 +172,9 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void testInit() {}
+  public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   @Override
   public void testPeriodic() {}

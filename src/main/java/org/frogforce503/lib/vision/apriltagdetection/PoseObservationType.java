@@ -1,4 +1,4 @@
-package org.frogforce503.lib.vision.apriltag_detection;
+package org.frogforce503.lib.vision.apriltagdetection;
 
 /**
  * Enum representing different types of pose observations for AprilTag detection.

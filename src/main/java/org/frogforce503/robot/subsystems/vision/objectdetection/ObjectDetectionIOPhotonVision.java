@@ -1,11 +1,12 @@
-package org.frogforce503.robot.subsystems.vision.object_detection;
+package org.frogforce503.robot.subsystems.vision.objectdetection;
 
 import java.util.Comparator;
 import java.util.List;
 
-import org.frogforce503.lib.vision.object_detection.ObjectSortingMode;
-import org.frogforce503.lib.vision.object_detection.TrackedObject;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
+import org.frogforce503.lib.vision.objectdetection.ObjectSortingMode;
+import org.frogforce503.lib.vision.objectdetection.TrackedObject;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;

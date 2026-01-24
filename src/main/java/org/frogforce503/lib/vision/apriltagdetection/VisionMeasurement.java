@@ -1,4 +1,4 @@
-package org.frogforce503.lib.vision.apriltag_detection;
+package org.frogforce503.lib.vision.apriltagdetection;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;

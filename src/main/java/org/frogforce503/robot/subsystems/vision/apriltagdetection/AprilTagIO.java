@@ -1,8 +1,10 @@
-package org.frogforce503.robot.subsystems.vision.apriltag_detection;
+package org.frogforce503.robot.subsystems.vision.apriltagdetection;
 
 import java.util.Set;
 
-import org.frogforce503.lib.vision.apriltag_detection.*;
+import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
+import org.frogforce503.lib.vision.apriltagdetection.PoseObservationType;
+import org.frogforce503.lib.vision.apriltagdetection.TrackedAprilTag;
 import org.frogforce503.robot.subsystems.vision.VisionIO;
 import org.littletonrobotics.junction.AutoLog;
 

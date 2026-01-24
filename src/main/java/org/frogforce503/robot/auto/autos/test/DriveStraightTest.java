@@ -17,12 +17,10 @@ import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveStraightTest extends AutoMode {
+public class DriveStraightTest implements AutoMode {
     private PathPlannerPath driveStraightPath;
 
     public DriveStraightTest(Drive drive, Vision vision, Superstructure superstructure) {
-        super(drive, vision, superstructure);
-
         try {
             driveStraightPath = PathPlannerPath.fromPathFile("Test");
         } catch (FileVersionException | IOException | ParseException e) {

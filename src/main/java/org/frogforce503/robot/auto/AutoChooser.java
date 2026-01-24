@@ -6,7 +6,6 @@ import java.util.List;
 import org.frogforce503.lib.auto.AutoFactoryConfigurator;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.rebuilt.ProximityUtil;
-import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -21,7 +20,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import lombok.Getter;
-import swervelib.simulation.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.SimulatedArena;
 
 public class AutoChooser {
     // Requirements
@@ -56,25 +55,21 @@ public class AutoChooser {
         // Random test auto
         routineChooser.addDefaultOption(
             "Test",
-            new AutoMode(drive, vision, superstructure) {
-
+            new AutoMode() {
                 @Override
                 public Command getCommand() {
-                    return Commands.runOnce(() -> drive.setPose(GeomUtil.toPose2d(new Translation2d(5,5))));
+                    return Commands.runOnce(() -> drive.setPose(GeomUtil.toPose2d(new Translation2d(1.889,4.002))));
                 }
 
                 @Override
                 public List<Pose2d> getPoses() {
                     return new ArrayList<>(List.of(Pose2d.kZero));
                 }
-            
         });
-
-        // routineChooser.addDefaultOption("Drive Straight Test", new DriveStraightTest(drive, vision, superstructure));
     }
 
     private void logTrajectory(Pose2d... trajectory) {
-        FieldInfo.getObject("Trajectory").setPoses(trajectory);
+        drive.getViz().getObject("Trajectory").setPoses(trajectory);
         Logger.recordOutput("Drive/Trajectory", trajectory);
     }
 

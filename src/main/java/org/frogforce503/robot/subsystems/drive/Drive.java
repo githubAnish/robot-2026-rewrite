@@ -1,8 +1,8 @@
 package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
-import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
-import org.frogforce503.robot.FieldInfo;
+import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -24,10 +24,7 @@ public class Drive extends SubsystemBase {
 
     // State
     private ChassisSpeeds targetSpeeds = new ChassisSpeeds();
-
-    // Toggles
-    @Getter private boolean robotRelative = false;
-    @Getter private boolean slowMode = false;
+    
     @Setter @Getter private boolean coastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {
@@ -42,20 +39,9 @@ public class Drive extends SubsystemBase {
         viz.update(inputs);
 
         Logger.recordOutput("Drive/TargetVelocity", targetSpeeds);
-        Logger.recordOutput("Drive/Toggles/SlowModeEnabled", slowMode);
-        Logger.recordOutput("Drive/Toggles/RobotRelative", robotRelative);
 
         // Record cycle time
         LoggedTracer.record("Drive");
-    }
-
-    // Toggles
-    public void toggleSlowMode() {
-        slowMode = !slowMode;
-    }
-
-    public void toggleRobotRelative() {
-        robotRelative = !robotRelative;
     }
 
     // Setters
@@ -69,7 +55,7 @@ public class Drive extends SubsystemBase {
 
     public void resetRotation() {
         setAngle(
-            FieldInfo.isRed()
+            FieldConstants.isRed()
                 ? Rotation2d.kZero
                 : Rotation2d.kPi);
     }
@@ -116,8 +102,7 @@ public class Drive extends SubsystemBase {
     public double getFFCharacterizationVelocity() {
         double output = 0.0;
         for (int i = 0; i < 4; i++) {
-            output +=
-                Units.radiansToRotations(inputs.driveVelocitiesRadPerSec[i]) / 4.0;
+            output += Units.radiansToRotations(inputs.driveVelocitiesRadPerSec[i]) / 4.0;
         }
         return output;
     }

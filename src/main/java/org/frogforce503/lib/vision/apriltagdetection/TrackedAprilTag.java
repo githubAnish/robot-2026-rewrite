@@ -1,4 +1,4 @@
-package org.frogforce503.lib.vision.apriltag_detection;
+package org.frogforce503.lib.vision.apriltagdetection;
 
 /**
  * Record representing an AprilTag detected by an AprilTagIO.

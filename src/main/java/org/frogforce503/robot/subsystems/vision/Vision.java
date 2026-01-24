@@ -6,20 +6,20 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagInputsAutoLogged;
-import org.frogforce503.robot.subsystems.vision.object_detection.ObjectDetectionInputsAutoLogged;
-import org.frogforce503.lib.vision.apriltag_detection.PoseObservation;
-import org.frogforce503.lib.vision.apriltag_detection.VisionMeasurement;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
-import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagGoal;
-import org.frogforce503.robot.subsystems.vision.apriltag_detection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.object_detection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
+import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagInputsAutoLogged;
+import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionInputsAutoLogged;
+import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
+import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
@@ -214,9 +214,5 @@ public class Vision extends SubsystemBase {
 
     public void setDesiredAprilTagGoal(AprilTagGoal goal) {
         this.desiredAprilTagGoal = goal;
-    }
-
-    public Pose2d getBestBallPose() {
-        return new Pose2d(8.7, 4.4, new Rotation2d()); // need to implement using object detection, just a placeholder for IntakeFuelFromGorund to work
     }
 }

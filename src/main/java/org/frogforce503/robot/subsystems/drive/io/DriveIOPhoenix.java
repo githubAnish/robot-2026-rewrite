@@ -76,6 +76,8 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
         // Update drive inputs
         inputs.fromSwerveDriveState(super.getStateCopy());
         
+        inputs.gyroAngle = Rotation2d.fromDegrees(gyroYaw.getValueAsDouble());
+
         for (int i = 0; i < 4; i++) {
             inputs.drivePositionsRad[i] = Units.rotationsToRadians(drivePositionSignals[0].getValueAsDouble());
             inputs.driveVelocitiesRadPerSec[i] = Units.rotationsToRadians(driveVelocitySignals[0].getValueAsDouble());

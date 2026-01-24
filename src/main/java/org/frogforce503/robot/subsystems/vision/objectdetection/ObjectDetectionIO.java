@@ -1,7 +1,7 @@
-package org.frogforce503.robot.subsystems.vision.object_detection;
+package org.frogforce503.robot.subsystems.vision.objectdetection;
 
-import org.frogforce503.lib.vision.object_detection.ObjectSortingMode;
-import org.frogforce503.lib.vision.object_detection.TrackedObject;
+import org.frogforce503.lib.vision.objectdetection.ObjectSortingMode;
+import org.frogforce503.lib.vision.objectdetection.TrackedObject;
 import org.frogforce503.robot.subsystems.vision.VisionIO;
 import org.littletonrobotics.junction.AutoLog;
 

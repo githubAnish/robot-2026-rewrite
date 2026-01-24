@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
 
-// Assume the climber is like an elevator / telescoping arm like in 2022
+// Climber pivots + is a chain
 public class Climber extends FFSubsystemBase {
     private final ClimberIO io;
     private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();

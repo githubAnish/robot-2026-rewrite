@@ -18,7 +18,7 @@ public class SuperstructureViz {
     // Requirements
     private final Supplier<Pose2d> robotPoseSupplier;
 
-    // 3D Viz Constants
+    // Constants
     public static Transform3d robotToTurret = new Transform3d(-0.19685, 0.0, 0.44, Rotation3d.kZero);
     public static Transform3d turretToCamera =
         new Transform3d(
@@ -34,15 +34,6 @@ public class SuperstructureViz {
         update3dViz(drivePose3d, turretAngleRad, hoodAngleRad);
     }
 
-    // Copyright (c) 2025-2026 Littleton Robotics
-    // http://github.com/Mechanical-Advantage
-    //
-    // Use of this source code is governed by an MIT-style
-    // license that can be found in the LICENSE file at
-    // the root directory of this project.
-    //
-    // Credits to FRC 6328 for their alpha bot model & 3d viz pose calculations
-    // Will switch to 3d model from FF once block cad looks good or cad model comes out
     private void update3dViz(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
         var turretPose =
             robotToTurret
@@ -56,13 +47,13 @@ public class SuperstructureViz {
                 new Transform3d(
                     0.105, 0.0, 0.092, new Rotation3d(0.0, -hoodAngleRad, Math.PI)));
 
-        Logger.recordOutput("SuperstructureViz/3D/Components", turretPose, hoodPose);
+        Logger.recordOutput("SuperstructureViz/Components", turretPose, hoodPose);
 
         var cameraPose =
             drivePose3d
                 .transformBy(turretPose.toTransform3d())
                 .transformBy(turretToCamera);
 
-        Logger.recordOutput("SuperstructureViz/3D/CameraPose", cameraPose);
+        Logger.recordOutput("SuperstructureViz/CameraPose", cameraPose);
     }
 }

@@ -1,4 +1,4 @@
-package org.frogforce503.lib.vision.object_detection;
+package org.frogforce503.lib.vision.objectdetection;
 
 import java.util.Comparator;
 

@@ -1,13 +1,13 @@
-package org.frogforce503.robot.subsystems.vision.apriltag_detection;
+package org.frogforce503.robot.subsystems.vision.apriltagdetection;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.frogforce503.lib.vision.apriltag_detection.*;
-import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
+import org.frogforce503.lib.vision.apriltagdetection.*;
+
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -16,6 +16,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
@@ -70,7 +71,7 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
      * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin
     */
     public AprilTagIOPhotonVision(CameraName cameraName, Transform3d robotToCameraOffset) {
-        this(cameraName, robotToCameraOffset, Constants.fieldVenue.getAprilTagFieldLayout());
+        this(cameraName, robotToCameraOffset, AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField));
     }
 
     //VisionIO

@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.lib.auto.planned_path.PlannedPath.HolonomicState;
 import org.frogforce503.lib.swerve.SwervePathController;
-import org.frogforce503.robot.FieldInfo;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;
@@ -61,7 +60,7 @@ public class DrivePlannedPath extends Command {
                 .map(state -> state.poseMeters)
                 .toArray(Pose2d[]::new);
 
-        FieldInfo
+        drive.getViz()
             .getObject("CurrentTrajectory")
             .setPoses(poses);
     }
@@ -114,7 +113,7 @@ public class DrivePlannedPath extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        FieldInfo
+        drive.getViz()
             .getObject("CurrentTrajectory")
             .setPoses();
 
