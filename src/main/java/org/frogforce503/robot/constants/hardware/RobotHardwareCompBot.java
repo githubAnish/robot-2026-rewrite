@@ -1,10 +1,14 @@
 package org.frogforce503.robot.constants.hardware;
 
+import java.util.EnumMap;
+
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.robot.constants.hardware.subsystem_config.*;
 import org.frogforce503.robot.constants.tuner.TunerConstantsCompBot;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
@@ -20,8 +24,28 @@ public class RobotHardwareCompBot extends RobotHardware {
                 TunerConstantsCompBot.BackRight);
 
         // Create vision config
+        EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
+        EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
+
+        Transform3d robotToTurretBaseOffset = Transform3d.kZero;
+
+        turretToTurretCameraOffsets.put(CameraName.CLOSE_TURRET_CAMERA, Transform3d.kZero);
+
+        turretToTurretCameraOffsets.put(CameraName.FAR_TURRET_CAMERA, Transform3d.kZero);
+
+        robotToFixedCameraOffsets.put(CameraName.INTAKE_LEFT_CAMERA, Transform3d.kZero);
+
+        robotToFixedCameraOffsets.put(CameraName.INTAKE_RIGHT_CAMERA, Transform3d.kZero);
+
+        robotToFixedCameraOffsets.put(CameraName.BACK_CAMERA, Transform3d.kZero);
+
+        robotToFixedCameraOffsets.put(CameraName.FUEL_CAMERA, Transform3d.kZero);
+
         this.visionConfig =
-            new VisionConfig();
+            new VisionConfig(
+                robotToFixedCameraOffsets,
+                turretToTurretCameraOffsets,
+                robotToTurretBaseOffset);
             
         // Create superstructure configs
         this.intakePivotConfig =

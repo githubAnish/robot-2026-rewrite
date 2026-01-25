@@ -27,7 +27,9 @@ import edu.wpi.first.math.numbers.N3;
  * The subsystem that handles vision processing for AprilTag detection and object detection.
  */
 public class Vision extends SubsystemBase {
+    // Method that takes in a vision measurement as a parameter, fuses it with odometry, and returns void
     private Consumer<VisionMeasurement> visionConsumer;
+    // Method that takes in no parameters and returns the robot's pose as a Pose2d
     private Supplier<Pose2d> robotPoseSupplier;
 
     // Maps camera names to their corresponding AprilTagIO instances.
@@ -72,6 +74,8 @@ public class Vision extends SubsystemBase {
             objectDetectionInputsMap.put(objectDetectionIOs[i].getCameraName(), new ObjectDetectionInputsAutoLogged());
         }
     }
+
+    // TODO: Add logic to calculate the robot to camera offsets of turret cameras based on the turret angle
 
     @Override
     public void periodic() {
@@ -165,6 +169,15 @@ public class Vision extends SubsystemBase {
         }
     }
 
+    /************************************ PUBLIC METHODS ************************************/
+
+    public void setDesiredAprilTagGoal(AprilTagGoal goal) {
+        this.desiredAprilTagGoal = goal;
+    }
+
+
+    /************************************ PRIVATE METHODS ************************************/
+
     /**
      * Gets a VisionMeasurement from the AprilTagIO based on the current goal.
      * The camera is configured based on the goal's camera configuration, and the outputted pose observation is checked against the goal's camera filter.
@@ -210,9 +223,5 @@ public class Vision extends SubsystemBase {
     private void logPoseObservation(AprilTagIO aprilTagIO, PoseObservation poseObservation) {
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation", poseObservation);
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation/Used April Tags", poseObservation.usedAprilTags());
-    }
-
-    public void setDesiredAprilTagGoal(AprilTagGoal goal) {
-        this.desiredAprilTagGoal = goal;
     }
 }

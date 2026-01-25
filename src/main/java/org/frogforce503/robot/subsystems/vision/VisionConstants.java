@@ -96,55 +96,7 @@ public class VisionConstants {
             Optional.empty()
         ),
 
-        /**
-         * Uses only turret-mounted AprilTag cameras for precise aiming tasks.
-         * Suitable for tasks such as shooting or precise alignment.
-         */
-        TURRET_HUB_AIMING(
-            EnumSet.of(
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA
-            ),
 
-            poseObservation -> {
-                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
-                
-                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
-                double distance = VisionUtils.getLowestDistanceToCamera(tags);
-
-                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
-                double maxDistance = tags.length > 1 ? Units.feetToMeters(12) : Units.feetToMeters(8);
-
-                return ambiguity <= maxAmbiguity && distance <= maxDistance;
-            },
-
-            aprilTagIO -> {
-                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
-                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
-                }
-                
-                Set<Integer> ignoredTags = Set.of();
-                ignoredTags.addAll(RED_TRENCH_TAGS);
-                ignoredTags.addAll(BLUE_TRENCH_TAGS);
-                ignoredTags.addAll(RED_OUTPOST_TAGS);
-                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
-                ignoredTags.addAll(RED_TOWER_TAGS);
-                ignoredTags.addAll(BLUE_TOWER_TAGS);
-                
-                if (FieldConstants.isRed()) {
-                    ignoredTags.addAll(BLUE_HUB_TAGS);
-                } else {
-                    ignoredTags.addAll(RED_HUB_TAGS);
-                }
-
-                aprilTagIO.setIgnoredAprilTags(ignoredTags);
-            },
-
-            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-
-            Optional.of(GLOBAL_LOCALIZATION)
-        ),
 
         /**
          * Uses backup AprilTag cameras for aiming tasks when primary turret cameras are unreliable.
@@ -196,12 +148,62 @@ public class VisionConstants {
             Optional.of(GLOBAL_LOCALIZATION)
         ),
 
-        TOWER_ALIGNMENT(
+        /**
+         * Uses only turret-mounted AprilTag cameras for precise aiming tasks.
+         * Suitable for tasks such as shooting or precise alignment.
+         */
+        TURRET_HUB_AIMING(
             EnumSet.of(
                 CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA,
-                CameraName.INTAKE_LEFT_CAMERA,
-                CameraName.INTAKE_RIGHT_CAMERA,
+                CameraName.FAR_TURRET_CAMERA
+            ),
+
+            poseObservation -> {
+                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
+                
+                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
+                double distance = VisionUtils.getLowestDistanceToCamera(tags);
+
+                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
+                double maxDistance = tags.length > 1 ? Units.feetToMeters(21.5) : Units.feetToMeters(15); 
+
+                return ambiguity <= maxAmbiguity && distance <= maxDistance;
+            },
+
+            aprilTagIO -> {
+                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
+                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
+                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
+                }
+                
+                Set<Integer> ignoredTags = Set.of();
+                ignoredTags.addAll(RED_TRENCH_TAGS);
+                ignoredTags.addAll(BLUE_TRENCH_TAGS);
+                ignoredTags.addAll(RED_OUTPOST_TAGS);
+                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
+                ignoredTags.addAll(RED_TOWER_TAGS);
+                ignoredTags.addAll(BLUE_TOWER_TAGS);
+                
+                if (FieldConstants.isRed()) {
+                    ignoredTags.addAll(BLUE_HUB_TAGS);
+                } else {
+                    ignoredTags.addAll(RED_HUB_TAGS);
+                }
+
+                aprilTagIO.setIgnoredAprilTags(ignoredTags);
+            },
+
+            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
+
+            Optional.of(STANDARD_HUB_AIM)
+        ),
+
+        TOWER_ALIGNMENT(
+            EnumSet.of(
+                CameraName.INTAKE_LEFT_CAMERA, 
+                CameraName.INTAKE_RIGHT_CAMERA, 
+                CameraName.CLOSE_TURRET_CAMERA, 
+                CameraName.FAR_TURRET_CAMERA, 
                 CameraName.BACK_CAMERA
             ),
             poseObservation -> {
@@ -217,23 +219,27 @@ public class VisionConstants {
             },
              aprilTagIO -> {
                 if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
-                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
+                    aprilTagIO.setPoseObservationType(PoseObservationType.PNP_DISTANCE_TRIG_SOLVE);
                 } 
                 Set<Integer> ignoredTags = Set.of();
-                ignoredTags.addAll(RED_TOWER_TAGS);
-                ignoredTags.addAll(BLUE_TOWER_TAGS);
+                ignoredTags.addAll(RED_HUB_TAGS);
+                ignoredTags.addAll(BLUE_HUB_TAGS);
+                ignoredTags.addAll(RED_OUTPOST_TAGS);
+                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
+                ignoredTags.addAll(RED_TRENCH_TAGS);
+                ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 
                 if (FieldConstants.isRed()) {
-                    ignoredTags.addAll(BLUE_HUB_TAGS);
+                    ignoredTags.addAll(BLUE_TOWER_TAGS);
                 } else {
-                    ignoredTags.addAll(RED_HUB_TAGS);
+                    ignoredTags.addAll(RED_TOWER_TAGS);
                 }
 
                 aprilTagIO.setIgnoredAprilTags(ignoredTags);
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
+
             Optional.of(GLOBAL_LOCALIZATION) 
         ),
 
@@ -262,8 +268,12 @@ public class VisionConstants {
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
                 Set<Integer> ignoredTags = Set.of();
+                ignoredTags.addAll(RED_HUB_TAGS);
+                ignoredTags.addAll(BLUE_HUB_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
                 ignoredTags.addAll(BLUE_OUTPOST_TAGS);
+                ignoredTags.addAll(RED_TRENCH_TAGS);
+                ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 
                 if (FieldConstants.isRed()) {
                     ignoredTags.addAll(BLUE_HUB_TAGS);

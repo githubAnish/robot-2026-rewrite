@@ -1,17 +1,37 @@
 package org.frogforce503.lib.rebuilt;
 
-// assume turret until further updates, look in superstructure.java javadocs
-// therefore first just use simple just use interpolating double tree map, then shoot on move & physics like 604 shotcalculator (have to integrate turret rotation & drivetrain rotation, both have to move)
-// take into account the drivetrain pose and velocity
+import org.frogforce503.robot.constants.field.FieldConstants;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
 public final class ShotCalculator {
     private ShotCalculator() {}
 
-    public static ShotInfo calculateHubShotInfo() {
+    public static ShotInfo calculateHubShotInfo(ShotParameters parameters) {
+        Translation3d targetHubPose =
+            FieldConstants.isRed() 
+                ? FieldConstants.Hub.redShotPose 
+                : FieldConstants.Hub.blueShotPose;
+
         return new ShotInfo();
+    }
+    
+    public static double calculateTurretRobotRelativeAngle() {
+        return 0.0;
+    }
+
+    public static record ShotParameters(
+        Pose2d robotPose,
+        ChassisSpeeds robotRelativeVelocity
+    ) {
+        public ShotParameters() {
+            this(Pose2d.kZero, new ChassisSpeeds());
+        }
     }
 
     public static record ShotInfo(
-        double turretAngleRad,
+        double turretRobotRelativeAngleRad,
         double flywheelsSpeedRadPerSec,
         double hoodAngleRad,
         boolean feasibleShot

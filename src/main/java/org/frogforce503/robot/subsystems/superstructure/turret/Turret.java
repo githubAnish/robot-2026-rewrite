@@ -27,6 +27,7 @@ public class Turret extends FFSubsystemBase {
 
     // Control
     private double targetAngleRad = TurretConstants.START;
+    private double targetVelocityRadPerSec = 0.0;
 
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
@@ -52,7 +53,7 @@ public class Turret extends FFSubsystemBase {
             var goalState =
                 new State(
                     MathUtil.clamp(targetAngleRad, TurretConstants.minAngle, TurretConstants.maxAngle),
-                    0.0);
+                    targetVelocityRadPerSec);
 
             double previousVelocity = setpoint.velocity;
 
@@ -117,6 +118,12 @@ public class Turret extends FFSubsystemBase {
     public void setAngle(double angleRad) {
         this.shouldRunProfile = true;
         this.targetAngleRad = angleRad;
+    }
+
+    public void setAngle(double angleRad, double velocityRadPerSec) {
+        this.shouldRunProfile = true;
+        this.targetAngleRad = angleRad;
+        this.targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     public boolean isAtAngle(double angleRad, double tolerance) {

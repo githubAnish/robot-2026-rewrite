@@ -78,7 +78,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
@@ -136,33 +135,33 @@ public class RobotContainer {
                         new AprilTagIO[] {
                             new AprilTagIOPhotonSim(
                                 CameraName.CLOSE_TURRET_CAMERA,
-                                new Transform3d(),
+                                Transform3d.kZero,
                                 visionViz
                             ),
                             new AprilTagIOPhotonSim(
                                 CameraName.FAR_TURRET_CAMERA,
-                                new Transform3d(),
+                                Transform3d.kZero,
                                 visionViz
                             ),
                             new AprilTagIOPhotonSim(
                                 CameraName.INTAKE_LEFT_CAMERA,
-                                new Transform3d(),
+                                Transform3d.kZero,
                                 visionViz
                             ),
                             new AprilTagIOPhotonSim(
                                 CameraName.INTAKE_RIGHT_CAMERA,
-                                new Transform3d(),
+                                Transform3d.kZero,
                                 visionViz
                             ),
                         },
                         new ObjectDetectionIO[] {
                             new ObjectDetectionIOPhotonSim(
                                 CameraName.FUEL_CAMERA,
-                                new Transform3d(),
+                                Transform3d.kZero,
                                 visionViz
                             )
                         });
-
+                        
                 intakePivot = new IntakePivot(new IntakePivotIOSpark());
                 intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
                 indexer = new Indexer(new IndexerIOSpark());
@@ -391,10 +390,6 @@ public class RobotContainer {
     }
 
     public void test() {
-        RobotModeTriggers.teleop().whileTrue(
-            Commands.sequence(
-                new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled::get)
-            )
-        );
+        
     }
 }
