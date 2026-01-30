@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakePivotConfig;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 
@@ -33,11 +31,9 @@ public class TuneIntakePivot extends Command {
         this.intakePivot = intakePivot;
 
         // Get initial values from config
-        final IntakePivotConfig intakePivotConfig = Robot.bot.getIntakePivotConfig();
-
-        final PIDConfig initialPID = intakePivotConfig.kPID();
-        final FFConfig initialFF = intakePivotConfig.kFF();
-        final Constraints initialConstraints = intakePivotConfig.kConstraints();
+        final PIDConfig initialPID = IntakePivotConstants.kPID;
+        final FFConfig initialFF = IntakePivotConstants.kFF;
+        final Constraints initialConstraints = IntakePivotConstants.kConstraints;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("IntakePivot/kP", initialPID.kP());

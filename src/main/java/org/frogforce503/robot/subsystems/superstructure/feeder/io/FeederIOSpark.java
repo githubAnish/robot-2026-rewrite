@@ -1,8 +1,7 @@
 package org.frogforce503.robot.subsystems.superstructure.feeder.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FeederConfig;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -34,30 +33,28 @@ public class FeederIOSpark implements FeederIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
     
     public FeederIOSpark() {
-        final FeederConfig feederConfig = Robot.bot.getFeederConfig();
-
         // Initialize motor
-        motor = new SparkMax(feederConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(FeederConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(feederConfig.inverted());
+        config.inverted(FeederConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(feederConfig.statorCurrentLimit());
+        config.smartCurrentLimit(FeederConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / feederConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / feederConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / FeederConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / FeederConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(feederConfig.kPID().kP(), feederConfig.kPID().kI(), feederConfig.kPID().kD());
+                .pid(FeederConstants.kPID.kP(), FeederConstants.kPID.kI(), FeederConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 

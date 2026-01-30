@@ -1,5 +1,6 @@
 package org.frogforce503.robot.subsystems.vision;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -18,11 +19,17 @@ import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhot
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import lombok.Getter;
 
+/**
+ * Important constants used by the Vision subsystem such as the different camera names and sets of AprilTag IDs.
+ */
 public class VisionConstants {
     /**
      * Cameras on robots are configured with a name.
@@ -39,6 +46,60 @@ public class VisionConstants {
 
         // Object Detection Cameras
         FUEL_CAMERA
+    }
+
+    // Vision Hardware
+    public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
+    public static final EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
+
+    static {
+        turretToTurretCameraOffsets.put(
+            CameraName.CLOSE_TURRET_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
+
+        turretToTurretCameraOffsets.put(
+            CameraName.FAR_TURRET_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
+
+        robotToFixedCameraOffsets.put(
+            CameraName.INTAKE_LEFT_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
+
+        robotToFixedCameraOffsets.put(
+            CameraName.INTAKE_RIGHT_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
+
+        robotToFixedCameraOffsets.put(
+            CameraName.BACK_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
+
+        robotToFixedCameraOffsets.put(
+            CameraName.FUEL_CAMERA,
+            new Transform3d(
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
+            )
+        );
     }
 
     public static final Set<Integer> RED_TOWER_TAGS = Set.of(15, 16);

@@ -3,6 +3,7 @@ package org.frogforce503.robot.subsystems.vision.objectdetection;
 import java.util.Comparator;
 import java.util.List;
 
+import org.frogforce503.robot.subsystems.vision.VisionConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.lib.vision.objectdetection.ObjectSortingMode;
 import org.frogforce503.lib.vision.objectdetection.TrackedObject;
@@ -35,10 +36,15 @@ public class ObjectDetectionIOPhotonVision implements ObjectDetectionIO {
      * @param cameraName The enum representing name of the camera configured in PhotonVision.
      * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin.
     */
-    public ObjectDetectionIOPhotonVision(CameraName cameraName, Transform3d robotToCameraOffset) {
+    public ObjectDetectionIOPhotonVision(CameraName cameraName) {
         this.cameraName = cameraName;
         this.camera = new PhotonCamera(cameraName.name());
-        this.robotToCameraOffset = robotToCameraOffset;
+
+        if (VisionConstants.robotToFixedCameraOffsets.containsKey(cameraName)) {
+            this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
+        } else { 
+            this.robotToCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName); // Default to identity transform if not found
+        }
     }
 
     //Vision IO

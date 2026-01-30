@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.HoodConfig;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
@@ -33,11 +31,9 @@ public class TuneHood extends Command {
         this.hood = hood;
 
         // Get initial values from config
-        final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
-
-        final PIDConfig initialPID = hoodConfig.kPID();
-        final FFConfig initialFF = hoodConfig.kFF();
-        final Constraints initialConstraints = hoodConfig.kConstraints();
+        final PIDConfig initialPID = HoodConstants.kPID;
+        final FFConfig initialFF = HoodConstants.kFF;
+        final Constraints initialConstraints = HoodConstants.kConstraints;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Hood/kP", initialPID.kP());

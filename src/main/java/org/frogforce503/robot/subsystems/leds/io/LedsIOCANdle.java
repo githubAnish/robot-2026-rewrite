@@ -1,6 +1,6 @@
 package org.frogforce503.robot.subsystems.leds.io;
 
-import org.frogforce503.robot.Robot;
+import org.frogforce503.robot.subsystems.leds.LedsConstants;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -23,7 +23,7 @@ public class LedsIOCANdle implements LedsIO {
 
     public LedsIOCANdle() {
         // Initialize CANdle
-        leds = new CANdle(Robot.bot.getLedsConfig().candleID());
+        leds = new CANdle(LedsConstants.candleID);
 
         // Apply config
         CANdleConfiguration config = new CANdleConfiguration();

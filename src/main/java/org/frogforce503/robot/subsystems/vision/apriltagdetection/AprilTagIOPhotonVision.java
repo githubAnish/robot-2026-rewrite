@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.frogforce503.robot.subsystems.vision.VisionConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.lib.vision.apriltagdetection.*;
 
@@ -49,13 +50,17 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
     //Constructors
     /**
      * @param cameraName The enum representing name of the camera configured in PhotonVision
-     * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin
      * @param aprilTagFieldLayout The AprilTagFieldLayout to use for pose estimation
     */
-    public AprilTagIOPhotonVision(CameraName cameraName, Transform3d robotToCameraOffset, AprilTagFieldLayout aprilTagFieldLayout) {
+    public AprilTagIOPhotonVision(CameraName cameraName, AprilTagFieldLayout aprilTagFieldLayout) {
         this.cameraName = cameraName;
         this.camera = new PhotonCamera(cameraName.name());
-        this.robotToCameraOffset = robotToCameraOffset;
+        if (VisionConstants.robotToFixedCameraOffsets.containsKey(cameraName)) {
+            this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
+        } else { 
+            this.robotToCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName); // Default to identity transform if not found
+        }
+
 
         poseEstimator = new PhotonPoseEstimator(
             aprilTagFieldLayout,
@@ -68,10 +73,9 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
 
     /**
      * @param cameraName The enum representing name of the camera configured in PhotonVision
-     * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin
     */
-    public AprilTagIOPhotonVision(CameraName cameraName, Transform3d robotToCameraOffset) {
-        this(cameraName, robotToCameraOffset, AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField));
+    public AprilTagIOPhotonVision(CameraName cameraName) {
+        this(cameraName,AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField));
     }
 
     //VisionIO

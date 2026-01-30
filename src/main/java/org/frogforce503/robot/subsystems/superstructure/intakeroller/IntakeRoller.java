@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.superstructure.intakeroller;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -28,7 +27,7 @@ public class IntakeRoller extends FFSubsystemBase {
     public IntakeRoller(IntakeRollerIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getIntakeRollerConfig().kFF().getSimpleMotorFF();
+        feedforward = IntakeRollerConstants.kFF.getSimpleMotorFF();
     }
 
     @Override

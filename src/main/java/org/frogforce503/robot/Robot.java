@@ -20,10 +20,6 @@ import java.lang.reflect.Field;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.VirtualSubsystem;
 import org.frogforce503.lib.util.NTClientLogger;
-import org.frogforce503.robot.constants.hardware.RobotHardware;
-import org.frogforce503.robot.constants.hardware.RobotHardwareCompBot;
-import org.frogforce503.robot.constants.hardware.RobotHardwarePracticeBot;
-import org.frogforce503.robot.constants.hardware.RobotHardwareProgrammingBot;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -40,20 +36,12 @@ import com.ctre.phoenix6.SignalLogger;
  * project.
  */
 public class Robot extends LoggedRobot {
-  public static RobotHardware bot;
   private RobotContainer robotContainer;
   
   /*
    * Robot Constructor 
    */
-  public Robot() {
-    bot =
-      switch (Constants.getRobot()) {
-        case CompBot, SimBot -> new RobotHardwareCompBot();
-        case PracticeBot -> new RobotHardwarePracticeBot();
-        case ProgrammingBot -> new RobotHardwareProgrammingBot();
-      };
-  }
+  public Robot() {}
 
   /**
    * This function is run when the robot is first started up and should be used for any

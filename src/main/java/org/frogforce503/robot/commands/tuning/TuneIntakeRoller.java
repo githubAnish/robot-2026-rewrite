@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakeRollerConfig;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 
@@ -28,10 +26,8 @@ public class TuneIntakeRoller extends Command {
         this.intakeRoller = intakeRoller;
 
         // Get initial values from config
-        final IntakeRollerConfig intakeRollerConfig = Robot.bot.getIntakeRollerConfig();
-
-        final PIDConfig initialPID = intakeRollerConfig.kPID();
-        final FFConfig initialFF = intakeRollerConfig.kFF();
+        final PIDConfig initialPID = IntakeRollerConstants.kPID;
+        final FFConfig initialFF = IntakeRollerConstants.kFF;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("IntakeRoller/kP", initialPID.kP());

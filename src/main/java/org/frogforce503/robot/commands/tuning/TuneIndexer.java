@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IndexerConfig;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 
@@ -28,10 +26,8 @@ public class TuneIndexer extends Command {
         this.indexer = indexer;
 
         // Get initial values from config
-        final IndexerConfig indexerConfig = Robot.bot.getIndexerConfig();
-
-        final PIDConfig initialPID = indexerConfig.kPID();
-        final FFConfig initialFF = indexerConfig.kFF();
+        final PIDConfig initialPID = IndexerConstants.kPID;
+        final FFConfig initialFF = IndexerConstants.kFF;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Indexer/kP", initialPID.kP());

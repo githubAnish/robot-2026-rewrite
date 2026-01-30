@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.intakepivot.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakePivotConfig;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
@@ -23,17 +21,15 @@ public class IntakePivotIOSim extends IntakePivotIOSpark {
     private final double moi = 0.62; // kg * m^2, TODO measure the moi from the pivot point
 
     public IntakePivotIOSim() {
-        final IntakePivotConfig pivotConfig = Robot.bot.getIntakePivotConfig();
-
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new SingleJointedArmSim(
                 motorModel,
-                pivotConfig.mechanismRatio(),
+                IntakePivotConstants.mechanismRatio,
                 moi,
                 length,
-                pivotConfig.minAngle(),
-                pivotConfig.maxAngle(),
+                IntakePivotConstants.minAngle,
+                IntakePivotConstants.maxAngle,
                 true,
                 IntakePivotConstants.START);
 

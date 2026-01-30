@@ -14,7 +14,6 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIO;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOInputsAutoLogged;
 
@@ -37,8 +36,8 @@ public class Turret extends FFSubsystemBase {
     public Turret(TurretIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getTurretConfig().kFF().getSimpleMotorFF();
-        profile = new TrapezoidProfile(Robot.bot.getTurretConfig().kConstraints());
+        feedforward = TurretConstants.kFF.getSimpleMotorFF();
+        profile = new TrapezoidProfile(TurretConstants.kConstraints);
     }
 
     @Override

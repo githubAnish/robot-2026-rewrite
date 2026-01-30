@@ -3,7 +3,6 @@ package org.frogforce503.robot.subsystems.climber;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -36,8 +35,8 @@ public class Climber extends FFSubsystemBase {
     public Climber(ClimberIO io) {
         this.io = io;
         
-        feedforward = Robot.bot.getClimberConfig().kFF().getElevatorFF();
-        profile = new TrapezoidProfile(Robot.bot.getClimberConfig().kConstraints());
+        feedforward = ClimberConstants.kFF.getElevatorFF();
+        profile = new TrapezoidProfile(ClimberConstants.kConstraints);
     }
 
     @Override

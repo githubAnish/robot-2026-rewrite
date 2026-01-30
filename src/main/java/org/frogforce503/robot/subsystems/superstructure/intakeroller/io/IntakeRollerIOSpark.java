@@ -1,8 +1,7 @@
 package org.frogforce503.robot.subsystems.superstructure.intakeroller.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakeRollerConfig;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -34,30 +33,28 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
     
     public IntakeRollerIOSpark() {
-        final IntakeRollerConfig rollerConfig = Robot.bot.getIntakeRollerConfig();
-
         // Initialize motor
-        motor = new SparkMax(rollerConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(IntakeRollerConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(rollerConfig.inverted());
+        config.inverted(IntakeRollerConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(rollerConfig.statorCurrentLimit());
+        config.smartCurrentLimit(IntakeRollerConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / rollerConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / rollerConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / IntakeRollerConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / IntakeRollerConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(rollerConfig.kPID().kP(), rollerConfig.kPID().kI(), rollerConfig.kPID().kD());
+                .pid(IntakeRollerConstants.kPID.kP(), IntakeRollerConstants.kPID.kI(), IntakeRollerConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 

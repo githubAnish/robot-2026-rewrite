@@ -5,8 +5,7 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.DriveConfig;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
@@ -28,8 +27,6 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
         super(
             MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules));
 
-        final DriveConfig config = Robot.bot.getDriveConfig();
-
         drivetrain =
             new MapleSimSwerveDrivetrain(
                 Seconds.of(kSimLoopPeriod),
@@ -42,10 +39,10 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
                 getModuleLocations(),
                 getPigeon2(),
                 getModules(),
-                config.frontLeft(),
-                config.frontRight(),
-                config.backLeft(),
-                config.backRight());
+                DriveConstants.frontLeft,
+                DriveConstants.frontRight,
+                DriveConstants.backLeft,
+                DriveConstants.backRight);
 
         simNotifier = new Notifier(drivetrain::update);
         simNotifier.startPeriodic(kSimLoopPeriod);
@@ -53,10 +50,10 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
 
     public DriveIOMapleSim() {
         this(
-            Robot.bot.getDriveConfig().frontLeft(),
-            Robot.bot.getDriveConfig().frontRight(),
-            Robot.bot.getDriveConfig().backLeft(),
-            Robot.bot.getDriveConfig().backRight());
+            DriveConstants.frontLeft,
+            DriveConstants.frontRight,
+            DriveConstants.backLeft,
+            DriveConstants.backRight);
     }
 
     @Override

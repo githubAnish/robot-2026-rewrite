@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.turret.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.TurretConfig;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 
 import com.revrobotics.REVLibError;
@@ -36,30 +34,28 @@ public class TurretIOSpark implements TurretIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
 
     public TurretIOSpark() {
-        final TurretConfig turretConfig = Robot.bot.getTurretConfig();
-
         // Initialize motor
-        motor = new SparkMax(turretConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(TurretConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         absoluteEncoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(turretConfig.inverted());
+        config.inverted(TurretConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(turretConfig.statorCurrentLimit());
+        config.smartCurrentLimit(TurretConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / turretConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / turretConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / TurretConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / TurretConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .absoluteEncoder
-                .zeroOffset(turretConfig.zeroOffset())
+                .zeroOffset(TurretConstants.zeroOffset)
                 .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of turret
                 .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of turret
                 .zeroCentered(true)
@@ -69,7 +65,7 @@ public class TurretIOSpark implements TurretIO {
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(turretConfig.kPID().kP(), turretConfig.kPID().kI(), turretConfig.kPID().kD());
+                .pid(TurretConstants.kPID.kP(), TurretConstants.kPID.kI(), TurretConstants.kPID.kD());
 
         config
             .softLimit // TODO Soft limits especially important for a turret, as wires can snap due to over-rotation

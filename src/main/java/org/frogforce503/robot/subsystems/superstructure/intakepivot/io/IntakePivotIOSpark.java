@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.intakepivot.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakePivotConfig;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 
 import com.revrobotics.REVLibError;
@@ -34,22 +32,20 @@ public class IntakePivotIOSpark implements IntakePivotIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
 
     public IntakePivotIOSpark() {
-        final IntakePivotConfig pivotConfig = Robot.bot.getIntakePivotConfig();
-
         // Initialize motor
-        motor = new SparkMax(pivotConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(IntakePivotConstants.id, MotorType.kBrushless);
         encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(pivotConfig.inverted());
+        config.inverted(IntakePivotConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(pivotConfig.statorCurrentLimit());
+        config.smartCurrentLimit(IntakePivotConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .absoluteEncoder
-                .zeroOffset(pivotConfig.zeroOffset())
+                .zeroOffset(IntakePivotConstants.zeroOffset)
                 .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .zeroCentered(true)
@@ -59,7 +55,7 @@ public class IntakePivotIOSpark implements IntakePivotIO {
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .pid(pivotConfig.kPID().kP(), pivotConfig.kPID().kI(), pivotConfig.kPID().kD());
+                .pid(IntakePivotConstants.kPID.kP(), IntakePivotConstants.kPID.kI(), IntakePivotConstants.kPID.kD());
 
         config
             .softLimit

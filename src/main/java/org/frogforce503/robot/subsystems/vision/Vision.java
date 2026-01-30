@@ -20,6 +20,8 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
@@ -31,6 +33,8 @@ public class Vision extends SubsystemBase {
     private Consumer<VisionMeasurement> visionConsumer;
     // Method that takes in no parameters and returns the robot's pose as a Pose2d
     private Supplier<Pose2d> robotPoseSupplier;
+    // Method that takes in no parameters and returns the turret angle in radians as a double
+    private Supplier<Double> turretAngleSupplier;
 
     // Maps camera names to their corresponding AprilTagIO instances.
     private EnumMap<CameraName, AprilTagIO> aprilTagIOMap = new EnumMap<>(CameraName.class);
@@ -49,17 +53,20 @@ public class Vision extends SubsystemBase {
     /**
      * @param visionConsumer The consumer that will fuse vision measurements into the robot pose
      * @param robotPoseSupplier The supplier that provides the robot's pose
+     * @param turretAngleSupplier The supplier that provides the turret angle in radians
      * @param aprilTagIOs Array of AprilTagIO for AprilTag detection
      * @param objectDetectionIOs Array of ObjectDetectionIO for object detection
      */
     public Vision(
         Consumer<VisionMeasurement> visionConsumer, 
         Supplier<Pose2d> robotPoseSupplier, 
+        Supplier<Double> turretAngleSupplier,
         AprilTagIO[] aprilTagIOs, 
         ObjectDetectionIO[] objectDetectionIOs
     ) {
         this.visionConsumer = visionConsumer;
         this.robotPoseSupplier = robotPoseSupplier;
+        this.turretAngleSupplier = turretAngleSupplier;
 
         //Populate maps
         for (int i = 0; i < aprilTagIOs.length; i++) {
@@ -75,8 +82,6 @@ public class Vision extends SubsystemBase {
         }
     }
 
-    // TODO: Add logic to calculate the robot to camera offsets of turret cameras based on the turret angle
-
     @Override
     public void periodic() {
         /************************************ APRILTAG DETECTION LOGIC ************************************/
@@ -91,6 +96,12 @@ public class Vision extends SubsystemBase {
 
             // Update AprilTag IO with the important information for accurate pose estimations.
             aprilTagIO.setRobotPose(robotPoseSupplier.get());
+
+            // If the camera is mounted on the turret, calculate and set the robot to camera offset based on the turret angle.
+            if (VisionConstants.turretToTurretCameraOffsets.containsKey(cameraName)) {
+                Transform3d robotToTurretCameraOffset = calculateRobotToTurretCameraOffset(turretAngleSupplier.get(), cameraName);
+                aprilTagIO.setRobotToCameraOffset(robotToTurretCameraOffset);
+            } 
 
             // Update the inputs for the AprilTagIO and log them.
             aprilTagIO.updateInputs(aprilTagInputs);
@@ -224,4 +235,34 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation", poseObservation);
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation/Used April Tags", poseObservation.usedAprilTags());
     }
+
+    /**
+     * Calculates the robot to turret camera offset based on the turret angle and the camera name.
+     * Gets the turret to turret camera offset from the robot's vision hardware, rotates it based on the turret angle.
+     * Adds the robot to turret base offset to get the final robot to turret camera offset.
+     * 
+     * @param turretAngleRadians The current turret angle in radians using the robot coordinate system
+     * @param cameraName The name of a camera mounted on the turret (Precondition: cameraName must be a turret camera)
+     * @return Transform3d representing the robot to turret camera offset
+     */
+    private Transform3d calculateRobotToTurretCameraOffset(double turretAngleRadians, CameraName cameraName) {
+        if (!VisionConstants.turretToTurretCameraOffsets.containsKey(cameraName)) {
+            return new Transform3d(); // Return empty transform if the camera is not a turret camera
+        }
+
+        Transform3d turretToTurretCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName);
+        Transform3d robotToTurretBaseOffset = new Transform3d(); // TODO: Get robot to turret base offset from turret hardware constants
+
+        turretToTurretCameraOffset = new Transform3d(
+            turretToTurretCameraOffset.getTranslation().rotateBy(
+                new Rotation3d(0, 0, turretAngleRadians)
+            ),
+            turretToTurretCameraOffset.getRotation().rotateBy(
+                new Rotation3d(0, 0, turretAngleRadians)
+            )
+        );
+
+        return robotToTurretBaseOffset.plus(turretToTurretCameraOffset);
+    }
+
 }

@@ -3,9 +3,7 @@ package org.frogforce503.robot.subsystems.climber.io;
 import java.time.Duration;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.ClimberConfig;
-import org.frogforce503.robot.constants.hardware.subsystem_config.SensorConfig;
+import org.frogforce503.robot.subsystems.climber.ClimberConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -41,36 +39,33 @@ public class ClimberIOSpark implements ClimberIO {
     private final DigitalGlitchFilter limitSwitchFilter = new DigitalGlitchFilter();
 
     public ClimberIOSpark() {
-        final ClimberConfig climberConfig = Robot.bot.getClimberConfig(); 
-        final SensorConfig sensorConfig = Robot.bot.getSensorConfig();
-
         // Initialize motor
-        motor = new SparkMax(climberConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(ClimberConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Initialize limit switch
-        limitSwitch = new DigitalInput(sensorConfig.climberLimitSwitchId());
+        limitSwitch = new DigitalInput(ClimberConstants.climberLimitSwitchId);
         limitSwitchFilter.setPeriodNanoSeconds(Duration.ofMillis(100).toNanos());
         limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
-        config.inverted(climberConfig.inverted());
+        config.inverted(ClimberConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(climberConfig.statorCurrentLimit());
+        config.smartCurrentLimit(ClimberConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / climberConfig.mechanismRatio()) * (Math.PI * climberConfig.sprocketPitchDiameter())) // convert rotations to meters
-                .velocityConversionFactor((1 / climberConfig.mechanismRatio()) * (Math.PI * climberConfig.sprocketPitchDiameter()) / 60) // convert RPM to meters/sec
+                .positionConversionFactor((1 / ClimberConstants.mechanismRatio) * (Math.PI * ClimberConstants.sprocketPitchDiameter)) // convert rotations to meters
+                .velocityConversionFactor((1 / ClimberConstants.mechanismRatio) * (Math.PI * ClimberConstants.sprocketPitchDiameter) / 60) // convert RPM to meters/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(climberConfig.kPID().kP(), climberConfig.kPID().kI(), climberConfig.kPID().kD());
+                .pid(ClimberConstants.kPID.kP(), ClimberConstants.kPID.kI(), ClimberConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 

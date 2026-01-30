@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FlywheelsConfig;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
@@ -30,11 +28,9 @@ public class TuneFlywheels extends Command {
         this.flywheels = flywheels;
 
         // Get initial values from config
-        final FlywheelsConfig flywheelsConfig = Robot.bot.getFlywheelsConfig();
-
-        final PIDConfig initialPID = flywheelsConfig.kPID();
-        final FFConfig initialFF = flywheelsConfig.kFF();
-        final double initialRateLimit = flywheelsConfig.kRateLimit();
+        final PIDConfig initialPID = FlywheelsConstants.kPID;
+        final FFConfig initialFF = FlywheelsConstants.kFF;
+        final double initialRateLimit = FlywheelsConstants.kRateLimit;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Flywheels/kP", initialPID.kP());

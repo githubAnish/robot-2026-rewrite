@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.TurretConfig;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 
@@ -32,11 +30,9 @@ public class TuneTurret extends Command {
         this.turret = turret;
 
         // Get initial values from config
-        final TurretConfig turretConfig = Robot.bot.getTurretConfig();
-
-        final PIDConfig initialPID = turretConfig.kPID();
-        final FFConfig initialFF = turretConfig.kFF();
-        final Constraints initialConstraints = turretConfig.kConstraints();
+        final PIDConfig initialPID = TurretConstants.kPID;
+        final FFConfig initialFF = TurretConstants.kFF;
+        final Constraints initialConstraints = TurretConstants.kConstraints;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Turret/kP", initialPID.kP());

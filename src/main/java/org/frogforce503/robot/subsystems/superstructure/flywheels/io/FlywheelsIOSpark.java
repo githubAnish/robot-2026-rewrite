@@ -1,8 +1,7 @@
 package org.frogforce503.robot.subsystems.superstructure.flywheels.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FlywheelsConfig;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -34,30 +33,28 @@ public class FlywheelsIOSpark implements FlywheelsIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
     
     public FlywheelsIOSpark() {
-        final FlywheelsConfig flywheelsConfig = Robot.bot.getFlywheelsConfig();
-
         // Initialize motor
-        motor = new SparkMax(flywheelsConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(FlywheelsConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(flywheelsConfig.inverted());
+        config.inverted(FlywheelsConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(flywheelsConfig.statorCurrentLimit());
+        config.smartCurrentLimit(FlywheelsConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / flywheelsConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / flywheelsConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / FlywheelsConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / FlywheelsConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(flywheelsConfig.kPID().kP(), flywheelsConfig.kPID().kI(), flywheelsConfig.kPID().kD());
+                .pid(FlywheelsConstants.kPID.kP(), FlywheelsConstants.kPID.kI(), FlywheelsConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 

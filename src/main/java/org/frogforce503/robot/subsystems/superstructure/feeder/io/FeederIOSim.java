@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.feeder.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FeederConfig;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 
 import com.revrobotics.spark.SparkSim;
@@ -22,12 +20,10 @@ public class FeederIOSim extends FeederIOSpark {
     private final double moi = 0.001;
 
     public FeederIOSim() {
-        final FeederConfig feederConfig = Robot.bot.getFeederConfig();
-
         motorSim = new SparkSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, feederConfig.mechanismRatio()),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, FeederConstants.mechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

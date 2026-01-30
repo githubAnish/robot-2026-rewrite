@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 
 import java.util.Optional;
@@ -37,8 +38,8 @@ public class TeleopDriveCommand extends Command {
     // State
     private TeleopDriveState currentState = TeleopDriveState.IDLE;
     private Optional<Rotation2d> headingSetpoint = Optional.empty();
-    private boolean robotRelative = false;
-    private boolean slowMode = false;
+    @Setter private boolean robotRelative = false;
+    @Setter private boolean slowMode = false;
 
     private enum TeleopDriveState {
         FIELD_RELATIVE,
@@ -129,14 +130,6 @@ public class TeleopDriveCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         drive.stop();
-    }
-
-    public void toggleSlowMode() {
-        slowMode = !slowMode;
-    }
-
-    public void toggleRobotRelative() {
-        robotRelative = !robotRelative;
     }
 
     public void runFieldRelativeVelocity(ChassisSpeeds speeds) {

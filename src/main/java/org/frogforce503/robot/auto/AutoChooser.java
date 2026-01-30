@@ -3,7 +3,8 @@ package org.frogforce503.robot.auto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.frogforce503.lib.auto.AutoFactoryConfigurator;
+import org.frogforce503.lib.auto.choreo.ChoreoUtil;
+import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.rebuilt.ProximityUtil;
 import org.frogforce503.robot.Robot;
@@ -41,14 +42,12 @@ public class AutoChooser {
         this.vision = vision;
         this.superstructure = superstructure;
 
-        this.choreoAutoFactory = AutoFactoryConfigurator.configureChoreo(drive);
-        AutoFactoryConfigurator.configurePathPlanner(drive);
+        // Configure auto factories
+        PathPlannerUtil.configureAutoBuilder(drive);
+        choreoAutoFactory = ChoreoUtil.createAutoFactory(drive);
 
+        // Configure autos
         configureAutos();
-
-        if (Robot.isSimulation()) {
-            SimulatedArena.getInstance().resetFieldForAuto();
-        }
     }
 
     private void configureAutos() {

@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.intakeroller.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IntakeRollerConfig;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 
 import com.revrobotics.spark.SparkSim;
@@ -22,12 +20,10 @@ public class IntakeRollerIOSim extends IntakeRollerIOSpark {
     private final double moi = 0.001;
 
     public IntakeRollerIOSim() {
-        final IntakeRollerConfig rollerConfig = Robot.bot.getIntakeRollerConfig();
-
         motorSim = new SparkSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, rollerConfig.mechanismRatio()),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, IntakeRollerConstants.mechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

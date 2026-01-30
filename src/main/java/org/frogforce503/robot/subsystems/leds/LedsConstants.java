@@ -7,7 +7,9 @@ import com.ctre.phoenix6.signals.RGBWColor;
 
 import edu.wpi.first.wpilibj.util.Color;
 
-public final class LedsRequest {
+public class LedsConstants {
+    public static final int candleID = 11;
+
     // Generic requests
     public static final EmptyAnimation CLEAR_ANIMATION = new EmptyAnimation(0);
     public static final SolidColor ALL_LEDS_OFF = new SolidColor(0, 399).withColor(new RGBWColor());

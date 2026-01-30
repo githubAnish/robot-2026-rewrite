@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIO;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOInputsAutoLogged;
 
@@ -36,8 +35,8 @@ public class IntakePivot extends FFSubsystemBase {
     public IntakePivot(IntakePivotIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getIntakePivotConfig().kFF().getArmFF();
-        profile = new TrapezoidProfile(Robot.bot.getIntakePivotConfig().kConstraints());
+        feedforward = IntakePivotConstants.kFF.getArmFF();
+        profile = new TrapezoidProfile(IntakePivotConstants.kConstraints);
     }
 
     @Override

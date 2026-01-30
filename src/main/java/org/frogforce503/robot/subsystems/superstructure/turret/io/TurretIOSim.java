@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.turret.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.TurretConfig;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 
 import com.revrobotics.spark.SparkSim;
@@ -22,10 +20,8 @@ public class TurretIOSim extends TurretIOSpark {
     private final double moi = 0.001;
 
     public TurretIOSim() {
-        final TurretConfig turretConfig = Robot.bot.getTurretConfig();
-
         motorSim = new SparkSim(super.getMotor(), motorModel);
-        physicsSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, turretConfig.mechanismRatio()), motorModel);
+        physicsSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, TurretConstants.mechanismRatio), motorModel);
 
         // Sync physics and motor sim positions
         motorSim.setPosition(TurretConstants.START);

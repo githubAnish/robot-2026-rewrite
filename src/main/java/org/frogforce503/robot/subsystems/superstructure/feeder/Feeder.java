@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.superstructure.feeder;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -29,7 +28,7 @@ public class Feeder extends FFSubsystemBase {
     public Feeder(FeederIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getFeederConfig().kFF().getSimpleMotorFF();
+        feedforward = FeederConstants.kFF.getSimpleMotorFF();
     }
 
     @Override

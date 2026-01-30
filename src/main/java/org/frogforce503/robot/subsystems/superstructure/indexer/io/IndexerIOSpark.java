@@ -1,8 +1,7 @@
 package org.frogforce503.robot.subsystems.superstructure.indexer.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IndexerConfig;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -34,30 +33,28 @@ public class IndexerIOSpark implements IndexerIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
     
     public IndexerIOSpark() {
-        final IndexerConfig indexerConfig = Robot.bot.getIndexerConfig();
-
         // Initialize motor
-        motor = new SparkMax(indexerConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(IndexerConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(indexerConfig.inverted());
+        config.inverted(IndexerConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(indexerConfig.statorCurrentLimit());
+        config.smartCurrentLimit(IndexerConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / indexerConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / indexerConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / IndexerConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / IndexerConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(indexerConfig.kPID().kP(), indexerConfig.kPID().kI(), indexerConfig.kPID().kD());
+                .pid(IndexerConstants.kPID.kP(), IndexerConstants.kPID.kI(), IndexerConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 

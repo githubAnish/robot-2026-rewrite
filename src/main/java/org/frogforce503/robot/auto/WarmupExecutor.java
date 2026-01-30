@@ -3,10 +3,9 @@ package org.frogforce503.robot.auto;
 import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.lib.auto.planned_path.PlannedPathFactory;
 import org.frogforce503.lib.auto.planned_path.components.Waypoint;
-import org.frogforce503.lib.rebuilt.ShotCalculator;
-import org.frogforce503.lib.rebuilt.ShotCalculator.ShotParameters;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -70,10 +69,6 @@ public class WarmupExecutor {
     }
 
     private void warumpShotCalculator() {
-        ShotCalculator.calculateHubShotInfo(
-            new ShotParameters(
-                drive.getPose(),
-                drive.getRobotVelocity())
-        );
+        ShotCalculator.calculateHubShotInfo();
     }
 }

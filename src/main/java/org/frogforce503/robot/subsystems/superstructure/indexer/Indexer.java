@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.superstructure.indexer;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIO;
 import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -30,7 +29,7 @@ public class Indexer extends FFSubsystemBase {
     public Indexer(IndexerIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getIndexerConfig().kFF().getSimpleMotorFF();
+        feedforward = IndexerConstants.kFF.getSimpleMotorFF();
     }
 
     @Override

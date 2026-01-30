@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOInputsAutoLogged;
 
@@ -35,8 +34,8 @@ public class Hood extends FFSubsystemBase {
     public Hood(HoodIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getHoodConfig().kFF().getArmFF();
-        profile = new TrapezoidProfile(Robot.bot.getHoodConfig().kConstraints());
+        feedforward = HoodConstants.kFF.getArmFF();
+        profile = new TrapezoidProfile(HoodConstants.kConstraints);
     }
 
     @Override

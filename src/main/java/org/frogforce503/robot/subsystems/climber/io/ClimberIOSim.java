@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.climber.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.ClimberConfig;
 import org.frogforce503.robot.subsystems.climber.ClimberConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
@@ -22,17 +20,15 @@ public class ClimberIOSim extends ClimberIOSpark {
     private final double simCarriageMass = Units.lbsToKilograms(16.895); // from CAD (Climber carriage (6.423 lb) + shoulder (3.000 lb) + arm (2.229 lb) + gripper (5.243 lb))
 
     public ClimberIOSim() {
-        final ClimberConfig climberConfig = Robot.bot.getClimberConfig();
-
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new ElevatorSim(
                 motorModel,
-                climberConfig.mechanismRatio(),
+                ClimberConstants.mechanismRatio,
                 simCarriageMass,
-                climberConfig.sprocketPitchDiameter() / 2,
-                climberConfig.minHeight(),
-                climberConfig.maxHeight(),
+                ClimberConstants.sprocketPitchDiameter / 2,
+                ClimberConstants.minHeight,
+                ClimberConstants.maxHeight,
                 true,
                 ClimberConstants.START);
 

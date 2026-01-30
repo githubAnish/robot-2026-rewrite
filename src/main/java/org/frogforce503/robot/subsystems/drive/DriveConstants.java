@@ -3,13 +3,23 @@ package org.frogforce503.robot.subsystems.drive;
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.lib.swerve.SwervePathController;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.DriveConfig;
+import org.frogforce503.robot.constants.tuner.TunerConstantsCompBot;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public final class DriveConstants {
+    public static final SwerveDrivetrainConstants drivetrainConstants = TunerConstantsCompBot.DrivetrainConstants;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft = TunerConstantsCompBot.FrontLeft;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontRight = TunerConstantsCompBot.FrontRight;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backLeft = TunerConstantsCompBot.BackLeft;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backRight = TunerConstantsCompBot.BackRight;
+
     public static final double trackWidthX;
     public static final double trackWidthY;
 
@@ -22,13 +32,14 @@ public final class DriveConstants {
     public static final SwerveDriveKinematics kinematics;
     public static final SwervePathController pathFollower;
 
-    static {
-        final DriveConfig driveConfig = Robot.bot.getDriveConfig();
+    public static final PIDConfig linearPID = new PIDConfig(5.0, 0.0, 0.0);
+    public static final PIDConfig thetaPID = new PIDConfig(4.0, 0.0, 0.0);
 
-        Translation2d frontLeftModuleTranslation = new Translation2d(driveConfig.frontLeft().LocationX, driveConfig.frontLeft().LocationY);
-        Translation2d frontRightModuleTranslation = new Translation2d(driveConfig.frontRight().LocationX, driveConfig.frontRight().LocationY);
-        Translation2d backLeftModuleTranslation = new Translation2d(driveConfig.backLeft().LocationX, driveConfig.backLeft().LocationY);
-        Translation2d backRightModuleTranslation = new Translation2d(driveConfig.backRight().LocationX, driveConfig.backRight().LocationY);
+    static {
+        Translation2d frontLeftModuleTranslation = new Translation2d(frontLeft.LocationX, frontLeft.LocationY);
+        Translation2d frontRightModuleTranslation = new Translation2d(frontRight.LocationX, frontRight.LocationY);
+        Translation2d backLeftModuleTranslation = new Translation2d(backLeft.LocationX, backLeft.LocationY);
+        Translation2d backRightModuleTranslation = new Translation2d(backRight.LocationX, backRight.LocationY);
 
         trackWidthX = frontLeftModuleTranslation.getDistance(backLeftModuleTranslation);
         trackWidthY = frontLeftModuleTranslation.getDistance(frontRightModuleTranslation);
@@ -40,7 +51,7 @@ public final class DriveConstants {
                 backLeftModuleTranslation.getNorm(),
                 backRightModuleTranslation.getNorm());
 
-        maxLinearSpeed = Robot.bot.getDriveConfig().frontLeft().SpeedAt12Volts;
+        maxLinearSpeed = frontLeft.SpeedAt12Volts;
         maxOmega = maxLinearSpeed / driveBaseRadius;
 
         kinematics =
@@ -50,9 +61,6 @@ public final class DriveConstants {
                     frontRightModuleTranslation,
                     backLeftModuleTranslation,
                     backRightModuleTranslation});
-
-        final PIDConfig linearPID = Robot.bot.getFollowerLinearPID();
-        final PIDConfig thetaPID = Robot.bot.getFollowerThetaPID();
 
         pathFollower =
             new SwervePathController(

@@ -3,8 +3,6 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FeederConfig;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 
@@ -28,10 +26,8 @@ public class TuneFeeder extends Command {
         this.feeder = feeder;
 
         // Get initial values from config
-        final FeederConfig feederConfig = Robot.bot.getFeederConfig();
-
-        final PIDConfig initialPID = feederConfig.kPID();
-        final FFConfig initialFF = feederConfig.kFF();
+        final PIDConfig initialPID = FeederConstants.kPID;
+        final FFConfig initialFF = FeederConstants.kFF;
 
         // Create tunable numbers
         this.kP = new LoggedTunableNumber("Feeder/kP", initialPID.kP());

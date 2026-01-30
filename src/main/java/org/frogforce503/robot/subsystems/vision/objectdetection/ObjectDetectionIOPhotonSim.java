@@ -23,19 +23,18 @@ public class ObjectDetectionIOPhotonSim extends ObjectDetectionIOPhotonVision {
     private PhotonCameraSim cameraSim;
     private VisionSystemSim objectDetectionSimulator;
 
+
     /**
      * @param cameraName The enum representing the name of the camera configured in PhotonVision.
-     * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin.
      * @param visionSimulator The VisionSimulator that contains the VisionSystemSim instance that the camera will be added – the simulation world for the camera.
      * @param cameraProperties The SimCameraProperties to configure the camera simulation.
      */
     public ObjectDetectionIOPhotonSim(
-        CameraName cameraName, 
-        Transform3d robotToCameraOffset, 
+        CameraName cameraName,
         VisionSimulator visionSimulator, 
         SimCameraProperties cameraProperties
     ) {
-        super(cameraName, robotToCameraOffset);
+        super(cameraName);
 
         PhotonCameraSim cameraSim = new PhotonCameraSim(super.getCamera(), cameraProperties);   
         cameraSim.enableRawStream(true);
@@ -43,18 +42,16 @@ public class ObjectDetectionIOPhotonSim extends ObjectDetectionIOPhotonVision {
         cameraSim.enableDrawWireframe(true);
 
         this.objectDetectionSimulator = visionSimulator.getObjectDetectionSimulator();
-        objectDetectionSimulator.addCamera(cameraSim, robotToCameraOffset);
+        objectDetectionSimulator.addCamera(cameraSim, super.getRobotToCameraOffset());
     }
     
     /**
      *
      * @param cameraName The enum representing the name of the camera configured in PhotonVision.
-     * @param robotToCameraOffset The transform3d representing the offset from the robot's origin to the camera's origin.
      * @param visionSimulator The VisionSimulator that contains the VisionSystemSim instance that the camera will be added – the simulation world for the camera.
      */
-    public ObjectDetectionIOPhotonSim(CameraName cameraName, Transform3d robotToCameraOffset, VisionSimulator visionSimulator) {
-        this(cameraName, 
-            robotToCameraOffset, 
+    public ObjectDetectionIOPhotonSim(CameraName cameraName,VisionSimulator visionSimulator) {
+        this(cameraName,
             visionSimulator, 
             new SimCameraProperties()
                 .setCalibration(640, 480, Rotation2d.fromDegrees(127.83))

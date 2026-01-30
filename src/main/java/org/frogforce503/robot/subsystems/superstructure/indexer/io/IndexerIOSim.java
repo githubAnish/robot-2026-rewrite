@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.indexer.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.IndexerConfig;
 import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 
 import com.revrobotics.spark.SparkSim;
@@ -22,12 +20,10 @@ public class IndexerIOSim extends IndexerIOSpark {
     private final double moi = 0.001;
 
     public IndexerIOSim() {
-        final IndexerConfig indexerConfig = Robot.bot.getIndexerConfig();
-
         motorSim = new SparkSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, indexerConfig.mechanismRatio()),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, IndexerConstants.mechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

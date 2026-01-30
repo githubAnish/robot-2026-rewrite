@@ -3,7 +3,6 @@ package org.frogforce503.robot.subsystems.superstructure.flywheels;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
@@ -33,8 +32,8 @@ public class Flywheels extends FFSubsystemBase {
     public Flywheels(FlywheelsIO io) {
         this.io = io;
 
-        feedforward = Robot.bot.getFlywheelsConfig().kFF().getSimpleMotorFF();
-        profile = new SlewRateLimiter(Robot.bot.getFlywheelsConfig().kRateLimit());
+        feedforward = FlywheelsConstants.kFF.getSimpleMotorFF();
+        profile = new SlewRateLimiter(FlywheelsConstants.kRateLimit);
     }
 
     @Override

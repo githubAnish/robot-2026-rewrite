@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.hood.io;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.HoodConfig;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
 import com.revrobotics.REVLibError;
@@ -34,30 +32,28 @@ public class HoodIOSpark implements HoodIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
 
     public HoodIOSpark() {
-        final HoodConfig hoodConfig = Robot.bot.getHoodConfig();
-
         // Initialize motor
-        motor = new SparkMax(hoodConfig.id(), MotorType.kBrushless);
+        motor = new SparkMax(HoodConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(hoodConfig.inverted());
+        config.inverted(HoodConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(hoodConfig.statorCurrentLimit());
+        config.smartCurrentLimit(HoodConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / hoodConfig.mechanismRatio()) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / HoodConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / HoodConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(hoodConfig.kPID().kP(), hoodConfig.kPID().kI(), hoodConfig.kPID().kD());
+                .pid(HoodConstants.kPID.kP(), HoodConstants.kPID.kI(), HoodConstants.kPID.kD());
 
         config
             .softLimit

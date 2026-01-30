@@ -1,8 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure.flywheels.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.Robot;
-import org.frogforce503.robot.constants.hardware.subsystem_config.FlywheelsConfig;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
 import com.revrobotics.spark.SparkSim;
@@ -22,12 +20,10 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
     private final double moi = 0.025;
 
     public FlywheelsIOSim() {
-        final FlywheelsConfig flywheelsConfig = Robot.bot.getFlywheelsConfig();
-
         motorSim = new SparkSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, flywheelsConfig.mechanismRatio()),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, FlywheelsConstants.mechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

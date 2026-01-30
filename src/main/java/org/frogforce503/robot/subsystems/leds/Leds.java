@@ -29,7 +29,7 @@ public class Leds extends SubsystemBase {
         Logger.processInputs("Leds", inputs);
 
         if (cameraDisconnected) {
-            io.runPattern(LedsRequest.CAMERA_DISCONNECTED);
+            io.runPattern(LedsConstants.CAMERA_DISCONNECTED);
         }
 
         // Record cycle time
@@ -37,15 +37,11 @@ public class Leds extends SubsystemBase {
     }
 
     public void stop() {
-        if (cameraDisconnected) {
-            return;
-        }
-
-        io.runPattern(LedsRequest.CLEAR_ANIMATION);
-        io.runPattern(LedsRequest.ALL_LEDS_OFF);
+        io.runPattern(LedsConstants.CLEAR_ANIMATION);
+        io.runPattern(LedsConstants.ALL_LEDS_OFF);
     }
 
-    /** Runs the specified LED pattern. See {@link LedsRequest} for available patterns. */
+    /** Runs the specified LED pattern. See {@link LedsConstants} for available patterns. */
     public void runPattern(ControlRequest pattern) {
         if (cameraDisconnected) {
             return;

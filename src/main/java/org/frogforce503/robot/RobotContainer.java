@@ -4,8 +4,8 @@ import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
-import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
+import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
 import org.frogforce503.robot.commands.ClimbSequence;
@@ -24,10 +24,11 @@ import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
 import org.frogforce503.robot.subsystems.leds.Leds;
-import org.frogforce503.robot.subsystems.leds.LedsRequest;
+import org.frogforce503.robot.subsystems.leds.LedsConstants;
 import org.frogforce503.robot.subsystems.leds.io.LedsIO;
 import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
@@ -68,19 +69,20 @@ import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhot
 import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIOPhotonSim;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
+/**
+ * Main container for robot subsystems, commands, and controller bindings.
+ * Use https://www.padcrafter.com to visualize the controller bindings.
+ */
 @ExtensionMethod({TriggerUtil.class})
 public class RobotContainer {
     // Subsystems
@@ -98,21 +100,13 @@ public class RobotContainer {
     private final GameViz gameViz;
     private final VisionSimulator visionViz = new VisionSimulator();
 
-    // Controllers
+    // Controllers / Buttons
     private final CommandXboxController driver = new CommandXboxController(0);
-    private final CommandXboxController operator = new CommandXboxController(1);
     private final Trigger driverLeftPaddle = driver.leftPaddle();
     private final Trigger driverRightPaddle = driver.rightPaddle();
 
-    // Overrides
-    private final LoggedNetworkBoolean autoAssistEnabled = // Includes auto-aligning and auto-aiming
-        new LoggedNetworkBoolean("Auto Assist Enabled", true);
-
     // Other
-    private final Consumer<VisionMeasurement> visionEstimateConsumer =
-        visionMeasurement ->
-            drive.acceptVisionMeasurement(visionMeasurement);
-
+    private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
     private final LoggedJVM loggedJVM = new LoggedJVM();
     
     public RobotContainer() {
@@ -125,121 +119,148 @@ public class RobotContainer {
         Hood hood = null;
 
         // Initialize subsystems based on robot type
-        switch (Constants.getRobot()) {
-            case CompBot -> {
-                drive = new Drive(new DriveIOPhoenix());
-                vision =
-                    new Vision(
-                        visionEstimateConsumer,
-                        drive::getPose,
-                        new AprilTagIO[] {
-                            new AprilTagIOPhotonSim(
-                                CameraName.CLOSE_TURRET_CAMERA,
-                                Transform3d.kZero,
-                                visionViz
-                            ),
-                            new AprilTagIOPhotonSim(
-                                CameraName.FAR_TURRET_CAMERA,
-                                Transform3d.kZero,
-                                visionViz
-                            ),
-                            new AprilTagIOPhotonSim(
-                                CameraName.INTAKE_LEFT_CAMERA,
-                                Transform3d.kZero,
-                                visionViz
-                            ),
-                            new AprilTagIOPhotonSim(
-                                CameraName.INTAKE_RIGHT_CAMERA,
-                                Transform3d.kZero,
-                                visionViz
-                            ),
-                        },
-                        new ObjectDetectionIO[] {
-                            new ObjectDetectionIOPhotonSim(
-                                CameraName.FUEL_CAMERA,
-                                Transform3d.kZero,
-                                visionViz
-                            )
-                        });
-                        
-                intakePivot = new IntakePivot(new IntakePivotIOSpark());
-                intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-                indexer = new Indexer(new IndexerIOSpark());
-                feeder = new Feeder(new FeederIOSpark());
-                turret = new Turret(new TurretIOSpark());
-                flywheels = new Flywheels(new FlywheelsIOSpark());
-                hood = new Hood(new HoodIOSpark());
+        if (Constants.getMode() != Mode.REPLAY) {
+            switch (Constants.getRobot()) {
+                case CompBot -> {
+                    drive = new Drive(new DriveIOPhoenix());
+                            
+                    intakePivot = new IntakePivot(new IntakePivotIOSpark());
+                    intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                    indexer = new Indexer(new IndexerIOSpark());
+                    feeder = new Feeder(new FeederIOSpark());
+                    turret = new Turret(new TurretIOSpark());
+                    flywheels = new Flywheels(new FlywheelsIOSpark());
+                    hood = new Hood(new HoodIOSpark());
 
-                climber = new Climber(new ClimberIOSpark());
+                    climber = new Climber(new ClimberIOSpark());
 
-                leds = new Leds(new LedsIOCANdle());
+                    leds = new Leds(new LedsIOCANdle());
+
+                    vision =
+                        new Vision(
+                            visionEstimateConsumer,
+                            drive::getPose,
+                            turret::getAngleRad,
+                            new AprilTagIO[] {},
+                            new ObjectDetectionIO[] {});
+                }
+                case PracticeBot -> {
+                    drive = new Drive(new DriveIOPhoenix());
+
+                    intakePivot = new IntakePivot(new IntakePivotIOSpark());
+                    intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
+                    indexer = new Indexer(new IndexerIOSpark());
+                    feeder = new Feeder(new FeederIOSpark());
+                    turret = new Turret(new TurretIOSpark());
+                    flywheels = new Flywheels(new FlywheelsIOSpark());
+                    hood = new Hood(new HoodIOSpark());
+
+                    climber = new Climber(new ClimberIOSpark());
+                    
+                    leds = new Leds(new LedsIOCANdle());
+
+                    vision =
+                        new Vision(
+                            visionEstimateConsumer,
+                            drive::getPose,
+                            turret::getAngleRad,
+                            new AprilTagIO[] {},
+                            new ObjectDetectionIO[] {});
+                }
+                case SimBot -> {
+                    drive = new Drive(new DriveIOMapleSim());
+
+                    intakePivot = new IntakePivot(new IntakePivotIOSim());
+                    intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+                    indexer = new Indexer(new IndexerIOSim());
+                    feeder = new Feeder(new FeederIOSim());
+                    turret = new Turret(new TurretIOSim());
+                    flywheels = new Flywheels(new FlywheelsIOSim());
+                    hood = new Hood(new HoodIOSim());
+
+                    climber = new Climber(new ClimberIOSim());
+                    
+                    leds = new Leds(new LedsIO() {});
+
+                    vision =
+                        new Vision(
+                            visionEstimateConsumer,
+                            drive::getPose,
+                            turret::getAngleRad,
+                            new AprilTagIO[] {
+                                new AprilTagIOPhotonSim(
+                                    CameraName.CLOSE_TURRET_CAMERA,
+                                    visionViz
+                                ),
+                                new AprilTagIOPhotonSim(
+                                    CameraName.FAR_TURRET_CAMERA,
+                                    visionViz
+                                ),
+                                new AprilTagIOPhotonSim(
+                                    CameraName.INTAKE_LEFT_CAMERA,
+                                    visionViz
+                                ),
+                                new AprilTagIOPhotonSim(
+                                    CameraName.INTAKE_RIGHT_CAMERA,
+                                    visionViz
+                                ),
+                            },
+                            new ObjectDetectionIO[] {
+                                new ObjectDetectionIOPhotonSim(
+                                    CameraName.FUEL_CAMERA,
+                                    visionViz
+                                )
+                            });
+                }
+                case ProgrammingBot -> {
+                    drive = new Drive(new DriveIOPhoenix());
+
+                    intakePivot = new IntakePivot(new IntakePivotIO() {});
+                    intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+                    indexer = new Indexer(new IndexerIO() {});
+                    feeder = new Feeder(new FeederIO() {});
+                    turret = new Turret(new TurretIO() {});
+                    flywheels = new Flywheels(new FlywheelsIO() {});
+                    hood = new Hood(new HoodIO() {});
+
+                    climber = new Climber(new ClimberIO() {});
+                    
+                    leds = new Leds(new LedsIO() {});
+
+                    vision =
+                        new Vision(
+                            visionEstimateConsumer,
+                            drive::getPose,
+                            turret::getAngleRad,
+                            new AprilTagIO[] {},
+                            new ObjectDetectionIO[] {});
+                }
             }
-            case PracticeBot -> {
-                drive = new Drive(new DriveIOPhoenix());
-                vision =
-                    new Vision(
-                        visionEstimateConsumer,
-                        drive::getPose,
-                        new AprilTagIO[] {},
-                        new ObjectDetectionIO[] {});
+        }
 
-                intakePivot = new IntakePivot(new IntakePivotIOSpark());
-                intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-                indexer = new Indexer(new IndexerIOSpark());
-                feeder = new Feeder(new FeederIOSpark());
-                turret = new Turret(new TurretIOSpark());
-                flywheels = new Flywheels(new FlywheelsIOSpark());
-                hood = new Hood(new HoodIOSpark());
+        // No-op implementations for replay
+        if (Constants.getMode() == Mode.REPLAY) {
+            drive = new Drive(new DriveIO() {});
 
-                climber = new Climber(new ClimberIOSpark());
-                
-                leds = new Leds(new LedsIOCANdle());
-            }
-            case SimBot -> {
-                drive = new Drive(new DriveIOMapleSim());
-                vision =
-                    new Vision(
-                        visionEstimateConsumer,
-                        drive::getPose,
-                        new AprilTagIO[] {},
-                        new ObjectDetectionIO[] {});
+            intakePivot = new IntakePivot(new IntakePivotIO() {});
+            intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+            indexer = new Indexer(new IndexerIO() {});
+            feeder = new Feeder(new FeederIO() {});
+            turret = new Turret(new TurretIO() {});
+            flywheels = new Flywheels(new FlywheelsIO() {});
+            hood = new Hood(new HoodIO() {});
 
-                intakePivot = new IntakePivot(new IntakePivotIOSim());
-                intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
-                indexer = new Indexer(new IndexerIOSim());
-                feeder = new Feeder(new FeederIOSim());
-                turret = new Turret(new TurretIOSim());
-                flywheels = new Flywheels(new FlywheelsIOSim());
-                hood = new Hood(new HoodIOSim());
+            climber = new Climber(new ClimberIO() {});
+            
+            leds = new Leds(new LedsIO() {});
 
-                climber = new Climber(new ClimberIOSim());
-                
-                leds = new Leds(new LedsIO() {});
-            }
-            case ProgrammingBot -> {
-                drive = new Drive(new DriveIOPhoenix());
-                vision =
-                    new Vision(
-                        visionEstimateConsumer,
-                        drive::getPose,
-                        new AprilTagIO[] {},
-                        new ObjectDetectionIO[] {});
-
-                intakePivot = new IntakePivot(new IntakePivotIO() {});
-                intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-                indexer = new Indexer(new IndexerIO() {});
-                feeder = new Feeder(new FeederIO() {});
-                turret = new Turret(new TurretIO() {});
-                flywheels = new Flywheels(new FlywheelsIO() {});
-                hood = new Hood(new HoodIO() {});
-
-                climber = new Climber(new ClimberIO() {});
-                
-                leds = new Leds(new LedsIO() {});
-            }
-            default -> {
-                System.err.println("What happened here?" + ErrorUtil.attachJavaClassName(RobotContainer.class));
-            }
+            vision =
+                new Vision(
+                    visionEstimateConsumer,
+                    drive::getPose,
+                    turret::getAngleRad,
+                    new AprilTagIO[] {},
+                    new ObjectDetectionIO[] {});
         }
 
         // Create virtual subsystems
@@ -251,85 +272,81 @@ public class RobotContainer {
                 feeder,
                 turret,
                 flywheels,
-                hood,
-                drive::getPose);
+                hood);
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive, vision, superstructure);
         warmupExecutor = new WarmupExecutor(drive, autoChooser);
 
         // Create sim requirements
-        gameViz = new GameViz(drive, visionViz);
+        gameViz = new GameViz(drive, superstructure, visionViz);
 
-        configureButtonBindings();
-        configureTriggers();
+        configureBindings();
     }
 
-    private void configureButtonBindings() {
+    private void configureBindings() {
         // Main controls
-        TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driver);
+        final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driver);
         drive.setDefaultCommand(teleopDriveCommand);
 
-        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnabled::get));
-        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnabled::get));
+        final Trigger autoAssistEnable = driver.back().and(driver.start()); // Includes auto-aligning and auto-aiming
 
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled::get)); // auto aim + shoot, see past examples
-        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnabled::get));
+        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnable));
+        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnable));
+
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnable));
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnable));
         
         driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
 
-        bindPresets(driver.y(), ShotPreset.BATTER);
-        bindPresets(driver.b(), ShotPreset.DEPOT);
-        bindPresets(driver.a(), ShotPreset.OUTPOST);
-        bindPresets(driver.x(), ShotPreset.TRENCH);
+        bindShotPresets(driver.y(), ShotPreset.BATTER);
+        bindShotPresets(driver.a(), ShotPreset.TRENCH);
 
-        bindClimbing(driver.povUp(), true);
+        bindClimbing(driver.b());
 
         // Overrides
-        driver.back().onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
-        driver.start().onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
-        operator.povUp().onTrue(Commands.runOnce(drive::resetRotation));
-        operator.b().onTrue(Commands.runOnce(drive::brake));
+        driver.back()
+            .onTrue(Commands.runOnce(() -> teleopDriveCommand.setSlowMode(true)))
+            .onFalse(Commands.runOnce(() -> teleopDriveCommand.setSlowMode(false)));
 
-        operator.a().onTrue(Commands.runOnce(superstructure::seedTurretRelativePosition));
-    }
+        driver.start()
+            .onTrue(Commands.runOnce(() -> teleopDriveCommand.setRobotRelative(true)))
+            .onFalse(Commands.runOnce(() -> teleopDriveCommand.setRobotRelative(false)));
 
-    private void configureTriggers() {
+        driver.povUp().onTrue(Commands.runOnce(drive::resetRotation));
+        driver.povDown().onTrue(Commands.runOnce(drive::brake));
+
+        driver.povLeft().onTrue(Commands.runOnce(superstructure::seedTurretRelativePosition));
+
+        driver.povRight()
+            .onTrue(Commands.runOnce(() -> superstructure.setCoastMode(true)).ignoringDisable(true))
+            .onFalse(Commands.runOnce(() -> superstructure.setCoastMode(false)).ignoringDisable(true));
+    
+        // Triggers
         Trigger inAllianceZone =
-            new Trigger(() ->
-                FieldConstants.isRed()
-                    ? drive.getPose().getX() > FieldConstants.Lines.redInitLineX
-                    : drive.getPose().getX() < FieldConstants.Lines.blueInitLineX
-            );
+            new Trigger(
+                () ->
+                    FieldConstants.isRed()
+                        ? drive.getPose().getX() > FieldConstants.Lines.redInitLineX
+                        : drive.getPose().getX() < FieldConstants.Lines.blueInitLineX);
 
         inAllianceZone
             .onTrue(new PrepForShootFuelIntoHub(drive, vision, superstructure))
             .onFalse(new PrepForLobFuelIntoAlliance(drive, vision, superstructure));
 
-        Trigger camerasConnected = new Trigger(() -> true); // TODO: Make a method for this in Vision.java
-
-        // If cameras disconnected for 5 seconds, then leds will blink red until cameras re-connected
-        camerasConnected
-            .debounce(5.0, DebounceType.kBoth)
-            .onTrue(
-                Commands.runOnce(
-                    () -> leds.setCameraDisconnected(false))
-                        .ignoringDisable(true))
-            .onFalse(
-                Commands.runOnce(
-                    () -> leds.setCameraDisconnected(true))
-                        .ignoringDisable(true));
-
         Trigger shotFeasible = new Trigger(superstructure::isFeasibleShot);
 
-        // If shot is feasible and driver knows they can take shot, then rumbles driver for 0.25 sec and blinks LEDs
-        // Rumbling logic can change in the future
+        // Rumbles controller for 0.25 sec & blinks LEDs for 1 sec once shot feasible
         shotFeasible
             .onTrue(
                 Commands.parallel(
                     setDriverRumble(0.75, 0.25),
-                    Commands.runOnce(() -> leds.runPattern(LedsRequest.READY_TO_SHOOT))
+                    Commands.sequence(
+                        Commands.runOnce(() -> leds.runPattern(LedsConstants.READY_TO_SHOOT)),
+                        Commands.waitSeconds(1),
+                        Commands.runOnce(() -> leds.stop())
+                    )
             ));
     }
 
@@ -341,20 +358,19 @@ public class RobotContainer {
                 .withName("setDriverRumble");
     }
 
-    private void bindPresets(Trigger trigger, ShotPreset shotPreset) {
+    private void bindShotPresets(Trigger trigger, ShotPreset shotPreset) {
         trigger
             .onTrue(Commands.runOnce(() -> superstructure.setShotPreset(shotPreset)))
             .onFalse(Commands.runOnce(() -> superstructure.setShotPreset(ShotPreset.NONE)));
     }
 
-    // Cancel incoming commands to ensure no unintended / undesirable behaior occurs outside of the climb sequence
-    private void bindClimbing(Trigger advanceTrigger, boolean cancelIncomingCommands) {
+    // Cancel incoming commands to ensure no unintended / undesirable behavior occurs outside of the climb sequence
+    private void bindClimbing(Trigger advanceTrigger) {
         Command climbSequence = new ClimbSequence(superstructure, climber, advanceTrigger);
 
         advanceTrigger.onTrue(
-            cancelIncomingCommands
-                ? climbSequence.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-                : climbSequence);
+            climbSequence
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     }
 
     public void robotPeriodic() {
@@ -385,7 +401,6 @@ public class RobotContainer {
     public void disabledPeriodic() {
         autoChooser.periodic();
         warmupExecutor.disabledPeriodic();
-        
         superstructure.seedTurretRelativePosition();
     }
 
