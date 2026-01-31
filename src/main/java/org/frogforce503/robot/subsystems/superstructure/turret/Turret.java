@@ -27,6 +27,7 @@ public class Turret extends FFSubsystemBase {
     // Control
     private double targetAngleRad = TurretConstants.START;
     private double targetVelocityRadPerSec = 0.0;
+    private double lastTargetAngleRad = TurretConstants.START;
 
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
@@ -49,9 +50,32 @@ public class Turret extends FFSubsystemBase {
 
         // Update profile
         if (shouldRunProfile && RobotState.isEnabled()) {
+            boolean hasBestAngle = false;
+            double bestAngle = 0;
+
+            for (int i = -2; i < 3; i++) {
+                double potentialSetpoint = targetAngleRad + Math.PI * 2.0 * i;
+
+                if (potentialSetpoint < TurretConstants.minAngle || potentialSetpoint > TurretConstants.maxAngle) {
+                    continue;
+
+                } else {
+                    if (!hasBestAngle) {
+                        bestAngle = potentialSetpoint;
+                        hasBestAngle = true;
+                    }
+                    
+                    if (Math.abs(lastTargetAngleRad - potentialSetpoint) < Math.abs(lastTargetAngleRad - bestAngle)) {
+                        bestAngle = potentialSetpoint;
+                    }
+                }
+            }
+
+            lastTargetAngleRad = bestAngle;
+
             var goalState =
                 new State(
-                    MathUtil.clamp(targetAngleRad, TurretConstants.minAngle, TurretConstants.maxAngle),
+                    MathUtil.clamp(bestAngle, TurretConstants.minAngle, TurretConstants.maxAngle),
                     targetVelocityRadPerSec);
 
             double previousVelocity = setpoint.velocity;
@@ -115,8 +139,7 @@ public class Turret extends FFSubsystemBase {
     }
 
     public void setAngle(double angleRad) {
-        this.shouldRunProfile = true;
-        this.targetAngleRad = angleRad;
+        setAngle(angleRad, 0.0);
     }
 
     public void setAngle(double angleRad, double velocityRadPerSec) {

@@ -6,8 +6,7 @@ import java.util.List;
 import org.frogforce503.lib.auto.choreo.ChoreoUtil;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.rebuilt.ProximityUtil;
-import org.frogforce503.robot.Robot;
+import org.frogforce503.robot.auto.autos.test.RandomAuto;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.vision.Vision;
@@ -17,11 +16,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import lombok.Getter;
-import org.ironmaple.simulation.SimulatedArena;
 
 public class AutoChooser {
     // Requirements
@@ -65,6 +62,8 @@ public class AutoChooser {
                     return new ArrayList<>(List.of(Pose2d.kZero));
                 }
         });
+
+        routineChooser.addOption("Random", new RandomAuto(drive, vision, superstructure));
     }
 
     private void logTrajectory(Pose2d... trajectory) {
@@ -99,10 +98,7 @@ public class AutoChooser {
 
             logTrajectory(trajectoryPoses.toArray(Pose2d[]::new));
         
-            // Reset pose if drive close to trajectory start
-            if (ProximityUtil.getDistanceFromPose(drive, start) <= Units.inchesToMeters(6)) {
-                drive.setPose(start);
-            }
+            drive.setPose(start);
         }
 
         lastSelectedAuto = selectedAuto;

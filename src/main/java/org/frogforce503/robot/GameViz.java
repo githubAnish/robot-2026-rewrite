@@ -20,15 +20,12 @@ public class GameViz {
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz;
     
-    private final SimulatedArena arena;
-    
     public GameViz(Drive drive, Superstructure superstructure, VisionSimulator visionViz) {
         this.drive = drive;
         this.turret = superstructure.getTurret();
         this.hood = superstructure.getHood();
         this.visionViz = visionViz;
-        this.superstructureViz = new SuperstructureViz(drive::getPose);
-        arena = SimulatedArena.getInstance();
+        this.superstructureViz = new SuperstructureViz();
 
         resetFieldForAuto();
     }
@@ -40,9 +37,12 @@ public class GameViz {
     public void update() {
         visionViz.update(drive.getPose());
         
-        superstructureViz.update(turret.getAngleRad(), hood.getAngleRad());
+        superstructureViz.update(
+            new Pose3d(drive.getPose()),
+            turret.getAngleRad(),
+            hood.getAngleRad());
 
-        Pose3d[] fuelPoses = arena.getGamePiecesArrayByType("Fuel");
+        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
         Logger.recordOutput("GameViz/FuelPoses", fuelPoses);
     }
 }

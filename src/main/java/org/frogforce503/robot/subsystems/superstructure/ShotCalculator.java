@@ -16,9 +16,21 @@ public final class ShotCalculator {
         return new ShotInfo();
     }
     
-    public static double calculateTurretRobotRelativeAngle(double turretFieldRelativeAngleRad, Rotation2d robotAngle, double robotAngularVelocity) {
-        return 0.0;
+    public static TurretSetpoint calculateTurretRobotRelativeSetpoint(
+        Rotation2d turretFieldAngle,
+        double turretFieldAngularVelocity,
+        Rotation2d robotAngle,
+        double robotOmega
+    ) {
+        double robotRelativeAngle = turretFieldAngle.minus(robotAngle).getRadians();
+        double robotRelativeVelocity = turretFieldAngularVelocity - robotOmega;
+
+        return new TurretSetpoint(robotRelativeAngle, robotRelativeVelocity);
     }
+
+    public record TurretSetpoint(
+        double angleRad,
+        double velocityRadPerSec) {}
 
     public static record ShotInfo(
         double turretRobotRelativeAngleRad,
