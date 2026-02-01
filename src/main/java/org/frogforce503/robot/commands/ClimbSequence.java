@@ -91,7 +91,7 @@ public class ClimbSequence extends Command {
                 break;
 
             case STOW_AT_L1:
-
+            
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.RAISE_FOR_L2;
                 }

@@ -23,4 +23,6 @@ public class FlywheelsConstants {
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
 
     public static final double IDLE_SPEED = Units.rotationsPerMinuteToRadiansPerSecond(1500);
+
+    public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(1500);
 }

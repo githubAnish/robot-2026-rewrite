@@ -2,6 +2,7 @@ package org.frogforce503.robot.commands;
 
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -14,7 +15,7 @@ public class EjectFuelFromFlywheels extends Command {
 
     @Override
     public void initialize() {
-
+        flywheels.setVelocity(FlywheelsConstants.EJECT);
     }
 
     @Override
@@ -29,6 +30,6 @@ public class EjectFuelFromFlywheels extends Command {
 
     @Override
     public void end(boolean interrupted) {
-
+        flywheels.stop();
     }
 }

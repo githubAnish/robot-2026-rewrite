@@ -30,22 +30,22 @@ public final class FieldConstantsUtil {
     }
 
     public static String jsonEntryToString(String key) {
-        return (String) fieldJson.get(key);
+        return fieldJson.get(key).toString();
     }
 
     /** <b> Make sure there is only 1 value associated with the {@code key}. </b> */
     public static boolean jsonEntryToBool(String key) {
-        return (boolean) fieldJson.get(key);
+        return Boolean.parseBoolean(jsonEntryToString(key));
     }
 
     /** <b> Make sure there is only 1 value associated with the {@code key}. </b> */
-    public static int jsonEntryToInt(String key) {
-        return ((Number) fieldJson.get(key)).intValue();
+    public static double jsonEntryToInt(String key) {
+        return Integer.parseInt(jsonEntryToString(key));
     }
 
     /** <b> Make sure there is only 1 value associated with the {@code key}. </b> */
     public static double jsonEntryToDouble(String key) {
-        return ((Number) fieldJson.get(key)).doubleValue();
+        return Double.parseDouble(jsonEntryToString(key));
     }
 
     /**
