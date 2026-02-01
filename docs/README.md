@@ -38,7 +38,7 @@ This is a ground-up rewrite of our robot code for the 2026 FIRST Robotics game *
 - **Simulation:** MapleSim for physics-accurate testing
 
 ### Dashboard Layout
-![Elastic Layout of Dashboard](../images/20260131_Elastic_Layout.png)
+![Elastic Layout of Dashboard](../images/ElasticLayout.png)
 
 ## Getting Started
 

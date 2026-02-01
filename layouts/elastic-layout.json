@@ -271,7 +271,7 @@
             }
           },
           {
-            "title": "PositionRad",
+            "title": "Turret PositionRad",
             "x": 512.0,
             "y": 0.0,
             "width": 256.0,
@@ -284,7 +284,7 @@
             }
           },
           {
-            "title": "AbsolutePositionRad",
+            "title": "Turret AbsolutePositionRad",
             "x": 768.0,
             "y": 0.0,
             "width": 256.0,
