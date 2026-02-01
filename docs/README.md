@@ -50,7 +50,7 @@ This is a ground-up rewrite of our robot code for the 2026 FIRST Robotics game *
 
 ![Controller Layout](../images/ControllerLayout.png)
 
-[View interactive version on PadCrafter](https://www.padcrafter.com/?templates=Controller+Scheme+1&plat=0&leftStick=Eject+From+Intake&rightStickClick=Eject+From+Flywheels&rightStick=Rotate&leftStickClick=Translate&dpadUp=Reset+Swerve+Rotation&dpadRight=Set+Superstructure+Coast&dpadLeft=Seed+Turret+Relative+Position&dpadDown=Set+Drive+To+Brake+%28X+Wheels%29&backButton=Set+Slow+Mode&startButton=Set+Robot+Relative&yButton=Set+Batter+Preset&xButton=&aButton=Set+Trench+Preset&bButton=Sequence+Climb&leftTrigger=Intake+Fuel+From+Ground&rightTrigger=Score+Fuel+Into+Hub&leftBumper=Intake+Fuel+From+Outpost&rightBumper=Lob+Fuel+Into+Alliance&col=%23242424%2C%23606A6E%2C%23FFFFFF)
+[View interactive version on PadCrafter](https://www.padcrafter.com/?templates=Controller+Scheme&plat=0&leftStick=Eject+From+Intake&rightStickClick=Eject+From+Flywheels&rightStick=Rotate&leftStickClick=Translate&dpadUp=Reset+Swerve+Rotation&dpadRight=Set+Superstructure+Coast&dpadLeft=Seed+Turret+Relative+Position&dpadDown=Set+Drive+To+Brake+%28X+Wheels%29&backButton=Set+Slow+Mode&startButton=Set+Robot+Relative&yButton=Set+Batter+Preset&xButton=&aButton=Set+Trench+Preset&bButton=Sequence+Climb&leftTrigger=Intake+Fuel+From+Ground&rightTrigger=Score+Fuel+Into+Hub&leftBumper=Intake+Fuel+From+Outpost&rightBumper=Lob+Fuel+Into+Alliance&col=%2523242424%2C%2523606A6E%2C%2523FFFFFF)
 
 ## Development Notes
 
