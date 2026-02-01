@@ -18,9 +18,9 @@ This is a ground-up rewrite of our robot code for the 2026 FIRST Robotics game *
 │   ├── robot/                 # Main robot logic
 │   │   ├── RobotContainer.java    # Central config
 │   │   ├── subsystems/            # Drive, turret, flywheels, etc.
-│   │   ├── commands/              # Command-based control
+│   │   ├── commands/              # High-level commands
 │   │   ├── auto/                  # Autonomous routines
-│   │   └── constants/             # Field, hardware, tuner constants
+│   │   └── constants/             # Field, swerve tuner constants
 │   └── lib/                   # Reusable utilities
 │       ├── math/              # Geometry & calculations
 │       ├── subsystem/         # Base subsystem classes
