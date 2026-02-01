@@ -72,14 +72,12 @@ public class HoodIOSpark implements HoodIO {
 
     @Override
     public void updateInputs(HoodIOInputs inputs) {
-        inputs.data =
-            new HoodIOData(
-                connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getPosition(),
-                encoder.getVelocity(),
-                motor.getAppliedOutput() * motor.getBusVoltage(),
-                motor.getOutputCurrent(),
-                motor.getMotorTemperature());
+        inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
+        inputs.positionRad = encoder.getPosition();
+        inputs.velocityRadPerSec = encoder.getVelocity();
+        inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
+        inputs.statorCurrentAmps = motor.getOutputCurrent();
+        inputs.tempCelsius = motor.getMotorTemperature();
     }
 
     @Override

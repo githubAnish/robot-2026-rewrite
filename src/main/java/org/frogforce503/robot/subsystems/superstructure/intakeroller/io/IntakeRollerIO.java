@@ -5,15 +5,12 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IntakeRollerIO {
     @AutoLog
     class IntakeRollerIOInputs {
-        public IntakeRollerIOData data = new IntakeRollerIOData(false, 0.0, 0.0, 0.0, 0.0);
+        public boolean motorConnected = false;
+        public double velocityRadPerSec = 0.0;
+        public double appliedVolts = 0.0;
+        public double statorCurrentAmps = 0.0;
+        public double tempCelsius = 0.0;
     }
-
-    record IntakeRollerIOData(
-        boolean motorConnected,
-        double velocityRadPerSec,
-        double appliedVolts,
-        double statorCurrentAmps,
-        double tempCelsius) {}
 
     default void updateInputs(IntakeRollerIOInputs inputs) {}
 

@@ -50,14 +50,12 @@ public class ClimberIOSim extends ClimberIOSpark {
         motorSim.setPosition(physicsSim.getPositionMeters());
         motorSim.setVelocity(physicsSim.getVelocityMetersPerSecond());
 
-        inputs.data =
-            new ClimberIOData(
-                true,
-                motorSim.getPosition(),
-                motorSim.getVelocity(),
-                appliedVolts,
-                motorSim.getMotorCurrent(),
-                24.0,
-                motorSim.getPosition() == 0);
+        inputs.motorConnected = true;
+        inputs.positionMeters = motorSim.getPosition();
+        inputs.velocityMetersPerSec = motorSim.getVelocity();
+        inputs.appliedVolts = appliedVolts;
+        inputs.statorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.tempCelsius = 24.0;
+        inputs.limitSwitchPressed = motorSim.getPosition() == 0;
     }
 }

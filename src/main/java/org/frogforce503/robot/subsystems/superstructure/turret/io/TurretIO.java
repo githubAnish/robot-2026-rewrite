@@ -5,17 +5,14 @@ import org.littletonrobotics.junction.AutoLog;
 public interface TurretIO {
     @AutoLog
     class TurretIOInputs {
-        public TurretIOData data = new TurretIOData(false, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        public boolean motorConnected = false;
+        public double positionRad = 0.0;
+        public double absolutePositionRad = 0.0;
+        public double velocityRadPerSec = 0.0;
+        public double appliedVolts = 0.0;
+        public double statorCurrentAmps = 0.0;
+        public double tempCelsius = 0.0;
     }
-
-    record TurretIOData(
-        boolean motorConnected,
-        double positionRad,
-        double absolutePositionRad,
-        double velocityRadPerSec,
-        double appliedVolts,
-        double statorCurrentAmps,
-        double tempCelsius) {}
 
     default void updateInputs(TurretIOInputs inputs) {}
 

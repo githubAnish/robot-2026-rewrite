@@ -74,14 +74,12 @@ public class IntakePivotIOSpark implements IntakePivotIO {
 
     @Override
     public void updateInputs(IntakePivotIOInputs inputs) {
-        inputs.data =
-            new IntakePivotIOData(
-                connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getPosition(),
-                encoder.getVelocity(),
-                motor.getAppliedOutput() * motor.getBusVoltage(),
-                motor.getOutputCurrent(),
-                motor.getMotorTemperature());
+        inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
+        inputs.positionRad = encoder.getPosition();
+        inputs.velocityRadPerSec = encoder.getVelocity();
+        inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
+        inputs.statorCurrentAmps = motor.getOutputCurrent();
+        inputs.tempCelsius = motor.getMotorTemperature();
     }
 
     @Override

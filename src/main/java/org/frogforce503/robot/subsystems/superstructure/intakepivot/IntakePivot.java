@@ -84,7 +84,7 @@ public class IntakePivot extends FFSubsystemBase {
     }
 
     public double getAngleRad() {
-        return inputs.data.positionRad();
+        return inputs.positionRad;
     }
 
     // Actions

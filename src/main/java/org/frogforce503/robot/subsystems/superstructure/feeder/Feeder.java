@@ -62,7 +62,7 @@ public class Feeder extends FFSubsystemBase {
     }
 
     public double getVelocityRadPerSec() {
-        return inputs.data.velocityRadPerSec();
+        return inputs.velocityRadPerSec;
     }
 
     // Actions

@@ -41,14 +41,12 @@ public class TurretIOSim extends TurretIOSpark {
         motorSim.setPosition(physicsSim.getAngularPositionRad());
         motorSim.setVelocity(physicsSim.getAngularVelocityRadPerSec());
         
-        inputs.data =
-            new TurretIOData(
-                true,
-                motorSim.getPosition(),
-                motorSim.getPosition() % (2 * Math.PI), // Since absolute encoder wraps around, do relative pos mod 360 deg
-                motorSim.getVelocity(),
-                appliedVolts,
-                motorSim.getMotorCurrent(),
-                24.0);
+        inputs.motorConnected = true;
+        inputs.positionRad = motorSim.getPosition();
+        inputs.absolutePositionRad = motorSim.getPosition() % (2 * Math.PI); // Since absolute encoder wraps around, do relative pos mod 360 deg
+        inputs.velocityRadPerSec = motorSim.getVelocity();
+        inputs.appliedVolts = appliedVolts;
+        inputs.statorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.tempCelsius = 24.0;
     }
 }

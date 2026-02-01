@@ -5,16 +5,13 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IntakePivotIO {
     @AutoLog
     class IntakePivotIOInputs {
-        public IntakePivotIOData data = new IntakePivotIOData(false, 0.0, 0.0, 0.0, 0.0, 0.0);
+        public boolean motorConnected = false;
+        public double positionRad = 0.0;
+        public double velocityRadPerSec = 0.0;
+        public double appliedVolts = 0.0;
+        public double statorCurrentAmps = 0.0;
+        public double tempCelsius = 0.0;
     }
-
-    record IntakePivotIOData(
-        boolean motorConnected,
-        double positionRad,
-        double velocityRadPerSec,
-        double appliedVolts,
-        double statorCurrentAmps,
-        double tempCelsius) {}
 
     default void updateInputs(IntakePivotIOInputs inputs) {}
 

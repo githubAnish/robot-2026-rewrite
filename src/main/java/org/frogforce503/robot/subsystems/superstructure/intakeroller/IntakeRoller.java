@@ -61,7 +61,7 @@ public class IntakeRoller extends FFSubsystemBase {
     }
 
     public double getVelocityRadPerSec() {
-        return inputs.data.velocityRadPerSec();
+        return inputs.velocityRadPerSec;
     }
 
     // Actions

@@ -79,15 +79,13 @@ public class ClimberIOSpark implements ClimberIO {
 
     @Override
     public void updateInputs(ClimberIOInputs inputs) {
-        inputs.data =
-            new ClimberIOData(
-                connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getPosition(),
-                encoder.getVelocity(),
-                motor.getAppliedOutput() * motor.getBusVoltage(),
-                motor.getOutputCurrent(),
-                motor.getMotorTemperature(),
-                !limitSwitch.get());
+        inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
+        inputs.positionMeters = encoder.getPosition();
+        inputs.velocityMetersPerSec = encoder.getVelocity();
+        inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
+        inputs.statorCurrentAmps = motor.getOutputCurrent();
+        inputs.tempCelsius = motor.getMotorTemperature();
+        inputs.limitSwitchPressed = !limitSwitch.get();
     }
 
     @Override

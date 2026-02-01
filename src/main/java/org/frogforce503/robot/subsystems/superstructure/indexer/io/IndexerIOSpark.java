@@ -66,13 +66,11 @@ public class IndexerIOSpark implements IndexerIO {
 
     @Override
     public void updateInputs(IndexerIOInputs inputs) {
-        inputs.data =
-            new IndexerIOData(
-                connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getVelocity(),
-                motor.getAppliedOutput() * motor.getBusVoltage(),
-                motor.getOutputCurrent(),
-                motor.getMotorTemperature());
+        inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
+        inputs.velocityRadPerSec = encoder.getVelocity();
+        inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
+        inputs.statorCurrentAmps = motor.getOutputCurrent();
+        inputs.tempCelsius = motor.getMotorTemperature();
     }
 
     @Override

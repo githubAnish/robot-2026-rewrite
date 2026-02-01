@@ -109,13 +109,13 @@ public class Turret extends FFSubsystemBase {
     }
 
     public double getAngleRad() {
-        return inputs.data.positionRad();
+        return inputs.positionRad;
     }
 
     // Actions
     public void seedRelativePosition() {
         if (MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI)) { // only if relative encoder in range -180 deg to 180 deg
-            io.setRelativePosition(inputs.data.absolutePositionRad());
+            io.setRelativePosition(inputs.absolutePositionRad);
         }
     }
 

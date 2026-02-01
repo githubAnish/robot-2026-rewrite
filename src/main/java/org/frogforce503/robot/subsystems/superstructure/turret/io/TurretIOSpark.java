@@ -86,15 +86,13 @@ public class TurretIOSpark implements TurretIO {
 
     @Override
     public void updateInputs(TurretIOInputs inputs) {
-        inputs.data =
-            new TurretIOData(
-                connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk),
-                encoder.getPosition(),
-                absoluteEncoder.getPosition(),
-                encoder.getVelocity(),
-                motor.getAppliedOutput() * motor.getBusVoltage(),
-                motor.getOutputCurrent(),
-                motor.getMotorTemperature());
+        inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
+        inputs.positionRad = encoder.getPosition();
+        inputs.absolutePositionRad = absoluteEncoder.getPosition();
+        inputs.velocityRadPerSec = encoder.getVelocity();
+        inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
+        inputs.statorCurrentAmps = motor.getOutputCurrent();
+        inputs.tempCelsius = motor.getMotorTemperature();
     }
 
     @Override

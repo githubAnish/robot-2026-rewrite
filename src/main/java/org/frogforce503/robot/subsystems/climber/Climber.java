@@ -46,7 +46,7 @@ public class Climber extends FFSubsystemBase {
         Logger.processInputs("Climber", inputs);
 
         // Reset encoder if limit switch pressed & Climber is going down
-        if (inputs.data.limitSwitchPressed() && getHeightMeters() < lastHeightMeters) {
+        if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
             io.resetEncoder();
             setpoint = new State(0.0, 0.0);
         }
@@ -90,7 +90,7 @@ public class Climber extends FFSubsystemBase {
     }
 
     public double getHeightMeters() {
-        return inputs.data.positionMeters();
+        return inputs.positionMeters;
     }
 
     // Actions
@@ -112,7 +112,7 @@ public class Climber extends FFSubsystemBase {
         shouldRunProfile = false;
 
         // Prevent downward motion into the limit switch
-        if (inputs.data.limitSwitchPressed() && volts < 0) {
+        if (inputs.limitSwitchPressed && volts < 0) {
             volts = 0;
         }
 

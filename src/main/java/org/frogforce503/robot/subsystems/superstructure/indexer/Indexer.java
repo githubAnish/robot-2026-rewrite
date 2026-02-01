@@ -63,7 +63,7 @@ public class Indexer extends FFSubsystemBase {
     }
 
     public double getVelocityRadPerSec() {
-        return inputs.data.velocityRadPerSec();
+        return inputs.velocityRadPerSec;
     }
 
     public boolean isCompressed() {
@@ -71,7 +71,7 @@ public class Indexer extends FFSubsystemBase {
             shouldRunVelocity &&
             Math.abs(targetVelocityRadPerSec) > 1e-3 &&
             getVelocityRadPerSec() < IndexerConstants.MIN_FREE_SPEED &&
-            inputs.data.statorCurrentAmps() > IndexerConstants.COMPRESSION_CURRENT;
+            inputs.statorCurrentAmps > IndexerConstants.COMPRESSION_CURRENT;
     }
 
     // Actions

@@ -50,13 +50,11 @@ public class HoodIOSim extends HoodIOSpark {
         motorSim.setPosition(physicsSim.getAngleRads());
         motorSim.setVelocity(physicsSim.getVelocityRadPerSec());
 
-        inputs.data =
-            new HoodIOData(
-                true,
-                motorSim.getPosition(),
-                motorSim.getVelocity(),
-                appliedVolts,
-                motorSim.getMotorCurrent(),
-                24.0);
+        inputs.motorConnected = true;
+        inputs.positionRad = motorSim.getPosition();
+        inputs.velocityRadPerSec = motorSim.getVelocity();
+        inputs.appliedVolts = appliedVolts;
+        inputs.statorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.tempCelsius = 24.0;
     }
 }

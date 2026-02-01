@@ -42,12 +42,10 @@ public class FeederIOSim extends FeederIOSpark {
         motorSim.iterate(physicsSim.getAngularVelocityRadPerSec(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
         motorSim.setVelocity(physicsSim.getAngularVelocityRadPerSec());
         
-        inputs.data =
-            new FeederIOData(
-                true,
-                motorSim.getVelocity(),
-                appliedVolts,
-                motorSim.getMotorCurrent(),
-                24.0);
+        inputs.motorConnected = true;
+        inputs.velocityRadPerSec = motorSim.getVelocity();
+        inputs.appliedVolts = appliedVolts;
+        inputs.statorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.tempCelsius = 24.0;
     }
 }
