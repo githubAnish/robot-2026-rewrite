@@ -69,8 +69,10 @@ import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhot
 import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIOPhotonSim;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -104,6 +106,10 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger driverLeftPaddle = driver.leftPaddle();
     private final Trigger driverRightPaddle = driver.rightPaddle();
+
+    // Overrides
+    private final LoggedNetworkBoolean autoAssistEnabled =
+        new LoggedNetworkBoolean("Auto Assist Enabled", true); // Includes auto-aligning and auto-aiming
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -289,13 +295,11 @@ public class RobotContainer {
         final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driver);
         drive.setDefaultCommand(teleopDriveCommand);
 
-        final Trigger autoAssistEnable = driver.back().and(driver.start()); // Includes auto-aligning and auto-aiming
+        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnabled));
+        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistEnabled));
 
-        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnable));
-        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistEnable));
-
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnable));
-        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnable));
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled));
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnabled));
         
         driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
@@ -306,22 +310,16 @@ public class RobotContainer {
         bindClimbing(driver.b());
 
         // Overrides
-        driver.back()
-            .onTrue(Commands.runOnce(() -> teleopDriveCommand.setSlowMode(true)))
-            .onFalse(Commands.runOnce(() -> teleopDriveCommand.setSlowMode(false)));
-
-        driver.start()
-            .onTrue(Commands.runOnce(() -> teleopDriveCommand.setRobotRelative(true)))
-            .onFalse(Commands.runOnce(() -> teleopDriveCommand.setRobotRelative(false)));
+        bindBooleanToggler(driver.back(), teleopDriveCommand::setSlowMode);
+        bindBooleanToggler(driver.start(), teleopDriveCommand::setRobotRelative);
 
         driver.povUp().onTrue(Commands.runOnce(drive::resetRotation));
         driver.povDown().onTrue(Commands.runOnce(drive::brake));
 
         driver.povLeft().onTrue(Commands.runOnce(superstructure::seedTurretRelativePosition));
 
-        driver.povRight()
-            .onTrue(Commands.runOnce(() -> superstructure.setCoastMode(true)).ignoringDisable(true))
-            .onFalse(Commands.runOnce(() -> superstructure.setCoastMode(false)).ignoringDisable(true));
+        bindBooleanToggler(driver.povRight(), superstructure::setCoastMode);
+        bindBooleanToggler(driver.back().and(driver.start()), autoAssistEnabled::set);
     
         // Triggers
         Trigger inAllianceZone =
@@ -371,6 +369,13 @@ public class RobotContainer {
         advanceTrigger.onTrue(
             climbSequence
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    }
+
+    // Prefer this clearer name
+    private void bindBooleanToggler(Trigger trigger, BooleanConsumer action) {
+        trigger
+            .onTrue(Commands.runOnce(() -> action.accept(true)).ignoringDisable(true))
+            .onFalse(Commands.runOnce(() -> action.accept(false)).ignoringDisable(true));
     }
 
     public void robotPeriodic() {
