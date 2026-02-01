@@ -1,4 +1,4 @@
-package org.frogforce503.lib.util;
+package org.frogforce503.lib.logging;
 
 import edu.wpi.first.networktables.ConnectionInfo;
 import edu.wpi.first.networktables.NetworkTableInstance;

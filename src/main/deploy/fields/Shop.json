@@ -1,7 +1,7 @@
 {
-    "AllianceWallToBlueInitLine": "156.8",
-    "AllianceWallToRedInitLine": "156.8",
+    "AllianceWallToBlueInitLine": 156.8,
+    "AllianceWallToRedInitLine": 156.8,
 
-    "LeftWallToBlueBackLeft": "61.5",
-    "RightWallToRedBackLeft": "61.5"
+    "LeftWallToBlueBackLeft": 61.5,
+    "RightWallToRedBackLeft": 61.5
 }

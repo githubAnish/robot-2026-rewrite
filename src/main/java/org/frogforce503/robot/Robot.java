@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.lang.reflect.Field;
 
 import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.logging.NTClientLogger;
 import org.frogforce503.lib.subsystem.VirtualSubsystem;
-import org.frogforce503.lib.util.NTClientLogger;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
