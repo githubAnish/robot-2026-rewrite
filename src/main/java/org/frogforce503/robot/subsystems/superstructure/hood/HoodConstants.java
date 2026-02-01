@@ -7,6 +7,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 public final class HoodConstants {
+    // Hardware / Configuration
     public static final int id = 6;
     public static final double mechanismRatio = 1;
 
@@ -20,6 +21,7 @@ public final class HoodConstants {
     public static final double minAngle = Units.degreesToRadians(0); // TODO 0 deg is when hood horizontal (ball shoots horizontally)
     public static final double maxAngle = Units.degreesToRadians(90);// TODO 90 deg is when hood vertical (ball shoots verticalally)
     
+    // Setpoints
     public static final double kTolerance = Units.degreesToRadians(0.5); //TODO Hood position has to be extremely accurate for consistent shot
 
     public static final double START = Units.degreesToRadians(0);

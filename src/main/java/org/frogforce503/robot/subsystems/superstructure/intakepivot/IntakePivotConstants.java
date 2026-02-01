@@ -7,6 +7,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 public class IntakePivotConstants {
+    // Hardware / Configuration
     public static final int id = 0;
     public static final double mechanismRatio = 1;
 
@@ -21,6 +22,7 @@ public class IntakePivotConstants {
     public static final double minAngle = Units.degreesToRadians(0); // TODO Can't say main linkage bar is 0 deg, but can change once block CAD / real CAD comes out
     public static final double maxAngle = Units.degreesToRadians(90); // TODO basically when the 4-bar intake is stowed, the main linkage bar is at 90 deg
 
+    // Setpoints
     public static final double kTolerance = Units.degreesToRadians(3.0); // TODO pivot doesn't need to be as accurate
 
     public static final double START = maxAngle;

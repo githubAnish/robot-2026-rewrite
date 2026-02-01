@@ -6,6 +6,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 public final class ClimberConstants {
+    // Hardware / Configuration
     public static final int id = 7;
     public static final double mechanismRatio = 1;
     public static final double sprocketPitchDiameter = Units.inchesToMeters(2);
@@ -22,6 +23,7 @@ public final class ClimberConstants {
 
     public static final int climberLimitSwitchId = 0;
 
+    // Setpoints
     public static final double kTolerance = Units.inchesToMeters(0.5);
 
     public static final double START = minHeight;

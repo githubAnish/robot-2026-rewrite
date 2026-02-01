@@ -6,6 +6,7 @@ import org.frogforce503.lib.motorcontrol.PIDConfig;
 import edu.wpi.first.math.util.Units;
 
 public class FlywheelsConstants {
+    // Hardware / Configuration
     public static final int id = 5;
     public static final double mechanismRatio = 1;
 
@@ -16,6 +17,7 @@ public class FlywheelsConstants {
     public static final FFConfig kFF = new FFConfig(0, 0, 0.0224, 0);
     public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(6000);
 
+    // Setpoints
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0); // TODO Flywheel speed has to be extremely accurate for consistent shot
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);

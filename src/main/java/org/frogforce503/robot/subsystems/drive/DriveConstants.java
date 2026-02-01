@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public final class DriveConstants {
+    // Hardware / Configuration
     public static final SwerveDrivetrainConstants drivetrainConstants = TunerConstantsCompBot.DrivetrainConstants;
     public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft = TunerConstantsCompBot.FrontLeft;
     public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontRight = TunerConstantsCompBot.FrontRight;
@@ -29,6 +30,7 @@ public final class DriveConstants {
     public static final double maxLinearSpeed;
     public static final double maxOmega;
 
+    // Swerve Control
     public static final SwerveDriveKinematics kinematics;
     public static final SwervePathController pathFollower;
 
