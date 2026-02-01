@@ -60,4 +60,14 @@ public final class PathPlannerUtil {
             return null;
         }
     }
+
+    public static PathPlannerPath loadChoreoTrajectory(String name) {
+        try {
+            return PathPlannerPath.fromChoreoTrajectory(name);
+        } catch (FileVersionException | IOException | ParseException e) {
+            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(RandomAuto.class));
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

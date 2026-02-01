@@ -55,10 +55,6 @@ public class Superstructure extends VirtualSubsystem {
         LoggedTracer.record("Superstructure");
     }
 
-    public boolean isFull() {
-        return indexer.isCompressed();
-    }
-
     // Actions
     public void setCoastMode(boolean enabled) {
         intakePivot.getCoastOverride().set(enabled);

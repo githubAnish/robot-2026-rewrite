@@ -7,6 +7,8 @@ import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 
+import com.pathplanner.lib.commands.FollowPathCommand;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -23,6 +25,7 @@ public class WarmupExecutor {
     public void disabledInit() {
         // NetworkTableInstance.getDefault().flush();
         // System.gc();
+        FollowPathCommand.warmupCommand().schedule();
     }
 
     public void disabledPeriodic() {

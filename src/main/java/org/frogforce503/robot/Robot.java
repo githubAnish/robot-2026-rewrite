@@ -28,6 +28,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.revrobotics.util.StatusLogger;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -76,6 +77,7 @@ public class Robot extends LoggedRobot {
 
     // Disable unnecessary logging
     SignalLogger.enableAutoLogging(false);
+    StatusLogger.disableAutoLogging();
 
     // Start AdvantageKit logger
     Logger.start();

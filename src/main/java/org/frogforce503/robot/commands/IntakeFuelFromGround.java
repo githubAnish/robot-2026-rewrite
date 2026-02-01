@@ -3,7 +3,6 @@ package org.frogforce503.robot.commands;
 import java.util.function.BooleanSupplier;
 
 import org.frogforce503.lib.io.JoystickUtil;
-import org.frogforce503.lib.rebuilt.ProximityUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -16,6 +15,7 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,43 +25,45 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import lombok.experimental.ExtensionMethod;
 
-// Notes:
-// involves some sort of fetching (no need of a separate fetching cmd, just needs to natural enough for the good driver, see orbit intake assist)
 @ExtensionMethod(JoystickUtil.class)
 public class IntakeFuelFromGround extends Command {
-    // Requirements
     private final Drive drive;
     private final Vision vision;
 
-    private final Superstructure superstructure;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
 
     private final CommandXboxController xboxController;
-
     private final BooleanSupplier autoAssistEnabled;
 
     // Constants
-    private final double maxFetchingLinearSpeed = DriveConstants.maxLinearSpeed * 0.6; // TODO rough guess
-    private final double maxFetchingLinearAcceleration = DriveConstants.maxLinearSpeed * 0.7; // TODO rough guess
-    private final double lookaheadTimeSec = 0.15;
-    private final double kRobotPoseCloseToTargetDistThresh = Units.inchesToMeters(40);
+    private final double kLookaheadTimeSec = 0.15;
+
+    private final double kAssistMaxDistance = Units.inchesToMeters(90);
+    private final double kMaxAssistStrafe = 0.7;     // m/s
+    private final double kMaxAssistOmega  = 2.0;     // rad/s
+
+    private final double kThetaAssistGain = 4.0;
 
     // Controllers
-    private final PIDController assistController = new PIDController(1.0, 0.0, 0.0);
+    private final PIDController lateralAssistController = new PIDController(1.2, 0.0, 0.0);
 
-    public IntakeFuelFromGround(Drive drive, Vision vision, Superstructure superstructure, CommandXboxController xboxController, BooleanSupplier autoAssistEnabled) {
+    public IntakeFuelFromGround(
+        Drive drive,
+        Vision vision,
+        Superstructure superstructure,
+        CommandXboxController xboxController,
+        BooleanSupplier autoAssistEnabled
+    ) {
         this.drive = drive;
         this.vision = vision;
 
-        this.superstructure = superstructure;
         this.intakePivot = superstructure.getIntakePivot();
         this.intakeRoller = superstructure.getIntakeRoller();
         this.indexer = superstructure.getIndexer();
 
         this.xboxController = xboxController;
-
         this.autoAssistEnabled = autoAssistEnabled;
 
         addRequirements(drive, intakePivot, intakeRoller, indexer);
@@ -69,7 +71,7 @@ public class IntakeFuelFromGround extends Command {
 
     @Override
     public void initialize() {
-        if (superstructure.isFull()) {
+        if (indexer.isCompressed()) {
             return;
         }
 
@@ -81,53 +83,66 @@ public class IntakeFuelFromGround extends Command {
     @Override
     public void execute() {
         // Get inputs
-        Pose2d robotPose = drive.getLookaheadPose(lookaheadTimeSec);
-        Pose2d targetPose = Pose2d.kZero; // TODO change in vision, currently it's in approximately middle of field, go to neutral zone outside of bump & trench
+        Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
+        boolean visionHasValidFuelTarget = true; // TODO assume true for now, change in vision
 
-        // If compressed, back off indexer speed
-        if (indexer.isCompressed()) {
-            indexer.setVelocity(IndexerConstants.SLOW_MIX);
-        } else {
-            indexer.setVelocity(IndexerConstants.INTAKE);
-        }
-
-        // Get driver velocity
+        // Calculate default teleop velocities
         Translation2d driverLinearVelocity = xboxController.getLinearVelocityFromJoysticks();
         double driverOmega = xboxController.getOmegaFromJoysticks();
 
-        // Calculate speeds
         double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed;
         double yVelocity = driverLinearVelocity.getY() * DriveConstants.maxLinearSpeed;
         double omega = driverOmega * DriveConstants.maxOmega;
 
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
+        ChassisSpeeds speeds =
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                xVelocity,
+                yVelocity,
+                omega,
+                drive.getAngle());
 
-        // Apply assist
-        double yError = 0;
-        double yOutput = 0;
-
-        boolean robotPoseCloseToTarget = ProximityUtil.getDistanceBetweenPoses(robotPose, targetPose) < kRobotPoseCloseToTargetDistThresh;
-
-        if (autoAssistEnabled.getAsBoolean() && robotPoseCloseToTarget) {
-            yError = robotPose.getTranslation().minus(targetPose.getTranslation()).getY();
-            yOutput = assistController.calculate(yError, 0);
-            speeds.vyMetersPerSecond += yOutput;
+        // Normal teleop drive if auto assist not wanted or vision doesn't have good view of fuel
+        if (!autoAssistEnabled.getAsBoolean() || !visionHasValidFuelTarget) {
+            drive.runVelocity(speeds);
+            return;
         }
 
+        // Assist logic
+        Pose2d targetPose = Pose2d.kZero; // TODO assume a fixed point for now, change in vision
+
+        Translation2d toTargetField = targetPose.getTranslation().minus(robotPose.getTranslation());
+        Translation2d toTargetRobot = toTargetField.rotateBy(robotPose.getRotation().unaryMinus());
+
+        double distance = toTargetField.getNorm();
+        double distanceScale = MathUtil.clamp((kAssistMaxDistance - distance) / kAssistMaxDistance, 0.0, 1.0);
+
+        // Lateral assist
+        double yError = toTargetRobot.getY();
+        double strafeOverride = MathUtil.clamp(1.0 - Math.abs(yVelocity), 0.0, 1.0);
+        double yOutput = lateralAssistController.calculate(yError, 0.0) * distanceScale * strafeOverride;
+        yOutput = MathUtil.clamp(yOutput, -kMaxAssistStrafe, kMaxAssistStrafe);
+
+        speeds.vyMetersPerSecond += yOutput;
+
+        // Rotation assist
+        double headingError = toTargetField.getAngle().minus(robotPose.getRotation()).getRadians();
+        double omegaOverride = MathUtil.clamp(1.0 - Math.abs(omega), 0.0, 1.0);
+        double omegaAssist = MathUtil.clamp(headingError * kThetaAssistGain, -kMaxAssistOmega, kMaxAssistOmega);
+
+        speeds.omegaRadiansPerSecond += omegaAssist * distanceScale * omegaOverride;
+
         // Apply speeds
-        drive.runVelocity(
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                drive.getAngle()));
+        drive.runVelocity(speeds);
 
         // Log data
-        Logger.recordOutput("IntakeFuelFromGround/Y Error", yError);
-        Logger.recordOutput("IntakeFuelFromGround/Y Controller Output", yOutput);
+        Logger.recordOutput("IntakeFuelFromGround/YError", yError);
+        Logger.recordOutput("IntakeFuelFromGround/YOutput", yOutput);
+        Logger.recordOutput("IntakeFuelFromGround/Distance", distance);
     }
 
     @Override
     public boolean isFinished() {
-        return superstructure.isFull();
+        return false;
     }
 
     @Override

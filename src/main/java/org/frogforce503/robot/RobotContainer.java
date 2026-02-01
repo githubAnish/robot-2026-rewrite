@@ -292,7 +292,7 @@ public class RobotContainer {
         final Trigger autoAssistEnable = driver.back().and(driver.start()); // Includes auto-aligning and auto-aiming
 
         driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnable));
-        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, autoAssistEnable));
+        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistEnable));
 
         driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnable));
         driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnable));

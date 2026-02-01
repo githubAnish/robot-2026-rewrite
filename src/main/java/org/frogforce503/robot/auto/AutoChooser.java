@@ -6,6 +6,8 @@ import java.util.List;
 import org.frogforce503.lib.auto.choreo.ChoreoUtil;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.robot.auto.autos.blue.BlueCenterDepotThenClimb;
+import org.frogforce503.robot.auto.autos.blue.BlueLeftTrenchGoToNZTwice;
 import org.frogforce503.robot.auto.autos.test.RandomAuto;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -64,6 +66,9 @@ public class AutoChooser {
         });
 
         routineChooser.addOption("Random", new RandomAuto(drive, vision, superstructure));
+
+        routineChooser.addOption("Blue Center Depot Then Climb", new BlueCenterDepotThenClimb(drive, vision, superstructure));
+        routineChooser.addOption("Blue Left Trench Go To NZ Twice", new BlueLeftTrenchGoToNZTwice(drive, vision, superstructure));
     }
 
     private void logTrajectory(Pose2d... trajectory) {
