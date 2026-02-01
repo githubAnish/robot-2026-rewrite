@@ -2,7 +2,6 @@ package org.frogforce503.robot.constants.field;
 
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.lib.util.FieldConstantsUtil;
 import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -46,10 +45,10 @@ public class FieldConstants {
         public static final double redInitLineX;
 
         static {
-            final double allianceWallToBlueInitLine = FieldConstantsUtil.getFieldValueMeters("AllianceWallToBlueInitLine");
+            final double allianceWallToBlueInitLine = Units.inchesToMeters(156.8);
             blueInitLineX = allianceWallToBlueInitLine;
 
-            final double allianceWallToRedInitLine = FieldConstantsUtil.getFieldValueMeters("AllianceWallToRedInitLine");
+            final double allianceWallToRedInitLine = Units.inchesToMeters(156.8);
             redInitLineX = fieldLength - allianceWallToRedInitLine;
         }
     }
@@ -93,14 +92,14 @@ public class FieldConstants {
             final double backLeftToFrontLeft = Units.inchesToMeters(26.7);
             final double frontLeftToFrontRight = Units.inchesToMeters(42.0);
 
-            final double leftWallToBlueBackLeft = FieldConstantsUtil.getFieldValueMeters("LeftWallToBlueBackLeft");
+            final double leftWallToBlueBackLeft = Units.inchesToMeters(61.5);
 
             blueBackLeftCorner = new Translation2d(0, fieldWidth - leftWallToBlueBackLeft);
             blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
             blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
             blueBackRightCorner = blueFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
 
-            final double rightWallToRedBackLeft = FieldConstantsUtil.getFieldValueMeters("RightWallToRedBackLeft");
+            final double rightWallToRedBackLeft = Units.inchesToMeters(61.5);
             
             redBackLeftCorner = new Translation2d(fieldLength, rightWallToRedBackLeft);
             redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
