@@ -108,8 +108,8 @@ public class RobotContainer {
     private final Trigger driverRightPaddle = driver.rightPaddle();
 
     // Overrides
-    private final LoggedNetworkBoolean autoAssistEnabled =
-        new LoggedNetworkBoolean("Auto Assist Enabled", true); // Includes auto-aligning and auto-aiming
+    private final LoggedNetworkBoolean autoAssistOverride =
+        new LoggedNetworkBoolean("Auto Assist Override", true); // Includes auto-aligning and auto-aiming
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -295,11 +295,11 @@ public class RobotContainer {
         final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driver);
         drive.setDefaultCommand(teleopDriveCommand);
 
-        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistEnabled));
-        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistEnabled));
+        driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistOverride));
+        driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistOverride));
 
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistEnabled));
-        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistEnabled));
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride));
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistOverride));
         
         driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
@@ -318,8 +318,8 @@ public class RobotContainer {
 
         driver.povLeft().onTrue(Commands.runOnce(superstructure::seedTurretRelativePosition));
 
-        bindBooleanToggler(driver.povRight(), superstructure::setCoastMode);
-        bindBooleanToggler(driver.back().and(driver.start()), autoAssistEnabled::set);
+        bindBooleanToggler(driver.povRight(), superstructure.getSuperstructureCoastOverride()::set);
+        bindBooleanToggler(driver.back().and(driver.start()), autoAssistOverride::set);
     
         // Triggers
         Trigger inAllianceZone =

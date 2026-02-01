@@ -10,7 +10,7 @@
             "title": "TeleopDriveCommand",
             "x": 256.0,
             "y": 0.0,
-            "width": 384.0,
+            "width": 256.0,
             "height": 384.0,
             "type": "List Layout",
             "properties": {
@@ -79,8 +79,34 @@
             },
             "children": [
               {
+                "title": "Climber",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "Coast Mode/Climber",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Superstructure",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "Coast Mode/Superstructure",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
                 "title": "IntakePivot",
-                "x": 384.0,
+                "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
@@ -93,8 +119,8 @@
               },
               {
                 "title": "IntakeRoller",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
@@ -106,8 +132,8 @@
               },
               {
                 "title": "Indexer",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
@@ -119,8 +145,8 @@
               },
               {
                 "title": "Feeder",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
@@ -132,8 +158,8 @@
               },
               {
                 "title": "Turret",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
@@ -145,8 +171,8 @@
               },
               {
                 "title": "Flywheels",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
@@ -158,26 +184,13 @@
               },
               {
                 "title": "Hood",
-                "x": 384.0,
-                "y": 128.0,
+                "x": 0.0,
+                "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Toggle Switch",
                 "properties": {
                   "topic": "Coast Mode/Hood",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Climber",
-                "x": 384.0,
-                "y": 128.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "Coast Mode/Climber",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -234,23 +247,6 @@
             }
           },
           {
-            "title": "Auto Assist Enabled",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 384.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "Auto Assist Enabled",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
             "title": "Alerts",
             "x": 1024.0,
             "y": 0.0,
@@ -272,6 +268,49 @@
             "properties": {
               "topic": "/SmartDashboard/Scheduler",
               "period": 0.06
+            }
+          },
+          {
+            "title": "PositionRad",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Turret/PositionRad",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "AbsolutePositionRad",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Turret/AbsolutePositionRad",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "Auto Assist Override",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 256.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "Auto Assist Override",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]

@@ -10,6 +10,7 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,10 @@ public class Superstructure extends VirtualSubsystem {
     // Inputs
     @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
     @Setter @Getter private boolean feasibleShot;
+
+    // Overrides
+    @Getter private final LoggedNetworkBoolean superstructureCoastOverride =
+        new LoggedNetworkBoolean("Coast Mode/Superstructure", false);
 
     public Superstructure(
         IntakePivot intakePivot,
@@ -48,6 +53,8 @@ public class Superstructure extends VirtualSubsystem {
 
     @Override
     public void periodic() {
+        setCoastMode(superstructureCoastOverride.get());
+
         Logger.recordOutput("Superstructure/ShotPreset", shotPreset);
         Logger.recordOutput("Superstructure/Is Shot Feasible?", feasibleShot);
 
@@ -56,7 +63,7 @@ public class Superstructure extends VirtualSubsystem {
     }
 
     // Actions
-    public void setCoastMode(boolean enabled) {
+    private void setCoastMode(boolean enabled) {
         intakePivot.getCoastOverride().set(enabled);
         intakeRoller.getCoastOverride().set(enabled);
         indexer.getCoastOverride().set(enabled);

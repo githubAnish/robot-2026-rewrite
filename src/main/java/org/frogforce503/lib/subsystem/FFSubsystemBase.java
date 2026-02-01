@@ -15,7 +15,7 @@ public abstract class FFSubsystemBase extends SubsystemBase {
         new LoggedNetworkBoolean("Coast Mode/" + this.getName(), false);
 
     protected final Alert coastModeWhileRunning =
-        new Alert(this.getName() + " is in coast mode while running!", AlertType.kError);
+        new Alert(this.getName() + " cannot coast while running! Request ignored.", AlertType.kError);
 
     private boolean inCoast = false;
 
