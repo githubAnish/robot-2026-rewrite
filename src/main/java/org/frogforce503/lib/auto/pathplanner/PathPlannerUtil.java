@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.auto.autos.test.RandomAuto;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.json.simple.parser.ParseException;
@@ -55,7 +54,7 @@ public final class PathPlannerUtil {
         try {
             return PathPlannerPath.fromPathFile(name);
         } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(RandomAuto.class));
+            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
             e.printStackTrace();
             return null;
         }
@@ -65,7 +64,7 @@ public final class PathPlannerUtil {
         try {
             return PathPlannerPath.fromChoreoTrajectory(name);
         } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(RandomAuto.class));
+            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
             e.printStackTrace();
             return null;
         }
