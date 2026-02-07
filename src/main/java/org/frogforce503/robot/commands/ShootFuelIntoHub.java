@@ -4,7 +4,9 @@ import java.util.function.BooleanSupplier;
 
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -36,7 +38,7 @@ public class ShootFuelIntoHub extends Command {
 
     private final BooleanSupplier autoAssistEnabled;
 
-    private final double kShotFireRateBallsPerSec = 1; // How many balls can you fire within 1 sec?
+    private final double kShotFireRateBallsPerSec = 10; // How many balls can you fire within 1 sec?
 
     public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
         this.drive = drive;
@@ -63,11 +65,17 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void execute() {
+        ShotInfo shotInfo =
+            ShotCalculator.calculateHubShotInfo(
+                drive.getPose(),
+                drive.getRobotVelocity(),
+                drive.getFieldVelocity());
+
         if (RobotBase.isSimulation()) {
             MapleSimUtil.scoreFuelIntoHub(
                 drive.getPose(),
                 drive.getFieldVelocity(),
-                0,
+                shotInfo.turretAngle().getRadians(),
                 Units.degreesToRadians(80),
                 kShotFireRateBallsPerSec);
         }

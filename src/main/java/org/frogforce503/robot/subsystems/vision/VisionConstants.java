@@ -33,8 +33,8 @@ import lombok.Getter;
  */
 public class VisionConstants {
     // Hardware / Configuration
-    public static EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets;
-    public static EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets;
+    public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
+    public static final EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
 
     static {
         turretToTurretCameraOffsets.put(

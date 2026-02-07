@@ -72,6 +72,10 @@ public class WarmupExecutor {
     }
 
     private void warumpShotCalculator() {
-        ShotCalculator.calculateHubShotInfo();
+        ShotCalculator.calculateHubShotInfo(
+            drive.getPose(),
+            drive.getRobotVelocity(),
+            drive.getFieldVelocity()
+        );
     }
 }
