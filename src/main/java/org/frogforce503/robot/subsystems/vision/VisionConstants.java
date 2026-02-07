@@ -2,6 +2,7 @@ package org.frogforce503.robot.subsystems.vision;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -149,7 +150,7 @@ public class VisionConstants {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.CLOSEST_TO_REFERENCE_POSE);
                 } 
-                aprilTagIO.setIgnoredAprilTags(Set.of());
+                aprilTagIO.setIgnoredAprilTags(new HashSet<>());
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
@@ -188,7 +189,7 @@ public class VisionConstants {
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
 
-                Set<Integer> ignoredTags = Set.of();
+                Set<Integer> ignoredTags = new HashSet<>();
                 ignoredTags.addAll(RED_TRENCH_TAGS);
                 ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -237,7 +238,7 @@ public class VisionConstants {
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 }
                 
-                Set<Integer> ignoredTags = Set.of();
+                Set<Integer> ignoredTags = new HashSet<>();
                 ignoredTags.addAll(RED_TRENCH_TAGS);
                 ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -282,7 +283,7 @@ public class VisionConstants {
                 if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
                     aprilTagIO.setPoseObservationType(PoseObservationType.PNP_DISTANCE_TRIG_SOLVE);
                 } 
-                Set<Integer> ignoredTags = Set.of();
+                Set<Integer> ignoredTags = new HashSet<>();
                 ignoredTags.addAll(RED_HUB_TAGS);
                 ignoredTags.addAll(BLUE_HUB_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -328,7 +329,7 @@ public class VisionConstants {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
-                Set<Integer> ignoredTags = Set.of();
+                Set<Integer> ignoredTags = new HashSet<>();
                 ignoredTags.addAll(RED_HUB_TAGS);
                 ignoredTags.addAll(BLUE_HUB_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);

@@ -50,6 +50,7 @@ public class Turret extends FFSubsystemBase {
 
         // Update profile
         if (shouldRunProfile && RobotState.isEnabled()) {
+            // Calculate best angle
             boolean hasBestAngle = false;
             double bestAngle = 0;
 
@@ -73,6 +74,7 @@ public class Turret extends FFSubsystemBase {
 
             lastTargetAngleRad = bestAngle;
 
+            // Run profile
             var goalState =
                 new State(
                     MathUtil.clamp(bestAngle, TurretConstants.minAngle, TurretConstants.maxAngle),
