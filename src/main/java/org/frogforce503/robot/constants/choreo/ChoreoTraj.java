@@ -24,20 +24,14 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj BlueLeftTrenchToNZ2 = new ChoreoTraj(
-	    "BlueLeftTrenchToNZ2",
-	    OptionalInt.empty(),
-	    6.04543,
-	    new Pose2d(3.582, 7.429, Rotation2d.fromRadians(0)),
-	    new Pose2d(3.582, 7.429, Rotation2d.fromRadians(0))
-	);
+    
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("BlueLeftTrenchToNZ2", BlueLeftTrenchToNZ2)
+    
     );
 
     /**

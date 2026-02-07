@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.drive;
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.lib.swerve.SwervePathController;
-import org.frogforce503.robot.constants.tuner.TunerConstantsCompBot;
+import org.frogforce503.robot.constants.tuner.TunerConstants;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,11 +15,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public final class DriveConstants {
     // Hardware / Configuration
-    public static final SwerveDrivetrainConstants drivetrainConstants = TunerConstantsCompBot.DrivetrainConstants;
-    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft = TunerConstantsCompBot.FrontLeft;
-    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontRight = TunerConstantsCompBot.FrontRight;
-    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backLeft = TunerConstantsCompBot.BackLeft;
-    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backRight = TunerConstantsCompBot.BackRight;
+    public static final SwerveDrivetrainConstants drivetrainConstants = TunerConstants.DrivetrainConstants;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft = TunerConstants.FrontLeft;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontRight = TunerConstants.FrontRight;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backLeft = TunerConstants.BackLeft;
+    public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> backRight = TunerConstants.BackRight;
 
     public static final double trackWidthX;
     public static final double trackWidthY;
@@ -34,8 +34,8 @@ public final class DriveConstants {
     public static final SwerveDriveKinematics kinematics;
     public static final SwervePathController pathFollower;
 
-    public static final PIDConfig linearPID = new PIDConfig(5.0, 0.0, 0.0);
-    public static final PIDConfig thetaPID = new PIDConfig(4.0, 0.0, 0.0);
+    public static final PIDConfig linearPID = new PIDConfig(0.25, 0.0, 0.1);
+    public static final PIDConfig thetaPID = new PIDConfig(3.0, 0.0, 0.0);
 
     static {
         Translation2d frontLeftModuleTranslation = new Translation2d(frontLeft.LocationX, frontLeft.LocationY);

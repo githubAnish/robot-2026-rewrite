@@ -7,11 +7,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
+import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagInputsAutoLogged;
-import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
-import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionInputsAutoLogged;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagInputsAutoLogged;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionInputsAutoLogged;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 
@@ -251,7 +252,7 @@ public class Vision extends SubsystemBase {
         }
 
         Transform3d turretToTurretCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName);
-        Transform3d robotToTurretBaseOffset = new Transform3d(); // TODO: Get robot to turret base offset from turret hardware constants
+        Transform3d robotToTurretBaseOffset = TurretConstants.robotToTurret;
 
         turretToTurretCameraOffset = new Transform3d(
             turretToTurretCameraOffset.getTranslation().rotateBy(

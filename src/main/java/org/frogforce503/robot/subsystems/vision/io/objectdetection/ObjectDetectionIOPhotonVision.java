@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.vision.objectdetection;
+package org.frogforce503.robot.subsystems.vision.io.objectdetection;
 
 import java.util.Comparator;
 import java.util.List;

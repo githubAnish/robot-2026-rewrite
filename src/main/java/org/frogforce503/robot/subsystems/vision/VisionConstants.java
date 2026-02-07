@@ -14,15 +14,15 @@ import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservationType;
 import org.frogforce503.lib.vision.apriltagdetection.TrackedAprilTag;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhotonSim;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhotonVision;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonVision;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -32,36 +32,11 @@ import lombok.Getter;
  * Important constants used by the Vision subsystem such as the different camera names and sets of AprilTag IDs.
  */
 public class VisionConstants {
-    /**
-     * Cameras on robots are configured with a name.
-     * Every camera on the robot must have a name from this enum.
-     * This enum is used to identify specific cameras on a robot for any use case.
-     */
-    public enum CameraName {
-        // AprilTag Detection Cameras
-        CLOSE_TURRET_CAMERA,
-        FAR_TURRET_CAMERA,
-        INTAKE_LEFT_CAMERA,
-        INTAKE_RIGHT_CAMERA,
-        BACK_CAMERA,
-
-        // Object Detection Cameras
-        FUEL_CAMERA
-    }
-
-    // Vision Hardware
-    public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
-    public static final EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
+    // Hardware / Configuration
+    public static EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets;
+    public static EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets;
 
     static {
-        turretToTurretCameraOffsets.put(
-            CameraName.CLOSE_TURRET_CAMERA,
-            new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
-            )
-        );
-
         turretToTurretCameraOffsets.put(
             CameraName.FAR_TURRET_CAMERA,
             new Transform3d(
@@ -70,19 +45,27 @@ public class VisionConstants {
             )
         );
 
+        turretToTurretCameraOffsets.put(
+            CameraName.CLOSE_TURRET_CAMERA,
+            new Transform3d(
+                new Translation3d(Units.inchesToMeters(2.321), Units.inchesToMeters(-.875), Units.inchesToMeters(1.141)),
+                new Rotation3d(0, Units.degreesToRadians(30), 0)
+            )
+        );
+
         robotToFixedCameraOffsets.put(
             CameraName.INTAKE_LEFT_CAMERA,
             new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
+                new Translation3d(Units.inchesToMeters(1.288), Units.inchesToMeters(11.525), Units.inchesToMeters(19.956)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(15), Units.degreesToRadians(-15))  
             )
         );
 
         robotToFixedCameraOffsets.put(
             CameraName.INTAKE_RIGHT_CAMERA,
             new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
+                new Translation3d(Units.inchesToMeters(1.288), Units.inchesToMeters(-11.525), Units.inchesToMeters(31.721)),
+                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(30), Units.degreesToRadians(10))
             )
         );
 
@@ -101,6 +84,23 @@ public class VisionConstants {
                 new Rotation3d(0, 0, 0)
             )
         );
+    }
+
+    /**
+     * Cameras on robots are configured with a name.
+     * Every camera on the robot must have a name from this enum.
+     * This enum is used to identify specific cameras on a robot for any use case.
+     */
+    public enum CameraName {
+        // AprilTag Detection Cameras
+        CLOSE_TURRET_CAMERA,
+        FAR_TURRET_CAMERA,
+        INTAKE_LEFT_CAMERA,
+        INTAKE_RIGHT_CAMERA,
+        BACK_CAMERA,
+
+        // Object Detection Cameras
+        FUEL_CAMERA
     }
 
     public static final Set<Integer> RED_TOWER_TAGS = Set.of(15, 16);
@@ -148,9 +148,9 @@ public class VisionConstants {
             aprilTagIO -> {
                 if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.CLOSEST_TO_REFERENCE_POSE);
+                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
-                aprilTagIO.setIgnoredAprilTags(new HashSet<>());
+                aprilTagIO.setIgnoredAprilTags(new HashSet<Integer>());
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
@@ -189,7 +189,7 @@ public class VisionConstants {
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
 
-                Set<Integer> ignoredTags = new HashSet<>();
+                Set<Integer> ignoredTags = new HashSet<Integer>();
                 ignoredTags.addAll(RED_TRENCH_TAGS);
                 ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -238,7 +238,7 @@ public class VisionConstants {
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 }
                 
-                Set<Integer> ignoredTags = new HashSet<>();
+                Set<Integer> ignoredTags = new HashSet<Integer>();
                 ignoredTags.addAll(RED_TRENCH_TAGS);
                 ignoredTags.addAll(BLUE_TRENCH_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -283,7 +283,7 @@ public class VisionConstants {
                 if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
                     aprilTagIO.setPoseObservationType(PoseObservationType.PNP_DISTANCE_TRIG_SOLVE);
                 } 
-                Set<Integer> ignoredTags = new HashSet<>();
+                Set<Integer> ignoredTags = new HashSet<Integer>();
                 ignoredTags.addAll(RED_HUB_TAGS);
                 ignoredTags.addAll(BLUE_HUB_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);
@@ -329,7 +329,7 @@ public class VisionConstants {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
-                Set<Integer> ignoredTags = new HashSet<>();
+                Set<Integer> ignoredTags = new HashSet<Integer>();
                 ignoredTags.addAll(RED_HUB_TAGS);
                 ignoredTags.addAll(BLUE_HUB_TAGS);
                 ignoredTags.addAll(RED_OUTPOST_TAGS);

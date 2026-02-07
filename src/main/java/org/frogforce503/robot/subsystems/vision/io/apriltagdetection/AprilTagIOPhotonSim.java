@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.vision.apriltagdetection;
+package org.frogforce503.robot.subsystems.vision.io.apriltagdetection;
 
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;

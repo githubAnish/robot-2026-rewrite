@@ -6,6 +6,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
@@ -116,7 +117,7 @@ public class Turret extends FFSubsystemBase {
 
     // Actions
     public void seedRelativePosition() {
-        if (MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI)) { // only if relative encoder in range -180 deg to 180 deg
+        if (MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI) && inputs.velocityRadPerSec < Units.degreesToRadians(2)) { // only if relative encoder in range -180 deg to 180 deg & velocity low
             io.setRelativePosition(inputs.absolutePositionRad);
         }
     }

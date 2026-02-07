@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.vision.apriltagdetection;
+package org.frogforce503.robot.subsystems.vision.io.apriltagdetection;
 
 import java.util.HashSet;
 import java.util.List;

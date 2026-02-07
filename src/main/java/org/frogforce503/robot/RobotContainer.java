@@ -64,10 +64,10 @@ import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.apriltagdetection.AprilTagIOPhotonSim;
-import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIO;
-import org.frogforce503.robot.subsystems.vision.objectdetection.ObjectDetectionIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
+import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 

@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.vision;
+package org.frogforce503.robot.subsystems.vision.io;
 
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 
