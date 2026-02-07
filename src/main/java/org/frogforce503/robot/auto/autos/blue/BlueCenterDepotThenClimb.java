@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class BlueCenterDepotThenClimb implements AutoMode {
     public BlueCenterDepotThenClimb(Drive drive, Vision vision, Superstructure superstructure) {
-            
+        
     }
 
     @Override
