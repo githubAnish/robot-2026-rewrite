@@ -75,7 +75,7 @@ public class ShootFuelIntoHub extends Command {
             MapleSimUtil.scoreFuelIntoHub(
                 drive.getPose(),
                 drive.getFieldVelocity(),
-                shotInfo.turretAngle().getRadians(),
+                turret.getAngleRad() + drive.getAngle().getRadians(),
                 Units.degreesToRadians(80),
                 kShotFireRateBallsPerSec);
         }

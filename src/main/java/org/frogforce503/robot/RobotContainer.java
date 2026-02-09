@@ -72,6 +72,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -417,6 +418,9 @@ public class RobotContainer {
         //         Commands.waitSeconds(1),
         //         new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride)
         //     )
+        // );
+        // RobotModeTriggers.teleop().onTrue(
+        //     Commands.runOnce(() -> {superstructure.getTurret().setAngle(Units.degreesToRadians(-90));})
         // );
     }
 }
