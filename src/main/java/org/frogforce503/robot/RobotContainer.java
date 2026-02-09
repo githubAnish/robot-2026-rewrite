@@ -306,7 +306,8 @@ public class RobotContainer {
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
 
         bindShotPresets(driver.y(), ShotPreset.BATTER);
-        bindShotPresets(driver.a(), ShotPreset.TRENCH);
+        bindShotPresets(driver.x(), ShotPreset.TOWER);
+        bindShotPresets(driver.a(), ShotPreset.LOB_FROM_NZ);
 
         bindClimbing(driver.b());
 

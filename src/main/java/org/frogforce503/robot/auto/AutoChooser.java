@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.frogforce503.lib.auto.choreo.ChoreoUtil;
+import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.auto.autos.blue.BlueCenterDepotThenClimb;
@@ -14,6 +15,8 @@ import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -41,9 +44,12 @@ public class AutoChooser {
         this.vision = vision;
         this.superstructure = superstructure;
 
-        // Configure auto factories
-        PathPlannerUtil.configureAutoBuilder(drive);
+        // Configure Choreo
         choreoAutoFactory = ChoreoUtil.createAutoFactory(drive);
+
+        // Configure PathPlanner
+        PathPlannerUtil.configureAutoBuilder(drive);
+        Pathfinding.setPathfinder(new LocalADStarAK());
 
         // Configure autos
         configureAutos();
