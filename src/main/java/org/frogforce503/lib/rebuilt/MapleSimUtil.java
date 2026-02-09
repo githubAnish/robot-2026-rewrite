@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,8 +27,8 @@ public final class MapleSimUtil {
     private MapleSimUtil() {}
     
     public static void scoreFuelIntoHub(
-        Pose2d robotPose,
-        ChassisSpeeds robotFieldRelativeVelocity,
+        Pose2d pose,
+        ChassisSpeeds fieldRelativeVelocity,
         double turretFieldRelativeAngleRad,
         double hoodAngleRad,
         double shotFireRateBallsPerSec
@@ -46,10 +47,10 @@ public final class MapleSimUtil {
 
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
-                robotPose.getTranslation(),
-                new Translation2d(),
-                robotFieldRelativeVelocity,
-                robotPose.getRotation(), // need to change to field-relative turret angle
+                pose.getTranslation(),
+                new Translation2d(-0.16, -0.22),
+                fieldRelativeVelocity,
+                new Rotation2d(turretFieldRelativeAngleRad), // need to change to field-relative turret angle
                 Inches.of(24),
                 MetersPerSecond.of(10),
                 Radians.of(hoodAngleRad));

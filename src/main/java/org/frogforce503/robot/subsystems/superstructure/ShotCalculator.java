@@ -74,13 +74,13 @@ public class ShotCalculator {
     }
 
     public static ShotInfo calculateHubShotInfo(
-        Pose2d estimatedPose,
+        Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity
     ) {
         // Calculate estimated pose while accounting for phase delay
-        estimatedPose =
-            estimatedPose.exp(
+        pose =
+            pose.exp(
                 new Twist2d(
                     robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
                     robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
@@ -92,12 +92,12 @@ public class ShotCalculator {
                 ? FieldConstants.Hub.redShotPose.toTranslation2d() 
                 : FieldConstants.Hub.blueShotPose.toTranslation2d();
 
-        Pose2d turretPosition = estimatedPose.transformBy(GeomUtil.toTransform2d(TurretConstants.robotToTurret));
+        Pose2d turretPosition = pose.transformBy(GeomUtil.toTransform2d(TurretConstants.robotToTurret));
         double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
 
         // Calculate field relative turret velocity
         ChassisSpeeds robotVelocity = fieldRelativeVelocity;
-        double robotAngle = estimatedPose.getRotation().getRadians();
+        double robotAngle = pose.getRotation().getRadians();
         
         double turretVelocityX =
             robotVelocity.vxMetersPerSecond

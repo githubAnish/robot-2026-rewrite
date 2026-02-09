@@ -4,6 +4,7 @@ import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.ironmaple.simulation.SimulatedArena;
@@ -16,6 +17,7 @@ public class GameViz {
     private final Drive drive;
     private final Turret turret;
     private final Hood hood;
+    private final IntakePivot intakePivot;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz;
@@ -24,6 +26,7 @@ public class GameViz {
         this.drive = drive;
         this.turret = superstructure.getTurret();
         this.hood = superstructure.getHood();
+        this.intakePivot = superstructure.getIntakePivot();
         this.visionViz = visionViz;
         this.superstructureViz = new SuperstructureViz();
 
@@ -40,7 +43,8 @@ public class GameViz {
         superstructureViz.update(
             new Pose3d(drive.getPose()),
             turret.getAngleRad(),
-            hood.getAngleRad());
+            hood.getAngleRad(),
+            intakePivot.getAngleRad());
 
         Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
         Logger.recordOutput("GameViz/FuelPoses", fuelPoses);
