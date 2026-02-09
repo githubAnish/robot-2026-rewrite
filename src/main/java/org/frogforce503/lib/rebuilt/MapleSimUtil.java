@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -48,7 +49,7 @@ public final class MapleSimUtil {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
                 pose.getTranslation(),
-                new Translation2d(-0.16, -0.22),
+                TurretConstants.robotToTurret.getTranslation().toTranslation2d(),
                 fieldRelativeVelocity,
                 new Rotation2d(turretFieldRelativeAngleRad), // need to change to field-relative turret angle
                 Inches.of(24),

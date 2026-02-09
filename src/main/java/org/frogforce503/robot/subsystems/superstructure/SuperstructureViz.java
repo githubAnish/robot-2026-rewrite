@@ -25,7 +25,7 @@ public class SuperstructureViz {
         // update6328(drivePose3d, turretAngleRad, hoodAngleRad);
     }
 
-    public void updateFF(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad) {
+    private void updateFF(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad) {
         var turretPose =
             Pose3d.kZero
                 .plus(robotToTurret)
@@ -49,7 +49,7 @@ public class SuperstructureViz {
         Logger.recordOutput("SuperstructureViz/Components", turretPose, hoodPose, intakePivotPose, hopperExtenderPose);
     }
 
-    public void update6328(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
+    private void update6328(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
         var turretPose =
             TurretConstants.robotToTurret
                 .toPose3d()
