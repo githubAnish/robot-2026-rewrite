@@ -175,15 +175,15 @@ public class FieldConstants {
     }
 
     public static class LeftBump {
-        public static final Translation2d blueLeftBumpFrontLeftCorner;
-        public static final Translation2d blueLeftBumpFrontRightCorner;
-        public static final Translation2d blueLeftBumpBackLeftCorner;
-        public static final Translation2d blueLeftBumpBackRightCorner;
+        public static final Translation2d blueFrontLeftCorner;
+        public static final Translation2d blueFrontRightCorner;
+        public static final Translation2d blueBackLeftCorner;
+        public static final Translation2d blueBackRightCorner;
 
-        public static final Translation2d redLeftBumpFrontLeftCorner;
-        public static final Translation2d redLeftBumpFrontRightCorner;
-        public static final Translation2d redLeftBumpBackLeftCorner;
-        public static final Translation2d redLeftBumpBackRightCorner;
+        public static final Translation2d redFrontLeftCorner;
+        public static final Translation2d redFrontRightCorner;
+        public static final Translation2d redBackLeftCorner;
+        public static final Translation2d redBackRightCorner;
 
         static {
             final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
@@ -192,31 +192,31 @@ public class FieldConstants {
             // Blue Left Bump
             final double leftWallToBlueLeftBumpBackLeft = Units.inchesToMeters(63.0);
 
-            blueLeftBumpBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - leftWallToBlueLeftBumpBackLeft);
-            blueLeftBumpFrontLeftCorner = blueLeftBumpBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-            blueLeftBumpFrontRightCorner = blueLeftBumpFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
-            blueLeftBumpBackRightCorner = blueLeftBumpFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            blueBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - leftWallToBlueLeftBumpBackLeft);
+            blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
+            blueBackRightCorner = blueFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
 
             // Red Left Bump
             final double rightWallToRedLeftBumpBackLeft = Units.inchesToMeters(63.0);
 
-            redLeftBumpBackLeftCorner = new Translation2d(Lines.redInitLineX, rightWallToRedLeftBumpBackLeft);
-            redLeftBumpFrontLeftCorner = redLeftBumpBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-            redLeftBumpFrontRightCorner = redLeftBumpFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
-            redLeftBumpBackRightCorner = redLeftBumpFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            redBackLeftCorner = new Translation2d(Lines.redInitLineX, rightWallToRedLeftBumpBackLeft);
+            redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            redFrontRightCorner = redFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
+            redBackRightCorner = redFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
         }
     }
 
     public static class RightBump {
-        public static final Translation2d blueRightBumpFrontLeftCorner;
-        public static final Translation2d blueRightBumpFrontRightCorner;
-        public static final Translation2d blueRightBumpBackLeftCorner;
-        public static final Translation2d blueRightBumpBackRightCorner;
+        public static final Translation2d blueFrontLeftCorner;
+        public static final Translation2d blueFrontRightCorner;
+        public static final Translation2d blueBackLeftCorner;
+        public static final Translation2d blueBackRightCorner;
 
-        public static final Translation2d redRightBumpFrontLeftCorner;
-        public static final Translation2d redRightBumpFrontRightCorner;
-        public static final Translation2d redRightBumpBackLeftCorner;
-        public static final Translation2d redRightBumpBackRightCorner;
+        public static final Translation2d redFrontLeftCorner;
+        public static final Translation2d redFrontRightCorner;
+        public static final Translation2d redBackLeftCorner;
+        public static final Translation2d redBackRightCorner;
 
         static {
             final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
@@ -225,18 +225,18 @@ public class FieldConstants {
             // Blue Right Bump
             final double rightWallToBlueRightBumpBackRight = Units.inchesToMeters(63.0);
 
-            blueRightBumpBackRightCorner = new Translation2d(Lines.blueInitLineX, rightWallToBlueRightBumpBackRight);
-            blueRightBumpFrontRightCorner = blueRightBumpBackRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-            blueRightBumpFrontLeftCorner = blueRightBumpFrontRightCorner.plus(new Translation2d(0, frontLeftToFrontRight));
-            blueRightBumpBackLeftCorner = blueRightBumpFrontLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            blueBackRightCorner = new Translation2d(Lines.blueInitLineX, rightWallToBlueRightBumpBackRight);
+            blueFrontRightCorner = blueBackRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            blueFrontLeftCorner = blueFrontRightCorner.plus(new Translation2d(0, frontLeftToFrontRight));
+            blueBackLeftCorner = blueFrontLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
 
             // Red Right Bump
             final double leftWallToRedRightBumpBackRight = Units.inchesToMeters(63.0);
 
-            redRightBumpBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - leftWallToRedRightBumpBackRight);
-            redRightBumpFrontRightCorner = redRightBumpBackRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-            redRightBumpFrontLeftCorner = redRightBumpFrontRightCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
-            redRightBumpBackLeftCorner = redRightBumpFrontLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            redBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - leftWallToRedRightBumpBackRight);
+            redFrontRightCorner = redBackRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            redFrontLeftCorner = redFrontRightCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
+            redBackLeftCorner = redFrontLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
         }
     }
 }

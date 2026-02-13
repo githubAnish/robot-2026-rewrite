@@ -132,7 +132,7 @@ public class TeleopDriveCommand extends Command {
         drive.stop();
     }
 
-    public void runFieldRelativeVelocity(ChassisSpeeds speeds) {
+    private void runFieldRelativeVelocity(ChassisSpeeds speeds) {
         drive.runVelocity(
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds,

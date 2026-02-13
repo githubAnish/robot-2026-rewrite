@@ -4,13 +4,16 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -19,18 +22,62 @@ import edu.wpi.first.wpilibj.Timer;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 
 public final class MapleSimUtil {
+    // Bump Sim Constants
+    private static final double maxLinearSpeedOverBumpMetersPerSec = DriveConstants.maxLinearSpeed / 5;
+
+    private static final Rectangle2d blueLeftBump =
+        new Rectangle2d(FieldConstants.LeftBump.blueBackLeftCorner, FieldConstants.LeftBump.blueFrontRightCorner);
+
+    private static final Rectangle2d blueRightBump =
+        new Rectangle2d(FieldConstants.RightBump.blueBackLeftCorner, FieldConstants.RightBump.blueFrontRightCorner);
+
+    private static final Rectangle2d redLeftBump =
+        new Rectangle2d(FieldConstants.LeftBump.redBackLeftCorner, FieldConstants.LeftBump.redFrontRightCorner);
+
+    private static final Rectangle2d redRightBump =
+        new Rectangle2d(FieldConstants.RightBump.redBackLeftCorner, FieldConstants.RightBump.redFrontRightCorner);
+
+    // Shoot Sim Constants
     private static final Timer shotTimer = new Timer();
     private static final Translation3d shotTolerance = new Translation3d(0.5, 0.5, 0.5);
 
     private MapleSimUtil() {}
+
+    public static void initializeArena() {
+        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false)); // Allow MapleSim to cross over bump
+    }
+
+    // Applies max velocity to bumps instead of blocking them out like MapleSim
+    public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
+        double linearSpeed =
+            Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
+
+        boolean inBump =
+            blueLeftBump.contains(robotTranslation) ||
+            blueRightBump.contains(robotTranslation) ||
+            redLeftBump.contains(robotTranslation) ||
+            redRightBump.contains(robotTranslation);
+
+        if ((inBump && linearSpeed <= maxLinearSpeedOverBumpMetersPerSec) || !inBump) {
+            return robotVelocity;
+        }
+
+        double scalar = maxLinearSpeedOverBumpMetersPerSec / linearSpeed;
+
+        return new ChassisSpeeds(
+            robotVelocity.vxMetersPerSecond * scalar,
+            robotVelocity.vyMetersPerSecond * scalar,
+            robotVelocity.omegaRadiansPerSecond);
+    }
     
     public static void scoreFuelIntoHub(
         Pose2d pose,
         ChassisSpeeds fieldRelativeVelocity,
-        double turretFieldRelativeAngleRad,
+        Rotation2d turretFieldRelativeAngle,
         double hoodAngleRad,
         double shotFireRateBallsPerSec
     ) {
@@ -49,9 +96,9 @@ public final class MapleSimUtil {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
                 pose.getTranslation(),
-                TurretConstants.robotToTurret.getTranslation().toTranslation2d(),
+                GeomUtil.toPose2d(pose.getRotation()).plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret)).getTranslation(),
                 fieldRelativeVelocity,
-                new Rotation2d(turretFieldRelativeAngleRad), // need to change to field-relative turret angle
+                turretFieldRelativeAngle, // need to change to field-relative turret angle
                 Inches.of(24),
                 MetersPerSecond.of(10),
                 Radians.of(hoodAngleRad));

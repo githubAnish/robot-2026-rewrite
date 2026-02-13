@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
+import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.lib.subsystem.VirtualSubsystem;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -107,6 +108,9 @@ public class Robot extends LoggedRobot {
       DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
       DriverStationSim.notifyNewData();
     }
+
+    // Set field for MapleSim
+    MapleSimUtil.initializeArena();
 
     // Initialize RobotContainer
     robotContainer = new RobotContainer();

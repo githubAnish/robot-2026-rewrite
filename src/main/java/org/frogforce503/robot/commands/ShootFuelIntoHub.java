@@ -2,11 +2,14 @@ package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.TurretSetpoint;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -14,8 +17,12 @@ import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
+import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
+import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -65,20 +72,51 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void execute() {
-        ShotInfo shotInfo =
-            ShotCalculator.calculateHubShotInfo(
-                drive.getPose(),
-                drive.getRobotVelocity(),
-                drive.getFieldVelocity());
+        // ShotInfo shotInfo =
+        //     ShotCalculator.calculateHubShotInfo(
+        //         drive.getPose(),
+        //         drive.getRobotVelocity(),
+        //         drive.getFieldVelocity());
+
+        // if (RobotBase.isSimulation()) {
+        //     MapleSimUtil.scoreFuelIntoHub(
+        //         drive.getPose(),
+        //         drive.getFieldVelocity(),
+        //         turret.getAngleRad() + drive.getAngle().getRadians(),
+        //         Units.degreesToRadians(80),
+        //         kShotFireRateBallsPerSec);
+        // }
+
+        // Translation2d target =
+        //     FieldConstants.isRed() 
+        //         ? FieldConstants.Hub.redShotPose.toTranslation2d() 
+        //         : FieldConstants.Hub.blueShotPose.toTranslation2d();
+        
+        // Rotation2d turretAng = target.minus(drive.getPose().plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret)).getTranslation()).getAngle();
+
+        // TurretSetpoint setpoint = ShotCalculator.calculateTurretRobotRelativeSetpoint(
+        //     turretAng, 0, drive.getAngle(), drive.getRobotVelocity().omegaRadiansPerSecond);
+
+        ShotInfo shotInfo = ShotCalculator.calculateHubShotInfo(drive.getPose(), drive.getRobotVelocity(), drive.getFieldVelocity());
+        TurretSetpoint setpoint = ShotCalculator.calculateTurretRobotRelativeSetpoint(
+            shotInfo.turretAngle(),
+            shotInfo.turretVelocity(),
+            drive.getAngle(),
+            drive.getRobotVelocity().omegaRadiansPerSecond);
+
+        turret.setAngle(setpoint.angleRad(), setpoint.velocityRadPerSec());
 
         if (RobotBase.isSimulation()) {
             MapleSimUtil.scoreFuelIntoHub(
                 drive.getPose(),
                 drive.getFieldVelocity(),
-                turret.getAngleRad() + drive.getAngle().getRadians(),
+                shotInfo.turretAngle(),
                 Units.degreesToRadians(80),
                 kShotFireRateBallsPerSec);
         }
+
+        Logger.recordOutput("ShootFuelIntoHub/ShotInfo", shotInfo);
+        Logger.recordOutput("ShootFuelIntoHub/TurretSetpoint", setpoint);
     }
 
     @Override
