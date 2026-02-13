@@ -32,10 +32,13 @@ public class ShotCalculator {
     private static double minDistance;
     private static double maxDistance;
     private static double phaseDelay;
+
     private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+        
     private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
+
     private static final InterpolatingDoubleTreeMap timeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
@@ -185,8 +188,8 @@ public class ShotCalculator {
         double angleRad,
         double velocityRadPerSec) {}
 
-    public static record ShotInfo(
-        boolean isValid,
+    public record ShotInfo(
+        boolean isFeasibleShot,
         Rotation2d turretAngle,
         double turretVelocity,
         double hoodAngle,

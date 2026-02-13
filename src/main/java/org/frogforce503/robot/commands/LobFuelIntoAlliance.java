@@ -45,7 +45,7 @@ public class LobFuelIntoAlliance extends Command {
 
         this.autoAssistEnabled = autoAssistEnabled;
 
-        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
+        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override

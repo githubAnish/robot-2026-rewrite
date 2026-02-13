@@ -22,6 +22,7 @@ import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import lombok.Getter;
 
@@ -93,7 +94,7 @@ public class AutoChooser {
         autoCommand = selectedAuto.getCommand();
 
         if (autoCommand != null) {
-            autoCommand.schedule();   
+            CommandScheduler.getInstance().schedule(autoCommand);
         }
     }
 

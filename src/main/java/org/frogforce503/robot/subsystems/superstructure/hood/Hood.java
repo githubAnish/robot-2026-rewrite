@@ -25,6 +25,7 @@ public class Hood extends FFSubsystemBase {
 
     // Control
     private double targetAngleRad = HoodConstants.START;
+    private double targetVelocityRadPerSec = 0.0;
 
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
@@ -50,7 +51,7 @@ public class Hood extends FFSubsystemBase {
             var goalState =
                 new State(
                     MathUtil.clamp(targetAngleRad, HoodConstants.minAngle, HoodConstants.maxAngle),
-                    0.0);
+                    targetVelocityRadPerSec);
 
             double previousVelocity = setpoint.velocity;
 
@@ -107,8 +108,13 @@ public class Hood extends FFSubsystemBase {
     }
 
     public void setAngle(double angleRad) {
+        setAngle(angleRad, 0.0);
+    }
+
+    public void setAngle(double angleRad, double velocityRadPerSec) {
         this.shouldRunProfile = true;
         this.targetAngleRad = angleRad;
+        this.targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     public boolean isAtAngle(double angleRad, double tolerance) {

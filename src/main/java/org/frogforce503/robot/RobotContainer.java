@@ -306,7 +306,6 @@ public class RobotContainer {
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
 
         bindShotPresets(driver.y(), ShotPreset.BATTER);
-        bindShotPresets(driver.x(), ShotPreset.TOWER);
         bindShotPresets(driver.a(), ShotPreset.LOB_FROM_NZ);
 
         bindClimbing(driver.b());
@@ -360,8 +359,8 @@ public class RobotContainer {
 
     private void bindShotPresets(Trigger trigger, ShotPreset shotPreset) {
         trigger
-            .onTrue(Commands.runOnce(() -> superstructure.setShotPreset(shotPreset)))
-            .onFalse(Commands.runOnce(() -> superstructure.setShotPreset(ShotPreset.NONE)));
+            .whileTrue(Commands.runOnce(() -> superstructure.setShotPreset(shotPreset)))
+            .whileFalse(Commands.runOnce(() -> superstructure.setShotPreset(ShotPreset.NONE)));
     }
 
     // Cancel incoming commands to ensure no unintended / undesirable behavior occurs outside of the climb sequence
@@ -412,14 +411,10 @@ public class RobotContainer {
     }
 
     public void test() {
-        // RobotModeTriggers.teleop().onTrue(
-        //     Commands.sequence(
-        //         // Commands.waitSeconds(1),
-        //         new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride)
-        //     )
-        // );
-        // RobotModeTriggers.teleop().onTrue(
-        //     Commands.runOnce(() -> {superstructure.getTurret().setAngle(Units.degreesToRadians(-90));})
-        // );
+        RobotModeTriggers.teleop().onTrue(
+            Commands.sequence(
+                new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride)
+            )
+        );
     }
 }

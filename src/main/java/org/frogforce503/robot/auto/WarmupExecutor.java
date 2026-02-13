@@ -12,6 +12,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class WarmupExecutor {
     private final Drive drive;
@@ -25,7 +26,7 @@ public class WarmupExecutor {
     public void disabledInit() {
         // NetworkTableInstance.getDefault().flush();
         // System.gc();
-        FollowPathCommand.warmupCommand().schedule();
+        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     }
 
     public void disabledPeriodic() {

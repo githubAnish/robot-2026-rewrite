@@ -98,6 +98,7 @@ public class ShootFuelIntoHub extends Command {
         //     turretAng, 0, drive.getAngle(), drive.getRobotVelocity().omegaRadiansPerSecond);
 
         ShotInfo shotInfo = ShotCalculator.calculateHubShotInfo(drive.getPose(), drive.getRobotVelocity(), drive.getFieldVelocity());
+        
         TurretSetpoint setpoint = ShotCalculator.calculateTurretRobotRelativeSetpoint(
             shotInfo.turretAngle(),
             shotInfo.turretVelocity(),
