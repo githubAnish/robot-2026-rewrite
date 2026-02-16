@@ -1,7 +1,5 @@
 package org.frogforce503.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -28,9 +26,7 @@ public class LobFuelIntoAlliance extends Command {
     private final Flywheels flywheels;
     private final Hood hood;
 
-    private final BooleanSupplier autoAssistEnabled;
-
-    public LobFuelIntoAlliance(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
+    public LobFuelIntoAlliance(Drive drive, Vision vision, Superstructure superstructure) {
         this.drive = drive;
         this.vision = vision;
 
@@ -42,8 +38,6 @@ public class LobFuelIntoAlliance extends Command {
         this.turret = superstructure.getTurret();
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
-
-        this.autoAssistEnabled = autoAssistEnabled;
 
         addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }

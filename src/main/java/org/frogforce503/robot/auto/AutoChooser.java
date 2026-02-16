@@ -91,7 +91,9 @@ public class AutoChooser {
             return;
         }
 
-        autoCommand = selectedAuto.getCommand();
+        final String autoName = selectedAuto.getClass().getSimpleName();
+
+        autoCommand = selectedAuto.getCommand().withName(autoName);
 
         if (autoCommand != null) {
             CommandScheduler.getInstance().schedule(autoCommand);

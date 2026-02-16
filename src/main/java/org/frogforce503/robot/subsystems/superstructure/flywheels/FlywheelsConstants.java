@@ -17,6 +17,8 @@ public class FlywheelsConstants {
     public static final FFConfig kFF = new FFConfig(0, 0, 0.0224, 0);
     public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(6000);
 
+    public static final double kSimRadiusMeters = Units.inchesToMeters(1.5);
+
     // Setpoints
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0); // TODO Flywheel speed has to be extremely accurate for consistent shot
 

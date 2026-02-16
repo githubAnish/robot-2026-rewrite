@@ -2,10 +2,12 @@ package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -150,5 +152,12 @@ public class Drive extends SubsystemBase {
     /** Runs the drive in a straight line with the specified drive output. */
     public void runCharacterization(double output) {
         io.runCharacterization(output);
+    }
+
+    public MapleSimSwerveDrivetrain getMapleSimDrive() {
+        if (io instanceof DriveIOMapleSim) {
+            return ((DriveIOMapleSim) io).getDrivetrain();
+        }
+        return null;
     }
 }

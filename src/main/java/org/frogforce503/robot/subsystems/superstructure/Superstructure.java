@@ -27,7 +27,7 @@ public class Superstructure extends VirtualSubsystem {
 
     // Inputs
     @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
-    @Setter @Getter private boolean feasibleShot;
+    @Setter @Getter private boolean feasibleShot = false;
 
     // Overrides
     @Getter private final LoggedNetworkBoolean superstructureCoastOverride =

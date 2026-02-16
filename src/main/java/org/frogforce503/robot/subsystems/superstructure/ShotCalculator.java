@@ -9,6 +9,9 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
+import java.util.OptionalDouble;
+
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -29,9 +32,9 @@ public class ShotCalculator {
     private static double turretVelocity;
     private static double hoodVelocity;
 
-    private static double minDistance;
-    private static double maxDistance;
-    private static double phaseDelay;
+    private static final double minDistance = 1.34; // update based on shotmap
+    private static final double maxDistance = 5.60; // update based on shotmap
+    private static final double phaseDelay = 0.03;
 
     private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
@@ -43,10 +46,7 @@ public class ShotCalculator {
         new InterpolatingDoubleTreeMap();
 
     static {
-        minDistance = 1.34;
-        maxDistance = 5.60;
-        phaseDelay = 0.03;
-
+        // Configure shotmaps
         launchHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0));
         launchHoodAngleMap.put(1.78, Rotation2d.fromDegrees(19.0));
         launchHoodAngleMap.put(2.17, Rotation2d.fromDegrees(24.0));
@@ -80,6 +80,24 @@ public class ShotCalculator {
         Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity
+    ) {
+        return
+            calculateHubShotInfo(
+                pose,
+                robotRelativeVelocity,
+                fieldRelativeVelocity,
+                OptionalDouble.empty(),
+                OptionalDouble.empty(),
+                OptionalDouble.empty());
+    }
+
+    public static ShotInfo calculateHubShotInfo(
+        Pose2d pose,
+        ChassisSpeeds robotRelativeVelocity,
+        ChassisSpeeds fieldRelativeVelocity,
+        OptionalDouble flywheelsVelocityRadPerSecOverride,
+        OptionalDouble hoodAngleRadOverride,
+        OptionalDouble timeOfFlightSecOverride
     ) {
         // Calculate estimated pose while accounting for phase delay
         pose =
@@ -120,7 +138,10 @@ public class ShotCalculator {
         double lookaheadTurretToTargetDistance = turretToTargetDistance;
         
         for (int i = 0; i < 20; i++) {
-            timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+            timeOfFlight =
+                timeOfFlightSecOverride.isEmpty()
+                    ? timeOfFlightMap.get(lookaheadTurretToTargetDistance)
+                    : timeOfFlightSecOverride.getAsDouble();
 
             double offsetX = turretVelocityX * timeOfFlight;
             double offsetY = turretVelocityY * timeOfFlight;
@@ -135,7 +156,10 @@ public class ShotCalculator {
 
         // Calculate parameters accounted for imparted velocity
         turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-        hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+        hoodAngle =
+            hoodAngleRadOverride.isEmpty()
+                ? launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians()
+                : hoodAngleRadOverride.getAsDouble();
 
         if (lastTurretAngle == null) {
             lastTurretAngle = turretAngle;
@@ -155,15 +179,21 @@ public class ShotCalculator {
         lastTurretAngle = turretAngle;
         lastHoodAngle = hoodAngle;
 
+        final double flywheelSpeed =
+            flywheelsVelocityRadPerSecOverride.isEmpty()
+                ? launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance)
+                : flywheelsVelocityRadPerSecOverride.getAsDouble();
+
         ShotInfo latestInfo =
             new ShotInfo(
                 lookaheadTurretToTargetDistance >= minDistance
                     && lookaheadTurretToTargetDistance <= maxDistance,
+                turretToTargetDistance,
                 turretAngle,
                 turretVelocity,
                 hoodAngle,
                 hoodVelocity,
-                launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
+                flywheelSpeed);
 
         // Log calculated values
         Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
@@ -190,9 +220,10 @@ public class ShotCalculator {
 
     public record ShotInfo(
         boolean isFeasibleShot,
-        Rotation2d turretAngle,
-        double turretVelocity,
-        double hoodAngle,
-        double hoodVelocity,
-        double flywheelSpeed) {}
+        double turretToTargetDistance,
+        Rotation2d turretFieldRelativeAngle,
+        double turretVelocityRadPerSec,
+        double hoodAngleRad,
+        double hoodVelocityRadPerSec,
+        double flywheelsVelocityRadPerSec) {}
 }

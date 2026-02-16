@@ -1,6 +1,7 @@
 package org.frogforce503.robot.subsystems.superstructure;
 
 import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,7 +15,7 @@ import lombok.experimental.ExtensionMethod;
 public class SuperstructureViz {
     // Constants
     private final Transform3d robotToTurret = TurretConstants.robotToTurret;
-    private final Transform3d turretToHood = new Transform3d(0.104, 0, 0.09, Rotation3d.kZero);
+    private final Transform3d turretToHood = HoodConstants.turretToHood;
     private final Transform3d robotToIntakePivot = new Transform3d(0.28, 0.01, 0.206, Rotation3d.kZero);
     private final Transform3d robotToHopperExtender = new Transform3d(0.306, 0.01, 0.31, Rotation3d.kZero);
 

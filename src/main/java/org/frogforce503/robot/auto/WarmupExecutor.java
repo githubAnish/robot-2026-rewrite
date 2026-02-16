@@ -8,6 +8,7 @@ import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,19 +22,30 @@ public class WarmupExecutor {
     public WarmupExecutor(Drive drive, AutoChooser autoChooser) {
         this.drive = drive;
         this.autoChooser = autoChooser;
+
+        // Warmup PathPlanner cmds on robot init
+        CommandScheduler.getInstance().schedule(
+            FollowPathCommand
+                .warmupCommand()
+                .withName("FollowPathCommand Warmup")
+                .ignoringDisable(true),
+                
+            PathfindingCommand
+                .warmupCommand()
+                .withName("PathfindingCommand Warmup")
+                .ignoringDisable(true));
     }
 
     public void disabledInit() {
         // NetworkTableInstance.getDefault().flush();
         // System.gc();
-        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     }
 
     public void disabledPeriodic() {
         warmupPlannedPathGenerator();
         warmupPaths();
         warmupDrive();
-        warumpShotCalculator();
+        warmupShotCalculator();
     }
 
     /** Wrap this method over another method to find its warmup time. */
@@ -72,11 +84,18 @@ public class WarmupExecutor {
             0.1);
     }
 
-    private void warumpShotCalculator() {
+    private void warmupShotCalculator() {
         ShotCalculator.calculateHubShotInfo(
             drive.getPose(),
             drive.getRobotVelocity(),
             drive.getFieldVelocity()
+        );
+
+        ShotCalculator.calculateTurretRobotRelativeSetpoint(
+            Rotation2d.kZero,
+            3,
+            Rotation2d.kZero,
+            3
         );
     }
 }

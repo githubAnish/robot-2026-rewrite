@@ -1,48 +1,48 @@
 package org.frogforce503.robot.subsystems.drive.io;
 
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
+import lombok.Getter;
 
 @SuppressWarnings("unchecked")
 public class DriveIOMapleSim extends DriveIOPhoenix {
     // Requirements
-    private final MapleSimSwerveDrivetrain drivetrain;
+    @Getter private final MapleSimSwerveDrivetrain drivetrain;
     private Notifier simNotifier;
 
     // Constants
     private static final double kSimLoopPeriod = 0.002; // 2 ms
 
-    public DriveIOMapleSim(SwerveModuleConstants<?, ?, ?>... modules) {
+    public DriveIOMapleSim(SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>... modules) {
         super(
             MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules));
 
         drivetrain =
             new MapleSimSwerveDrivetrain(
                 Seconds.of(kSimLoopPeriod),
-                Pounds.of(132.2), // from robot-2025 Choreo settings
-                Inches.of(33),
-                Inches.of(33),
+                Pounds.of(DriveConstants.massLbs),
+                Meters.of(DriveConstants.bumperLength),
+                Meters.of(DriveConstants.bumperWidth),
                 DCMotor.getKrakenX60Foc(1),
                 DCMotor.getKrakenX60Foc(1),
-                1.2,
+                DriveConstants.wheelCOF,
                 getModuleLocations(),
                 getPigeon2(),
                 getModules(),
-                DriveConstants.frontLeft,
-                DriveConstants.frontRight,
-                DriveConstants.backLeft,
-                DriveConstants.backRight);
+                modules);
 
         simNotifier = new Notifier(drivetrain::update);
         simNotifier.startPeriodic(kSimLoopPeriod);

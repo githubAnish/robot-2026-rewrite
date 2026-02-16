@@ -165,15 +165,9 @@ public final class DriveCharacterizationCommands {
                         })));
     }
 
-    private static class WheelRadiusCharacterizationState {
-        double[] positions = new double[4];
-        Rotation2d lastAngle = Rotation2d.kZero;
-        double gyroDelta = 0.0;
-    }
-
     /** Measures the robot's wheel radius by driving straight and comparing actual vs reported distance. See https://www.frc5712.com/swerve-calibration. */
     public static Command wheelRadiusCharacterizationDriveStraight(Drive drive) {
-        LoggedTunableNumber actualDistanceInches = new LoggedTunableNumber("Tuning/WheelRadius/ActualDistanceInches", 0.0); // Type the actual measured distance
+        LoggedTunableNumber actualDistanceInches = new LoggedTunableNumber("WheelRadiusCharacterizationStraight/ActualDistanceInches", 0.0); // Type actual measured distance (get from measuring tape)
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
         return Commands.sequence(
@@ -224,4 +218,9 @@ public final class DriveCharacterizationCommands {
         );
     }
 
+    private static class WheelRadiusCharacterizationState {
+        double[] positions = new double[4];
+        Rotation2d lastAngle = Rotation2d.kZero;
+        double gyroDelta = 0.0;
+    }
 }

@@ -12,6 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 public final class DriveConstants {
     // Hardware / Configuration
@@ -29,6 +30,11 @@ public final class DriveConstants {
 
     public static final double maxLinearSpeed;
     public static final double maxOmega;
+
+    public static final double massLbs = 90.0;
+    public static final double wheelCOF = 1.2;
+    public static final double bumperLength = Units.inchesToMeters(35);
+    public static final double bumperWidth = Units.inchesToMeters(30);
 
     // Swerve Control
     public static final SwerveDriveKinematics kinematics;

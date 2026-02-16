@@ -1,12 +1,9 @@
 package org.frogforce503.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
-import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.TurretSetpoint;
@@ -17,13 +14,10 @@ import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
-import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -43,11 +37,9 @@ public class ShootFuelIntoHub extends Command {
     private final Flywheels flywheels;
     private final Hood hood;
 
-    private final BooleanSupplier autoAssistEnabled;
+    private final double kShotFireRateBallsPerSec = 7; // How many balls can you fire within 1 sec?
 
-    private final double kShotFireRateBallsPerSec = 10; // How many balls can you fire within 1 sec?
-
-    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, BooleanSupplier autoAssistEnabled) {
+    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure) {
         this.drive = drive;
         this.vision = vision;
 
@@ -60,14 +52,12 @@ public class ShootFuelIntoHub extends Command {
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
 
-        this.autoAssistEnabled = autoAssistEnabled;
-
         addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
 
     @Override
     public void initialize() {
-
+        vision.setDesiredAprilTagGoal(AprilTagGoal.TURRET_HUB_AIMING);
     }
 
     @Override
@@ -98,26 +88,30 @@ public class ShootFuelIntoHub extends Command {
         //     turretAng, 0, drive.getAngle(), drive.getRobotVelocity().omegaRadiansPerSecond);
 
         ShotInfo shotInfo = ShotCalculator.calculateHubShotInfo(drive.getPose(), drive.getRobotVelocity(), drive.getFieldVelocity());
-        
+                
         TurretSetpoint setpoint = ShotCalculator.calculateTurretRobotRelativeSetpoint(
-            shotInfo.turretAngle(),
-            shotInfo.turretVelocity(),
+            shotInfo.turretFieldRelativeAngle(),
+            shotInfo.turretVelocityRadPerSec(),
             drive.getAngle(),
             drive.getRobotVelocity().omegaRadiansPerSecond);
 
         turret.setAngle(setpoint.angleRad(), setpoint.velocityRadPerSec());
+        hood.setAngle(shotInfo.hoodAngleRad(), shotInfo.hoodVelocityRadPerSec());
+        flywheels.setVelocity(shotInfo.flywheelsVelocityRadPerSec());
+
+        superstructure.setFeasibleShot(shotInfo.isFeasibleShot());
 
         if (RobotBase.isSimulation()) {
             MapleSimUtil.scoreFuelIntoHub(
                 drive.getPose(),
                 drive.getFieldVelocity(),
-                shotInfo.turretAngle(),
-                Units.degreesToRadians(80),
+                shotInfo.turretFieldRelativeAngle(),
+                shotInfo.hoodAngleRad(),
+                shotInfo.flywheelsVelocityRadPerSec(),
                 kShotFireRateBallsPerSec);
         }
 
         Logger.recordOutput("ShootFuelIntoHub/ShotInfo", shotInfo);
-        Logger.recordOutput("ShootFuelIntoHub/TurretSetpoint", setpoint);
     }
 
     @Override
@@ -127,6 +121,6 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        
+        vision.setDesiredAprilTagGoal(AprilTagGoal.GLOBAL_LOCALIZATION);
     }
 }

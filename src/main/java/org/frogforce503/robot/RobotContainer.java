@@ -18,6 +18,7 @@ import org.frogforce503.robot.commands.PrepForLobFuelIntoAlliance;
 import org.frogforce503.robot.commands.PrepForShootFuelIntoHub;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.commands.tuning.TuneShot;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
@@ -72,6 +73,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -110,7 +112,7 @@ public class RobotContainer {
 
     // Overrides
     private final LoggedNetworkBoolean autoAssistOverride =
-        new LoggedNetworkBoolean("Auto Assist Override", true); // Includes auto-aligning and auto-aiming
+        new LoggedNetworkBoolean("Auto Assist Override", true); // Auto-aligning
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -299,14 +301,15 @@ public class RobotContainer {
         driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistOverride));
         driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistOverride));
 
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride));
-        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, autoAssistOverride));
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure));
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure));
         
         driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
 
         bindShotPresets(driver.y(), ShotPreset.BATTER);
         bindShotPresets(driver.a(), ShotPreset.LOB_FROM_NZ);
+        bindShotPresets(driver.x(), ShotPreset.TOWER);
 
         bindClimbing(driver.b());
 
@@ -346,7 +349,7 @@ public class RobotContainer {
                         Commands.waitSeconds(1),
                         Commands.runOnce(() -> leds.stop())
                     )
-            ));
+            ).withName("Driver Rumble Feasible Shot"));
     }
 
     private Command setDriverRumble(double value, double durationSec) {
@@ -413,8 +416,13 @@ public class RobotContainer {
     public void test() {
         RobotModeTriggers.teleop().onTrue(
             Commands.sequence(
-                new ShootFuelIntoHub(drive, vision, superstructure, autoAssistOverride)
-            )
+                new ShootFuelIntoHub(drive, vision, superstructure)
+                // new TuneShot(drive, superstructure)
+                // Commands.repeatingSequence(
+                //     Commands.runOnce(() -> superstructure.getHood().setAngle(Units.degreesToRadians(Units.radiansToDegrees(superstructure.getHood().getAngleRad()) + 1))),
+                //     Commands.waitSeconds(0.1)
+                // )
+            ).withName("RobotContainer Test Cmd")
         );
     }
 }
