@@ -5,8 +5,10 @@ import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * Utility class for vision with useful static methods.
@@ -105,5 +107,28 @@ public class VisionUtils {
         Translation2d fieldToObject = robotToObject.rotateBy(robotPose.getRotation()).plus(robotPose.getTranslation());
 
         return fieldToObject;
+    }
+
+    /**
+     * Calculates the robot to camera offset of a camera mounted on a turret
+     * 
+     * @param robotToTurretBaseOffset the offset from the center of the robot to the turret's center of rotation (in robot frame)
+     * @param turretToTurretCameraOffset the offset from the turret's center of rotation to the camera lens (in turret frame)
+     * @param turretRotation the orientation of the turret (in robot frame)
+     * @return Transform3d representing the robot to turret camera offset
+     */
+    public static Transform3d calculateRobotToTurretCameraOffset(
+        Transform3d robotToTurretBaseOffset,
+        Transform3d turretToTurretCameraOffset,
+        Rotation3d turretRotation
+    ) {
+        Transform3d robotToTurret =
+            robotToTurretBaseOffset.plus(
+                new Transform3d(new Translation3d(), turretRotation)
+            );
+
+        Transform3d robotToTurretCamera = robotToTurret.plus(turretToTurretCameraOffset);
+
+        return robotToTurretCamera;
     }
 }

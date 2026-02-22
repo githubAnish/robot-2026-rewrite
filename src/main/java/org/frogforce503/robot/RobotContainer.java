@@ -18,7 +18,6 @@ import org.frogforce503.robot.commands.PrepForLobFuelIntoAlliance;
 import org.frogforce503.robot.commands.PrepForShootFuelIntoHub;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
-import org.frogforce503.robot.commands.tuning.TuneShot;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
@@ -73,7 +72,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -198,19 +196,15 @@ public class RobotContainer {
                             turret::getAngleRad,
                             new AprilTagIO[] {
                                 new AprilTagIOPhotonSim(
-                                    CameraName.CLOSE_TURRET_CAMERA,
+                                    CameraName.TURRET_CAMERA,
                                     visionViz
                                 ),
                                 new AprilTagIOPhotonSim(
-                                    CameraName.FAR_TURRET_CAMERA,
+                                    CameraName.LEFT_CAMERA,
                                     visionViz
                                 ),
                                 new AprilTagIOPhotonSim(
-                                    CameraName.INTAKE_LEFT_CAMERA,
-                                    visionViz
-                                ),
-                                new AprilTagIOPhotonSim(
-                                    CameraName.INTAKE_RIGHT_CAMERA,
+                                    CameraName.RIGHT_CAMERA,
                                     visionViz
                                 ),
                             },

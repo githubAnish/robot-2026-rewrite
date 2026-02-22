@@ -111,13 +111,17 @@ public class Turret extends FFSubsystemBase {
         LoggedTracer.record("Turret");
     }
 
+    /** Gets the turret's robot-relative angle. */
     public double getAngleRad() {
         return inputs.positionRad;
     }
 
     // Actions
     public void seedRelativePosition() {
-        if (MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI) && inputs.velocityRadPerSec < Units.degreesToRadians(2)) { // only if relative encoder in range -180 deg to 180 deg & velocity low
+        boolean inRange = MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI);
+        boolean goingSlow = inputs.velocityRadPerSec < Units.degreesToRadians(2);
+
+        if (inRange && goingSlow) { // only if relative encoder in range -180 deg to 180 deg & velocity low
             io.setRelativePosition(inputs.absolutePositionRad);
         }
     }
@@ -141,16 +145,19 @@ public class Turret extends FFSubsystemBase {
         io.runVolts(volts);
     }
 
+    /** Sets the turret's robot-relative angle. */
     public void setAngle(double angleRad) {
         setAngle(angleRad, 0.0);
     }
 
+    /** Sets the turret's robot-relative angle and robot-relative velocity. */
     public void setAngle(double angleRad, double velocityRadPerSec) {
         this.shouldRunProfile = true;
         this.targetAngleRad = angleRad;
         this.targetVelocityRadPerSec = velocityRadPerSec;
     }
 
+    /** Checks if an angle is within tolerance of the turret's robot-relative angle. */
     public boolean isAtAngle(double angleRad, double tolerance) {
         return MathUtil.isNear(angleRad, getAngleRad(), tolerance);
     }

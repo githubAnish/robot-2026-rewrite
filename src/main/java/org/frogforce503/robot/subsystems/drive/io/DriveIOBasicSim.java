@@ -71,7 +71,7 @@ public class DriveIOBasicSim implements DriveIO {
         runVelocity(speeds); // Ignore module force feedforwards in simulation
     }
 
-    public void update() {
+    private void update() {
         double currentTime = Timer.getFPGATimestamp();
 
         if (lastUpdatedTime > 0) {

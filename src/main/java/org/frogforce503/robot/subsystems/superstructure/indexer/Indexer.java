@@ -11,8 +11,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Setter;
 
-// need velocity control, but need some sort of pulsing mechanism to get the balls into feeder correctly according to ri3d videos
-// Assume the indexer is just a spindexer that rotates around
 public class Indexer extends FFSubsystemBase {
     private final IndexerIO io;
     private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();

@@ -85,6 +85,7 @@ public class IntakeFuelFromGround extends Command {
         // Get inputs
         Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
         boolean visionHasValidFuelTarget = true; // TODO assume true for now, change in vision
+        Pose2d targetPose = Pose2d.kZero; // TODO assume a fixed point for now, change in vision
 
         // Calculate default teleop velocities
         Translation2d driverLinearVelocity = xboxController.getLinearVelocityFromJoysticks();
@@ -108,8 +109,6 @@ public class IntakeFuelFromGround extends Command {
         }
 
         // Assist logic
-        Pose2d targetPose = Pose2d.kZero; // TODO assume a fixed point for now, change in vision
-
         Translation2d toTargetField = targetPose.getTranslation().minus(robotPose.getTranslation());
         Translation2d toTargetRobot = toTargetField.rotateBy(robotPose.getRotation().unaryMinus());
 

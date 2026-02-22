@@ -1,7 +1,5 @@
 package org.frogforce503.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;

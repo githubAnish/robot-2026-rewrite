@@ -35,45 +35,71 @@ public class VisionConstants {
     // Hardware / Configuration
     public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
     public static final EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
-
+    
     static {
         turretToTurretCameraOffsets.put(
-            CameraName.FAR_TURRET_CAMERA,
+            CameraName.TURRET_CAMERA,
             new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
-            )
-        );
-
-        turretToTurretCameraOffsets.put(
-            CameraName.CLOSE_TURRET_CAMERA,
-            new Transform3d(
-                new Translation3d(Units.inchesToMeters(2.321), Units.inchesToMeters(-.875), Units.inchesToMeters(1.141)),
-                new Rotation3d(0, Units.degreesToRadians(30), 0)
-            )
-        );
-
-        robotToFixedCameraOffsets.put(
-            CameraName.INTAKE_LEFT_CAMERA,
-            new Transform3d(
-                new Translation3d(Units.inchesToMeters(1.288), Units.inchesToMeters(11.525), Units.inchesToMeters(19.956)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(15), Units.degreesToRadians(-15))  
+                new Translation3d(
+                    Units.inchesToMeters(2.075000), 
+                    Units.inchesToMeters(  5.493439), 
+                    Units.inchesToMeters( 6.244572)
+                ),
+                new Rotation3d(
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(-15), 
+                    Units.degreesToRadians(0) 
+                )
             )
         );
 
         robotToFixedCameraOffsets.put(
-            CameraName.INTAKE_RIGHT_CAMERA,
+            CameraName.LEFT_CAMERA,
             new Transform3d(
-                new Translation3d(Units.inchesToMeters(1.288), Units.inchesToMeters(-11.525), Units.inchesToMeters(31.721)),
-                new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(30), Units.degreesToRadians(10))
+                new Translation3d(
+                    Units.inchesToMeters(0), 
+                    Units.inchesToMeters(14.727452), 
+                    Units.inchesToMeters(19.954539)
+                ),
+                new Rotation3d(
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(-15), 
+                    Units.degreesToRadians(90)
+                )
             )
         );
+
+
+        robotToFixedCameraOffsets.put(
+            CameraName.RIGHT_CAMERA,
+            new Transform3d(
+                new Translation3d(
+                    Units.inchesToMeters(0), 
+                    Units.inchesToMeters(0), 
+                    Units.inchesToMeters(0)
+                ),
+                new Rotation3d(
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(0)
+                )
+            )
+        );
+
 
         robotToFixedCameraOffsets.put(
             CameraName.BACK_CAMERA,
             new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
+                new Translation3d(
+                    Units.inchesToMeters(-12.245515), 
+                    Units.inchesToMeters(0), 
+                    Units.inchesToMeters(18.459379)
+                ),
+                new Rotation3d(
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(-15), 
+                    Units.degreesToRadians(180)
+                )
             )
         );
 
@@ -90,13 +116,14 @@ public class VisionConstants {
      * Cameras on robots are configured with a name.
      * Every camera on the robot must have a name from this enum.
      * This enum is used to identify specific cameras on a robot for any use case.
+     * 
+     * The intake side of the robot is the front
      */
     public enum CameraName {
         // AprilTag Detection Cameras
-        CLOSE_TURRET_CAMERA,
-        FAR_TURRET_CAMERA,
-        INTAKE_LEFT_CAMERA,
-        INTAKE_RIGHT_CAMERA,
+        TURRET_CAMERA,
+        LEFT_CAMERA,
+        RIGHT_CAMERA,
         BACK_CAMERA,
 
         // Object Detection Cameras
@@ -126,10 +153,9 @@ public class VisionConstants {
          */
         GLOBAL_LOCALIZATION(
             EnumSet.of(
-                CameraName.INTAKE_LEFT_CAMERA, 
-                CameraName.INTAKE_RIGHT_CAMERA, 
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA, 
+                CameraName.LEFT_CAMERA, 
+                CameraName.RIGHT_CAMERA, 
+                CameraName.TURRET_CAMERA,
                 CameraName.BACK_CAMERA
             ),
 
@@ -166,10 +192,9 @@ public class VisionConstants {
          */
         STANDARD_HUB_AIM(
             EnumSet.of(
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA,
-                CameraName.INTAKE_LEFT_CAMERA,
-                CameraName.INTAKE_RIGHT_CAMERA,
+                CameraName.TURRET_CAMERA, 
+                CameraName.LEFT_CAMERA,
+                CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
             ),
             poseObservation -> {
@@ -207,7 +232,8 @@ public class VisionConstants {
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-            Optional.of(GLOBAL_LOCALIZATION)
+            // Optional.of(GLOBAL_LOCALIZATION)
+            Optional.empty() 
         ),
 
         /**
@@ -216,8 +242,7 @@ public class VisionConstants {
          */
         TURRET_HUB_AIMING(
             EnumSet.of(
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA
+                CameraName.TURRET_CAMERA
             ),
 
             poseObservation -> {
@@ -262,10 +287,9 @@ public class VisionConstants {
 
         TOWER_ALIGNMENT(
             EnumSet.of(
-                CameraName.INTAKE_LEFT_CAMERA, 
-                CameraName.INTAKE_RIGHT_CAMERA, 
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA, 
+                CameraName.LEFT_CAMERA, 
+                CameraName.RIGHT_CAMERA, 
+                CameraName.TURRET_CAMERA, 
                 CameraName.BACK_CAMERA
             ),
             poseObservation -> {
@@ -307,10 +331,9 @@ public class VisionConstants {
 
         OUTPOST_ALIGNMENT(
             EnumSet.of(
-                CameraName.CLOSE_TURRET_CAMERA, 
-                CameraName.FAR_TURRET_CAMERA,
-                CameraName.INTAKE_LEFT_CAMERA,
-                CameraName.INTAKE_RIGHT_CAMERA,
+                CameraName.TURRET_CAMERA, 
+                CameraName.LEFT_CAMERA,
+                CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
             ),
             poseObservation -> {

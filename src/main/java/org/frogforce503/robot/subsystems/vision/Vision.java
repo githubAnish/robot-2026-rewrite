@@ -13,6 +13,8 @@ import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagInp
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionInputsAutoLogged;
+import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.vision.VisionUtils;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 
@@ -179,6 +181,8 @@ public class Vision extends SubsystemBase {
             objectDetectionIO.updateInputs(objectDetectionInputs);
             Logger.processInputs("Vision/Object Detection/" + cameraName.name() + "/Inputs", objectDetectionInputs);
         }
+
+        LoggedTracer.record("Vision");
     }
 
     /************************************ PUBLIC METHODS ************************************/
@@ -236,7 +240,8 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation", poseObservation);
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation/Used April Tags", poseObservation.usedAprilTags());
     }
-
+    
+    
     /**
      * Calculates the robot to turret camera offset based on the turret angle and the camera name.
      * Gets the turret to turret camera offset from the robot's vision hardware, rotates it based on the turret angle.
@@ -253,17 +258,8 @@ public class Vision extends SubsystemBase {
 
         Transform3d turretToTurretCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName);
         Transform3d robotToTurretBaseOffset = TurretConstants.robotToTurret;
+        Rotation3d turretRotation = new Rotation3d(0, 0, turretAngleRadians);
 
-        turretToTurretCameraOffset = new Transform3d(
-            turretToTurretCameraOffset.getTranslation().rotateBy(
-                new Rotation3d(0, 0, turretAngleRadians)
-            ),
-            turretToTurretCameraOffset.getRotation().rotateBy(
-                new Rotation3d(0, 0, turretAngleRadians)
-            )
-        );
-
-        return robotToTurretBaseOffset.plus(turretToTurretCameraOffset);
+        return VisionUtils.calculateRobotToTurretCameraOffset(robotToTurretBaseOffset, turretToTurretCameraOffset, turretRotation);
     }
-
 }

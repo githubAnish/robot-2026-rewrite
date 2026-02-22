@@ -3,6 +3,7 @@ package org.frogforce503.robot.subsystems.superstructure.turret;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -24,6 +25,15 @@ public final class TurretConstants {
     public static final double minAngle = Units.degreesToRadians(-210.0); // Assume 6328 params here
     public static final double maxAngle = Units.degreesToRadians(210.0); // Assume 6328 params here
     
+    // new Transform3d(
+            //     new Translation3d(
+            //         Units.inchesToMeters(-6.0), 
+            //         Units.inchesToMeters(-8.5), 
+            //         Units.inchesToMeters(13.91)
+            //     ),
+            //     new Rotation3d()            
+            // ),
+
     public static final Transform3d robotToTurret = new Transform3d(-0.16, -0.22, 0.395, Rotation3d.kZero); // Sim robot to turret, can change based on real robot CAD
     public static final Transform3d turretToCamera =
         new Transform3d(
@@ -33,6 +43,9 @@ public final class TurretConstants {
     public static final double kTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot
 
     public static final double START = Units.degreesToRadians(0);
+    public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards
 
-    public static final double CLIMB = Units.degreesToRadians(180); // faces backwards
+    public static final Rotation2d BATTER_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d LOB_FROM_NZ_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d TOWER_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
 }

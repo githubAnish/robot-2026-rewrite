@@ -3,6 +3,7 @@ package org.frogforce503.robot.commands.tuning;
 import java.util.OptionalDouble;
 
 import org.frogforce503.lib.logging.LoggedTunableNumber;
+import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
@@ -19,6 +20,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 // Notes:
@@ -66,32 +68,31 @@ public class TuneShot extends Command {
 
     @Override
     public void execute() {
-        // Get inputs
-        Pose2d pose = drive.getPose();
-        ChassisSpeeds robotRelativeSpeeds = drive.getRobotVelocity();
-        ChassisSpeeds fieldRelativeSpeeds = drive.getFieldVelocity();
-
-        // Calculate and apply shot parameters
         ShotInfo shotInfo =
             ShotCalculator.calculateHubShotInfo(
-                pose,
-                robotRelativeSpeeds,
-                fieldRelativeSpeeds,
-                OptionalDouble.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheelsVelocityRpm.get())),
-                OptionalDouble.of(Units.degreesToRadians(hoodAngleDeg.get())),
-                OptionalDouble.of(timeOfFlightSec.get()));
+                drive.getPose(),
+                drive.getRobotVelocity(),
+                drive.getFieldVelocity());
                 
-        TurretSetpoint setpoint = ShotCalculator.calculateTurretRobotRelativeSetpoint(
-            shotInfo.turretFieldRelativeAngle(),
-            shotInfo.turretVelocityRadPerSec(),
-            drive.getAngle(),
-            drive.getRobotVelocity().omegaRadiansPerSecond);
+        TurretSetpoint turretSetpoint =
+            ShotCalculator.calculateTurretRobotRelativeSetpoint(
+                shotInfo.turretFieldRelativeAngle(),
+                shotInfo.turretVelocityRadPerSec(),
+                drive.getAngle(),
+                drive.getRobotVelocity().omegaRadiansPerSecond);
 
-        turret.setAngle(setpoint.angleRad(), setpoint.velocityRadPerSec());
-        hood.setAngle(shotInfo.hoodAngleRad(), shotInfo.hoodVelocityRadPerSec());
-        flywheels.setVelocity(shotInfo.flywheelsVelocityRadPerSec());
+        turret.setAngle(turretSetpoint.angleRad(), turretSetpoint.velocityRadPerSec());
+        flywheels.setVelocity(Units.rotationsPerMinuteToRadiansPerSecond(flywheelsVelocityRpm.get()));
+        hood.setAngle(Units.degreesToRadians(hoodAngleDeg.get()), 0.0);
 
-        superstructure.setFeasibleShot(shotInfo.isFeasibleShot());
+        if (RobotBase.isSimulation()) {
+            MapleSimUtil.scoreFuelIntoHub(
+                drive.getPose(),
+                drive.getFieldVelocity(),
+                shotInfo.turretFieldRelativeAngle(),
+                shotInfo.hoodAngleRad(),
+                shotInfo.flywheelsVelocityRadPerSec());
+        }
 
         if (recordShot.get()) {
             String info = "Distance: " + shotInfo.turretToTargetDistance() + " m, " +
@@ -99,10 +100,12 @@ public class TuneShot extends Command {
                           "Hood Angle: " + hoodAngleDeg.get() + " deg, " +
                           "Time of Flight: " + timeOfFlightSec.get() + " sec";
 
-            Logger.recordOutput("TuneShot/Shot Info", info);
+            Logger.recordOutput("TuneShot/Latest Parameters", info);
 
             recordShot.set(false);
         }
+
+        Logger.recordOutput("TuneShot/ShotInfo", shotInfo);
     }
 
     @Override

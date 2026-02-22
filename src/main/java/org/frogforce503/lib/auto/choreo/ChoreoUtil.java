@@ -16,25 +16,25 @@ public final class ChoreoUtil {
             new AutoFactory(
                 drive::getPose,
                 drive::setPose,
-                trajectorySample -> {
-                    SwerveSample sample = (SwerveSample) trajectorySample;
-
-                    // Generate the next robot-relative speeds for the robot
-                    ChassisSpeeds speeds =
-                        DriveConstants.pathFollower.calculate(
-                            drive.getPose(),
-                            sample.getPose(),
-                            sample.vx,
-                            sample.vy,
-                            sample.omega);
-
-                    // Apply the generated speeds (with module forces)
-                    drive.runVelocity(
-                        speeds,
-                        sample.moduleForcesX(),
-                        sample.moduleForcesY());
-                },
+                sample -> followTrajectory(drive, (SwerveSample) sample),
                 Constants.useAllianceFlipping,
                 drive);
+    }
+
+    private static void followTrajectory(Drive drive, SwerveSample sample) {
+        // Generate the next robot-relative speeds for the robot
+        ChassisSpeeds speeds =
+            DriveConstants.pathFollower.calculate(
+                drive.getPose(),
+                sample.getPose(),
+                sample.vx,
+                sample.vy,
+                sample.omega);
+
+        // Apply the generated speeds (with module forces)
+        drive.runVelocity(
+            speeds,
+            sample.moduleForcesX(),
+            sample.moduleForcesY());
     }
 }

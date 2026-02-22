@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
-import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
@@ -49,6 +47,7 @@ public final class MapleSimUtil {
     // Shoot Sim Constants
     private static final Timer shotTimer = new Timer();
     private static final Translation3d shotTolerance = new Translation3d(0.5, 0.5, 0.5);
+    public static final double shotFireRateBallsPerSec = 7; // How many balls can you fire within 1 sec?
 
     private MapleSimUtil() {}
 
@@ -95,14 +94,8 @@ public final class MapleSimUtil {
         ChassisSpeeds robotFieldRelativeVelocity,
         Rotation2d turretFieldRelativeAngle,
         double hoodAngleRad,
-        double flywheelsSpeedRadPerSec,
-        double shotFireRateBallsPerSec
+        double flywheelsSpeedRadPerSec
     ) {
-        if (shotFireRateBallsPerSec < 0) {
-            System.out.println("Balls Per Second < 0" + ErrorUtil.attachJavaClassName(MapleSimUtil.class));
-            return;
-        }
-
         double shotDelaySec = 1.0 / shotFireRateBallsPerSec;
 
         // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed

@@ -29,6 +29,9 @@ public final class HoodConstants {
     public static final double kTolerance = Units.degreesToRadians(0.5); //TODO Hood position has to be extremely accurate for consistent shot
 
     public static final double START = Units.degreesToRadians(0);
-
     public static final double CLIMB = Units.degreesToRadians(0);
+
+    public static final double BATTER = Units.degreesToRadians(0);
+    public static final double LOB_FROM_NZ = Units.degreesToRadians(0);
+    public static final double TOWER = Units.degreesToRadians(0);
 }
