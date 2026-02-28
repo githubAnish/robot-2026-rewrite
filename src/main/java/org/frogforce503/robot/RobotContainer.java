@@ -18,11 +18,16 @@ import org.frogforce503.robot.commands.PrepForLobFuelIntoAlliance;
 import org.frogforce503.robot.commands.PrepForShootFuelIntoHub;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.commands.tuning.TuneShot;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.climber.Climber;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSim;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSpark;
+import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
+import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIO;
+import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSim;
+import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
@@ -92,7 +97,8 @@ public class RobotContainer {
     private Drive drive;
     private Vision vision;
     private final Superstructure superstructure;
-    private Climber climber;
+    private ClimberDeploy climberDeploy;
+    private ClimberHook climberHook;
     private Leds leds;
 
     // Auto
@@ -139,7 +145,8 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIOSpark());
                     hood = new Hood(new HoodIOSpark());
 
-                    climber = new Climber(new ClimberIOSpark());
+                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
+                    climberHook = new ClimberHook(new ClimberHookIOSpark());
 
                     leds = new Leds(new LedsIOCANdle());
 
@@ -162,7 +169,8 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIOSpark());
                     hood = new Hood(new HoodIOSpark());
 
-                    climber = new Climber(new ClimberIOSpark());
+                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
+                    climberHook = new ClimberHook(new ClimberHookIOSpark());
                     
                     leds = new Leds(new LedsIOCANdle());
 
@@ -185,7 +193,8 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIOSim());
                     hood = new Hood(new HoodIOSim());
 
-                    climber = new Climber(new ClimberIOSim());
+                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSim());
+                    climberHook = new ClimberHook(new ClimberHookIOSim());
                     
                     leds = new Leds(new LedsIO() {});
 
@@ -226,7 +235,8 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIO() {});
                     hood = new Hood(new HoodIO() {});
 
-                    climber = new Climber(new ClimberIO() {});
+                    climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
+                    climberHook = new ClimberHook(new ClimberHookIO() {});
                     
                     leds = new Leds(new LedsIO() {});
 
@@ -253,7 +263,8 @@ public class RobotContainer {
             flywheels = new Flywheels(new FlywheelsIO() {});
             hood = new Hood(new HoodIO() {});
 
-            climber = new Climber(new ClimberIO() {});
+            climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
+            climberHook = new ClimberHook(new ClimberHookIO() {});
             
             leds = new Leds(new LedsIO() {});
 
@@ -362,7 +373,7 @@ public class RobotContainer {
 
     // Cancel incoming commands to ensure no unintended / undesirable behavior occurs outside of the climb sequence
     private void bindClimbing(Trigger advanceTrigger) {
-        Command climbSequence = new ClimbSequence(superstructure, climber, advanceTrigger);
+        Command climbSequence = new ClimbSequence(superstructure, climberDeploy, climberHook, advanceTrigger);
 
         advanceTrigger.onTrue(
             climbSequence
@@ -408,15 +419,10 @@ public class RobotContainer {
     }
 
     public void test() {
-        RobotModeTriggers.teleop().onTrue(
-            Commands.sequence(
-                new ShootFuelIntoHub(drive, vision, superstructure)
-                // new TuneShot(drive, superstructure)
-                // Commands.repeatingSequence(
-                //     Commands.runOnce(() -> superstructure.getHood().setAngle(Units.degreesToRadians(Units.radiansToDegrees(superstructure.getHood().getAngleRad()) + 1))),
-                //     Commands.waitSeconds(0.1)
-                // )
-            ).withName("RobotContainer Test Cmd")
-        );
+        // RobotModeTriggers.teleop().onTrue(
+        //     Commands.sequence(
+        //         new ShootFuelIntoHub(drive, vision, superstructure)
+        //     ).withName("RobotContainer Test Cmd")
+        // );
     }
 }

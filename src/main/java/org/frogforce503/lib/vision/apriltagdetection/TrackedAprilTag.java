@@ -1,5 +1,8 @@
 package org.frogforce503.lib.vision.apriltagdetection;
 
+import org.frogforce503.lib.vision.apriltagdetection.TrackedAprilTag;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 /**
  * Record representing an AprilTag detected by an AprilTagIO.
  * 
@@ -29,5 +32,19 @@ public record TrackedAprilTag (
      */
     public boolean isReal() {
         return tagID != -1;
+    }
+
+     /** 
+     * Creates a TrackedAprilTag using PhotonLib's PhotonTargetTarget from a real camera
+     */
+    public static TrackedAprilTag fromPhotonVisionTarget(PhotonTrackedTarget aprilTag) {
+        return new TrackedAprilTag(
+            aprilTag.getFiducialId(),
+            aprilTag.getPitch(),
+            aprilTag.getYaw(),
+            aprilTag.getArea(),
+            aprilTag.getBestCameraToTarget().getTranslation().getNorm(),
+            aprilTag.getPoseAmbiguity()
+        );
     }
 };

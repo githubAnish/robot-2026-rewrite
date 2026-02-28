@@ -2,7 +2,8 @@ package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
-import org.frogforce503.robot.subsystems.climber.Climber;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
+import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
@@ -27,7 +28,8 @@ public class ClimbSequence extends Command {
     private final Turret turret;
     private final Flywheels flywheels;
     private final Hood hood;
-    private final Climber climber;
+    private final ClimberDeploy climberDeploy;
+    private final ClimberHook climberHook;
 
     private final BooleanSupplier advanceButton;
 
@@ -46,7 +48,7 @@ public class ClimbSequence extends Command {
         FINISHED,
     }
     
-    public ClimbSequence(Superstructure superstructure, Climber climber, BooleanSupplier advanceButton) {
+    public ClimbSequence(Superstructure superstructure, ClimberDeploy climberDeploy, ClimberHook climberHook, BooleanSupplier advanceButton) {
         this.intakePivot = superstructure.getIntakePivot();
         this.intakeRoller = superstructure.getIntakeRoller();
         this.indexer = superstructure.getIndexer();
@@ -55,11 +57,12 @@ public class ClimbSequence extends Command {
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
 
-        this.climber = climber;
+        this.climberDeploy = climberDeploy;
+        this.climberHook = climberHook;
 
         this.advanceButton = advanceButton;
 
-        addRequirements(climber);
+        addRequirements(climberDeploy);
     }
 
     @Override
@@ -140,7 +143,7 @@ public class ClimbSequence extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        climber.stop();
+        climberDeploy.stop();
     }
 
     private boolean buttonPressedThisCycle() {

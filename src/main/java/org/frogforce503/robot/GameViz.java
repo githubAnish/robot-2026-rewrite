@@ -1,5 +1,7 @@
 package org.frogforce503.robot;
 
+import java.util.Arrays;
+
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
@@ -11,6 +13,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /** Simulates the field, including interaction with & movement of game elements. Implement physics simulation here. */
 public class GameViz {
@@ -46,7 +49,12 @@ public class GameViz {
             hood.getAngleRad(),
             intakePivot.getAngleRad());
 
-        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
-        Logger.recordOutput("GameViz/FuelPoses", fuelPoses);
+        Translation3d[] fuelTranslations = // Convert fuel poses to translations to lower data processed by NetworkTables
+            Arrays
+                .stream(SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")) // Get all fuel from MapleSim arena
+                .map(Pose3d::getTranslation)
+                .toArray(Translation3d[]::new);
+
+        Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
     }
 }

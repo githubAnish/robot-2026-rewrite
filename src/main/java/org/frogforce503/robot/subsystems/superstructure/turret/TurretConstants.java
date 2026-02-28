@@ -24,15 +24,6 @@ public final class TurretConstants {
     
     public static final double minAngle = Units.degreesToRadians(-210.0); // Assume 6328 params here
     public static final double maxAngle = Units.degreesToRadians(210.0); // Assume 6328 params here
-    
-    // new Transform3d(
-            //     new Translation3d(
-            //         Units.inchesToMeters(-6.0), 
-            //         Units.inchesToMeters(-8.5), 
-            //         Units.inchesToMeters(13.91)
-            //     ),
-            //     new Rotation3d()            
-            // ),
 
     public static final Transform3d robotToTurret = new Transform3d(-0.16, -0.22, 0.395, Rotation3d.kZero); // Sim robot to turret, can change based on real robot CAD
     public static final Transform3d turretToCamera =

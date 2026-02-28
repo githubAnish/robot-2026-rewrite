@@ -106,8 +106,16 @@ public class VisionConstants {
         robotToFixedCameraOffsets.put(
             CameraName.FUEL_CAMERA,
             new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
+                new Translation3d(
+                    Units.inchesToMeters(10.0),
+                    Units.inchesToMeters(-4.5),
+                    Units.inchesToMeters(13.5)
+                ),
+                new Rotation3d(
+                    Units.degreesToRadians(0), 
+                    Units.degreesToRadians(15), 
+                    Units.degreesToRadians(0)
+                )
             )
         );
     }
@@ -129,7 +137,11 @@ public class VisionConstants {
         // Object Detection Cameras
         FUEL_CAMERA
     }
+    // OBJECT DETECTION
+    public static final double FUEL_SPACING_IN_CLUSTER = Units.inchesToMeters(15); // distance between fuel in a cluster
+    public static final double FUEL_DIAMETER = Units.inchesToMeters(5.91);
 
+    // APRIL TAG DETECTION
     public static final Set<Integer> RED_TOWER_TAGS = Set.of(15, 16);
     public static final Set<Integer> RED_HUB_TAGS = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
     public static final Set<Integer> RED_OUTPOST_TAGS = Set.of(13, 14);

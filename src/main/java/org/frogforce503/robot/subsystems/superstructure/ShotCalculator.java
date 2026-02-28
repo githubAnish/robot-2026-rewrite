@@ -9,6 +9,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.Constants;
@@ -30,8 +31,8 @@ public class ShotCalculator {
     private static double turretVelocity;
     private static double hoodVelocity;
 
-    private static final double minDistance = 1.34; // update based on shotmap
-    private static final double maxDistance = 5.60; // update based on shotmap
+    private static final double minDistance = 1.263;
+    private static final double maxDistance = 5.427;
     private static final double phaseDelay = 0.03;
 
     private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
@@ -44,34 +45,32 @@ public class ShotCalculator {
         new InterpolatingDoubleTreeMap();
 
     static {
-        // Configure shotmaps
-        launchHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0));
-        launchHoodAngleMap.put(1.78, Rotation2d.fromDegrees(19.0));
-        launchHoodAngleMap.put(2.17, Rotation2d.fromDegrees(24.0));
-        launchHoodAngleMap.put(2.81, Rotation2d.fromDegrees(27.0));
-        launchHoodAngleMap.put(3.82, Rotation2d.fromDegrees(29.0));
-        launchHoodAngleMap.put(4.09, Rotation2d.fromDegrees(30.0));
-        launchHoodAngleMap.put(4.40, Rotation2d.fromDegrees(31.0));
-        launchHoodAngleMap.put(4.77, Rotation2d.fromDegrees(32.0));
-        launchHoodAngleMap.put(5.57, Rotation2d.fromDegrees(32.0));
-        launchHoodAngleMap.put(5.60, Rotation2d.fromDegrees(35.0));
+        // Configure shotmaps (tuned in sim)
+        launchHoodAngleMap.put(1.263, Rotation2d.fromDegrees(80));
+        launchHoodAngleMap.put(2.056, Rotation2d.fromDegrees(70));
+        launchHoodAngleMap.put(2.585, Rotation2d.fromDegrees(64));
+        launchHoodAngleMap.put(2.905, Rotation2d.fromDegrees(60));
+        launchHoodAngleMap.put(3.110, Rotation2d.fromDegrees(57));
+        launchHoodAngleMap.put(3.716, Rotation2d.fromDegrees(55));
+        launchHoodAngleMap.put(4.360, Rotation2d.fromDegrees(54));
+        launchHoodAngleMap.put(4.950, Rotation2d.fromDegrees(50));
+        launchHoodAngleMap.put(5.427, Rotation2d.fromDegrees(49));
 
-        launchFlywheelSpeedMap.put(1.34, 210.0);
-        launchFlywheelSpeedMap.put(1.78, 220.0);
-        launchFlywheelSpeedMap.put(2.17, 220.0);
-        launchFlywheelSpeedMap.put(2.81, 230.0);
-        launchFlywheelSpeedMap.put(3.82, 250.0);
-        launchFlywheelSpeedMap.put(4.09, 255.0);
-        launchFlywheelSpeedMap.put(4.40, 260.0);
-        launchFlywheelSpeedMap.put(4.77, 265.0);
-        launchFlywheelSpeedMap.put(5.57, 275.0);
-        launchFlywheelSpeedMap.put(5.60, 290.0);
+        launchFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
+        launchFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
+        launchFlywheelSpeedMap.put(2.585, Units.rotationsPerMinuteToRadiansPerSecond(1650));
+        launchFlywheelSpeedMap.put(2.905, Units.rotationsPerMinuteToRadiansPerSecond(1750));
+        launchFlywheelSpeedMap.put(3.110, Units.rotationsPerMinuteToRadiansPerSecond(1775));
+        launchFlywheelSpeedMap.put(3.716, Units.rotationsPerMinuteToRadiansPerSecond(1900));
+        launchFlywheelSpeedMap.put(4.360, Units.rotationsPerMinuteToRadiansPerSecond(2000));
+        launchFlywheelSpeedMap.put(4.950, Units.rotationsPerMinuteToRadiansPerSecond(2100));
+        launchFlywheelSpeedMap.put(5.427, Units.rotationsPerMinuteToRadiansPerSecond(2200));
 
-        timeOfFlightMap.put(5.68, 1.16);
-        timeOfFlightMap.put(4.55, 1.12);
-        timeOfFlightMap.put(3.15, 1.11);
-        timeOfFlightMap.put(1.88, 1.09);
-        timeOfFlightMap.put(1.38, 0.90);
+        timeOfFlightMap.put(1.263, 0.62);
+        timeOfFlightMap.put(2.585, 0.71);
+        timeOfFlightMap.put(3.110, 0.75);
+        timeOfFlightMap.put(4.360, 0.95);
+        timeOfFlightMap.put(5.427, 1.1);
     }
 
     public static ShotInfo calculateHubShotInfo(
@@ -183,10 +182,6 @@ public class ShotCalculator {
         return new TurretSetpoint(robotRelativeAngle, robotRelativeVelocity);
     }
 
-    public record TurretSetpoint(
-        double angleRad,
-        double velocityRadPerSec) {}
-
     public record ShotInfo(
         boolean isFeasibleShot,
         double turretToTargetDistance,
@@ -195,4 +190,8 @@ public class ShotCalculator {
         double hoodAngleRad,
         double hoodVelocityRadPerSec,
         double flywheelsVelocityRadPerSec) {}
+
+    public record TurretSetpoint(
+        double angleRad,
+        double velocityRadPerSec) {}
 }

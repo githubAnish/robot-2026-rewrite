@@ -1,11 +1,11 @@
-package org.frogforce503.robot.subsystems.climber;
+package org.frogforce503.robot.subsystems.climberdeploy;
 
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
-public final class ClimberConstants {
+public final class ClimberDeployConstants {
     // Hardware / Configuration
     public static final int id = 7;
     public static final double mechanismRatio = 1;

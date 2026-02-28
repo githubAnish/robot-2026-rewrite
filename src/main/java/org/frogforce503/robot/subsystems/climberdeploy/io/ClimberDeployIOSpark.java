@@ -1,9 +1,9 @@
-package org.frogforce503.robot.subsystems.climber.io;
+package org.frogforce503.robot.subsystems.climberdeploy.io;
 
 import java.time.Duration;
 
 import org.frogforce503.lib.motorcontrol.SparkUtil;
-import org.frogforce503.robot.subsystems.climber.ClimberConstants;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.DigitalGlitchFilter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import lombok.Getter;
 
-public class ClimberIOSpark implements ClimberIO {
+public class ClimberDeployIOSpark implements ClimberDeployIO {
     // Hardware
     @Getter private final SparkMax motor;
     private final RelativeEncoder encoder;
@@ -38,34 +38,34 @@ public class ClimberIOSpark implements ClimberIO {
     private final Debouncer connectedDebouncer = new Debouncer(.5);
     private final DigitalGlitchFilter limitSwitchFilter = new DigitalGlitchFilter();
 
-    public ClimberIOSpark() {
+    public ClimberDeployIOSpark() {
         // Initialize motor
-        motor = new SparkMax(ClimberConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(ClimberDeployConstants.id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Initialize limit switch
-        limitSwitch = new DigitalInput(ClimberConstants.climberLimitSwitchId);
+        limitSwitch = new DigitalInput(ClimberDeployConstants.climberLimitSwitchId);
         limitSwitchFilter.setPeriodNanoSeconds(Duration.ofMillis(100).toNanos());
         limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
-        config.inverted(ClimberConstants.inverted);
+        config.inverted(ClimberDeployConstants.inverted);
         config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(ClimberConstants.statorCurrentLimit);
+        config.smartCurrentLimit(ClimberDeployConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / ClimberConstants.mechanismRatio) * (Math.PI * ClimberConstants.sprocketPitchDiameter)) // convert rotations to meters
-                .velocityConversionFactor((1 / ClimberConstants.mechanismRatio) * (Math.PI * ClimberConstants.sprocketPitchDiameter) / 60) // convert RPM to meters/sec
+                .positionConversionFactor((1 / ClimberDeployConstants.mechanismRatio) * (Math.PI * ClimberDeployConstants.sprocketPitchDiameter)) // convert rotations to meters
+                .velocityConversionFactor((1 / ClimberDeployConstants.mechanismRatio) * (Math.PI * ClimberDeployConstants.sprocketPitchDiameter) / 60) // convert RPM to meters/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
         config
             .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(ClimberConstants.kPID.kP(), ClimberConstants.kPID.kI(), ClimberConstants.kPID.kD());
+                .pid(ClimberDeployConstants.kPID.kP(), ClimberDeployConstants.kPID.kI(), ClimberDeployConstants.kPID.kD());
 
         SparkUtil.optimizeSignals(config, false, false);
 
@@ -78,7 +78,7 @@ public class ClimberIOSpark implements ClimberIO {
     }
 
     @Override
-    public void updateInputs(ClimberIOInputs inputs) {
+    public void updateInputs(ClimberDeployIOInputs inputs) {
         inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
         inputs.positionMeters = encoder.getPosition();
         inputs.velocityMetersPerSec = encoder.getVelocity();

@@ -84,8 +84,7 @@ public class IntakeFuelFromGround extends Command {
     public void execute() {
         // Get inputs
         Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
-        boolean visionHasValidFuelTarget = true; // TODO assume true for now, change in vision
-        Pose2d targetPose = Pose2d.kZero; // TODO assume a fixed point for now, change in vision
+        Translation2d target = vision.getFieldToBestCluster();
 
         // Calculate default teleop velocities
         Translation2d driverLinearVelocity = xboxController.getLinearVelocityFromJoysticks();
@@ -103,13 +102,13 @@ public class IntakeFuelFromGround extends Command {
                 drive.getAngle());
 
         // Normal teleop drive if auto assist not wanted or vision doesn't have good view of fuel
-        if (!autoAssistEnabled.getAsBoolean() || !visionHasValidFuelTarget) {
+        if (!autoAssistEnabled.getAsBoolean()) {
             drive.runVelocity(speeds);
             return;
         }
 
         // Assist logic
-        Translation2d toTargetField = targetPose.getTranslation().minus(robotPose.getTranslation());
+        Translation2d toTargetField = target.minus(robotPose.getTranslation());
         Translation2d toTargetRobot = toTargetField.rotateBy(robotPose.getRotation().unaryMinus());
 
         double distance = toTargetField.getNorm();

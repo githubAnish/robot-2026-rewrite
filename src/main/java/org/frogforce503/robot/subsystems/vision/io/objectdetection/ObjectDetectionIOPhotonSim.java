@@ -75,13 +75,7 @@ public class ObjectDetectionIOPhotonSim extends ObjectDetectionIOPhotonVision {
             List<PhotonTrackedTarget> objects = super.getLatestResult().getTargets();
 
             inputs.trackedObjects = objects.stream()
-                .map(object -> new TrackedObject( // Maps the PhotonTrackedTarget to a TrackedObject.
-                    object.getFiducialId(),
-                    object.getPitch(),
-                    object.getYaw(),
-                    object.getArea(),
-                    1.0 // Simulated targets do not have a confidence value, so we set it to 100%
-                ))
+                .map(object -> TrackedObject.fromPhotonSimTarget(object))
                 .sorted( // Sorts based on the type of object (class ID) and then by the sorting mode.
                     Comparator.comparingInt(TrackedObject::classId)
                     .thenComparing(super.getSortingMode().getComparator())

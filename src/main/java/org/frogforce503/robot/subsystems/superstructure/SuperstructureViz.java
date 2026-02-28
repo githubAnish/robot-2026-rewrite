@@ -22,11 +22,6 @@ public class SuperstructureViz {
     public SuperstructureViz() {}
 
     public void update(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad) {
-        updateFF(drivePose3d, turretAngleRad, hoodAngleRad, intakePivotAngleRad);
-        // update6328(drivePose3d, turretAngleRad, hoodAngleRad);
-    }
-
-    private void updateFF(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad) {
         var turretPose =
             Pose3d.kZero
                 .plus(robotToTurret)
@@ -48,28 +43,5 @@ public class SuperstructureViz {
                 .plus(new Transform3d(Translation3d.kZero, new Rotation3d(0.0, 0.0, 0.0)));
 
         Logger.recordOutput("SuperstructureViz/Components", turretPose, hoodPose, intakePivotPose, hopperExtenderPose);
-    }
-
-    private void update6328(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad) {
-        var turretPose =
-            TurretConstants.robotToTurret
-                .toPose3d()
-                .transformBy(
-                    new Transform3d(
-                        Translation3d.kZero, new Rotation3d(0.0, 0.0, turretAngleRad)));
-
-        var hoodPose =
-            turretPose.transformBy(
-                new Transform3d(
-                    0.105, 0.0, 0.092, new Rotation3d(0.0, -hoodAngleRad, Math.PI)));
-
-        Logger.recordOutput("SuperstructureViz/Components", turretPose, hoodPose);
-
-        var cameraPose =
-            drivePose3d
-                .transformBy(turretPose.toTransform3d())
-                .transformBy(TurretConstants.turretToCamera);
-
-        Logger.recordOutput("SuperstructureViz/CameraPose", cameraPose);
     }
 }

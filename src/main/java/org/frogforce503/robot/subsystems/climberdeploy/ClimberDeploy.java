@@ -1,10 +1,10 @@
-package org.frogforce503.robot.subsystems.climber;
+package org.frogforce503.robot.subsystems.climberdeploy;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
@@ -15,15 +15,15 @@ import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
 
-public class Climber extends FFSubsystemBase {
-    private final ClimberIO io;
-    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
+public class ClimberDeploy extends FFSubsystemBase {
+    private final ClimberDeployIO io;
+    private final ClimberDeployIOInputsAutoLogged inputs = new ClimberDeployIOInputsAutoLogged();
 
     // Constants
     @Setter private ElevatorFeedforward feedforward;
     
     // Control
-    private double targetHeightMeters = ClimberConstants.START;
+    private double targetHeightMeters = ClimberDeployConstants.START;
     private double lastHeightMeters = 0.0;
 
     private boolean shouldRunProfile = true;
@@ -31,11 +31,11 @@ public class Climber extends FFSubsystemBase {
     @Getter private State setpoint = new State();
     private boolean atGoal = false;
 
-    public Climber(ClimberIO io) {
+    public ClimberDeploy(ClimberDeployIO io) {
         this.io = io;
         
-        feedforward = ClimberConstants.kFF.getElevatorFF();
-        profile = new TrapezoidProfile(ClimberConstants.kConstraints);
+        feedforward = ClimberDeployConstants.kFF.getElevatorFF();
+        profile = new TrapezoidProfile(ClimberDeployConstants.kConstraints);
     }
 
     @Override
@@ -55,13 +55,13 @@ public class Climber extends FFSubsystemBase {
         if (shouldRunProfile && RobotState.isEnabled()) {
             var goalState =
                 new State(
-                    MathUtil.clamp(targetHeightMeters, ClimberConstants.minHeight, ClimberConstants.maxHeight),
+                    MathUtil.clamp(targetHeightMeters, ClimberDeployConstants.minHeight, ClimberDeployConstants.maxHeight),
                     0.0);
 
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtHeight(goalState.position, ClimberConstants.kTolerance);
+            atGoal = isAtHeight(goalState.position, ClimberDeployConstants.kTolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));

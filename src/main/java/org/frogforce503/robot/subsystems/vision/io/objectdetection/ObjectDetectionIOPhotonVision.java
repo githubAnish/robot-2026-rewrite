@@ -119,13 +119,7 @@ public class ObjectDetectionIOPhotonVision implements ObjectDetectionIO {
                 List<PhotonTrackedTarget> objects = latestResult.getTargets();
     
                 inputs.trackedObjects = inputs.trackedObjects = objects.stream()
-                .map(object -> new TrackedObject( // Maps the PhotonTrackedTarget to a TrackedObject.
-                    object.getDetectedObjectClassID(),
-                    object.getPitch(),
-                    object.getYaw(),
-                    object.getArea(),
-                    (double) object.getDetectedObjectConfidence()
-                ))
+                .map(object -> TrackedObject.fromPhotonVisionTarget(object))
                 .sorted( // Sorts based on the type of object (class ID) and then by the sorting mode.
                     Comparator.comparingInt(TrackedObject::classId)
                     .thenComparing(sortingMode.getComparator())

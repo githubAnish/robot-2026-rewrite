@@ -152,15 +152,7 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
 
                 inputs.hasTargets = latestResult.hasTargets();
                 inputs.trackedAprilTags = latestResult.targets.stream()
-                    .map(tag -> new TrackedAprilTag(
-                            tag.getFiducialId(),
-                            tag.getPitch(),
-                            tag.getYaw(),
-                            tag.getArea(),
-                            tag.getBestCameraToTarget().getTranslation().getNorm(),
-                            tag.getPoseAmbiguity()
-                            )
-                        )
+                    .map(tag -> TrackedAprilTag.fromPhotonVisionTarget(tag))
                     .toArray(TrackedAprilTag[]::new);
             }
         }
@@ -187,15 +179,7 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
                     lastEstimatedRobotPose.estimatedPose,
                     lastEstimatedRobotPose.targetsUsed.size() > 1 ? primaryPoseObservationType : secondaryPoseObservationType, // Use primary if multiple tags are used, otherwise use secondary
                     lastEstimatedRobotPose.targetsUsed.stream()
-                        .map(tag -> new TrackedAprilTag(
-                                tag.getFiducialId(),
-                                tag.getPitch(),
-                                tag.getYaw(),
-                                tag.getArea(),
-                                tag.getBestCameraToTarget().getTranslation().getNorm(),
-                                tag.getPoseAmbiguity()
-                                )
-                            )
+                        .map(tag -> TrackedAprilTag.fromPhotonVisionTarget(tag))
                         .toArray(TrackedAprilTag[]::new)
                 );
             }

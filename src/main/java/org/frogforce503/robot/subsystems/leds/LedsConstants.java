@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.util.Color;
 
 public class LedsConstants {
     // Hardware / Configuration
-    public static final int candleID = 11;
+    public static final int candleID = 12;
 
     // Generic setpoints
     public static final EmptyAnimation CLEAR_ANIMATION = new EmptyAnimation(0);

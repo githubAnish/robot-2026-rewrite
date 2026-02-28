@@ -106,7 +106,7 @@ public final class MapleSimUtil {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
                 pose.getTranslation().plus(TurretConstants.robotToTurret.getTranslation().toTranslation2d()),
-                Translation2d.kZero, // Using TurretConstants.robotToTurret causes the initial position to shift because the GamePieceProjectile constructor rotates the position about the origin (Z axis) by the shooter’s facing. Since robotPosition is only used to compute the game piece’s initial position and isn’t used elsewhere, it can be simplified by treating the turret’s position as the robot position (i.e., using Translation.kZero)
+                HoodConstants.turretToHood.getTranslation().toTranslation2d(), // Using TurretConstants.robotToTurret causes the initial position to shift because the GamePieceProjectile constructor rotates the position about the origin (Z axis) by the shooter’s facing. Since robotPosition is only used to compute the game piece’s initial position and isn’t used elsewhere, it can be simplified by treating the turret’s position as the robot position (i.e., using Translation.kZero)
                 robotFieldRelativeVelocity,
                 turretFieldRelativeAngle,
                 TurretConstants.robotToTurret.plus(HoodConstants.turretToHood).getMeasureZ().plus(Inches.of(4)), // 4 inches is offset

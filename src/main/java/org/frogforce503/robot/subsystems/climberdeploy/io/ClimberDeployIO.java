@@ -1,10 +1,10 @@
-package org.frogforce503.robot.subsystems.climber.io;
+package org.frogforce503.robot.subsystems.climberdeploy.io;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ClimberIO {
+public interface ClimberDeployIO {
     @AutoLog
-    class ClimberIOInputs {
+    class ClimberDeployIOInputs {
         public boolean motorConnected = false;
         public double positionMeters = 0.0;
         public double velocityMetersPerSec = 0.0;
@@ -14,7 +14,7 @@ public interface ClimberIO {
         public boolean limitSwitchPressed = false;
     }
 
-    default void updateInputs(ClimberIOInputs inputs) {}
+    default void updateInputs(ClimberDeployIOInputs inputs) {}
 
     default void runOpenLoop(double output) {}
 
