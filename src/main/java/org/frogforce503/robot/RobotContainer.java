@@ -14,11 +14,8 @@ import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
 import org.frogforce503.robot.commands.LobFuelIntoAlliance;
-import org.frogforce503.robot.commands.PrepForLobFuelIntoAlliance;
-import org.frogforce503.robot.commands.PrepForShootFuelIntoHub;
 import org.frogforce503.robot.commands.ShootFuelIntoHub;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
-import org.frogforce503.robot.commands.tuning.TuneShot;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
@@ -83,7 +80,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
@@ -306,8 +302,8 @@ public class RobotContainer {
         driver.leftTrigger().whileTrue(new IntakeFuelFromGround(drive, vision, superstructure, driver, autoAssistOverride));
         driver.leftBumper().whileTrue(new IntakeFuelFromOutpost(drive, vision, superstructure, driver, autoAssistOverride));
 
-        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure));
-        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure));
+        driver.rightTrigger().whileTrue(new ShootFuelIntoHub(drive, vision, superstructure, true));
+        driver.rightBumper().whileTrue(new LobFuelIntoAlliance(drive, vision, superstructure, true));
         
         driverLeftPaddle.whileTrue(new EjectFuelFromIntake(superstructure));
         driverRightPaddle.whileTrue(new EjectFuelFromFlywheels(superstructure));
@@ -339,8 +335,8 @@ public class RobotContainer {
                         : drive.getPose().getX() < FieldConstants.Lines.blueInitLineX);
 
         inAllianceZone
-            .onTrue(new PrepForShootFuelIntoHub(drive, vision, superstructure))
-            .onFalse(new PrepForLobFuelIntoAlliance(drive, vision, superstructure));
+            .onTrue(new ShootFuelIntoHub(drive, vision, superstructure, false))
+            .onFalse(new LobFuelIntoAlliance(drive, vision, superstructure, false));
 
         Trigger shotFeasible = new Trigger(superstructure::isFeasibleShot);
 
@@ -421,7 +417,7 @@ public class RobotContainer {
     public void test() {
         // RobotModeTriggers.teleop().onTrue(
         //     Commands.sequence(
-        //         new ShootFuelIntoHub(drive, vision, superstructure)
+        //         new ShootFuelIntoHub(drive, vision, superstructure, true)
         //     ).withName("RobotContainer Test Cmd")
         // );
     }

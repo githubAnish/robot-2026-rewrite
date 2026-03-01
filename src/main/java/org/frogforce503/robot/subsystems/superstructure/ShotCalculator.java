@@ -31,8 +31,8 @@ public class ShotCalculator {
     private static double turretVelocity;
     private static double hoodVelocity;
 
-    private static final double minDistance = 1.263;
-    private static final double maxDistance = 5.427;
+    public static final double minDistanceToHub = 1.263; // Update based on shotmap distance range
+    public static final double maxDistanceToHub = 5.427; // Update based on shotmap distance range
     private static final double phaseDelay = 0.03;
 
     private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
@@ -41,7 +41,10 @@ public class ShotCalculator {
     private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
 
-    private static final InterpolatingDoubleTreeMap timeOfFlightMap =
+    private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+
+    private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
     static {
@@ -66,17 +69,51 @@ public class ShotCalculator {
         launchFlywheelSpeedMap.put(4.950, Units.rotationsPerMinuteToRadiansPerSecond(2100));
         launchFlywheelSpeedMap.put(5.427, Units.rotationsPerMinuteToRadiansPerSecond(2200));
 
-        timeOfFlightMap.put(1.263, 0.62);
-        timeOfFlightMap.put(2.585, 0.71);
-        timeOfFlightMap.put(3.110, 0.75);
-        timeOfFlightMap.put(4.360, 0.95);
-        timeOfFlightMap.put(5.427, 1.1);
+        hubTimeOfFlightMap.put(1.263, 0.62);
+        hubTimeOfFlightMap.put(2.585, 0.71);
+        hubTimeOfFlightMap.put(3.110, 0.75);
+        hubTimeOfFlightMap.put(4.360, 0.95);
+        hubTimeOfFlightMap.put(5.427, 1.1);
     }
 
     public static ShotInfo calculateHubShotInfo(
         Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity
+    ) {
+        return
+            calculateShotInfo(
+                pose,
+                robotRelativeVelocity,
+                fieldRelativeVelocity,
+                FieldConstants.isRed() 
+                    ? FieldConstants.Hub.redShotPose.toTranslation2d() 
+                    : FieldConstants.Hub.blueShotPose.toTranslation2d(),
+                hubTimeOfFlightMap);
+    }
+
+    public static ShotInfo calculateLobShotInfo(
+        Pose2d pose,
+        ChassisSpeeds robotRelativeVelocity,
+        ChassisSpeeds fieldRelativeVelocity
+    ) {
+        return
+            calculateShotInfo(
+                pose,
+                robotRelativeVelocity,
+                fieldRelativeVelocity,
+                FieldConstants.isRed() 
+                    ? Translation2d.kZero 
+                    : Translation2d.kZero,
+                lobTimeOfFlightMap);
+    }
+
+    private static ShotInfo calculateShotInfo(
+        Pose2d pose,
+        ChassisSpeeds robotRelativeVelocity,
+        ChassisSpeeds fieldRelativeVelocity,
+        Translation2d target,
+        InterpolatingDoubleTreeMap timeOfFlightMap
     ) {
         // Calculate estimated pose while accounting for phase delay
         pose =
@@ -87,11 +124,6 @@ public class ShotCalculator {
                     robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
         // Calculate distance from turret to target
-        Translation2d target =
-            FieldConstants.isRed() 
-                ? FieldConstants.Hub.redShotPose.toTranslation2d() 
-                : FieldConstants.Hub.blueShotPose.toTranslation2d();
-
         Pose2d turretPosition = pose.transformBy(GeomUtil.toTransform2d(TurretConstants.robotToTurret));
         double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
 
@@ -117,7 +149,7 @@ public class ShotCalculator {
         double lookaheadTurretToTargetDistance = turretToTargetDistance;
         
         for (int i = 0; i < 20; i++) {
-            timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+            timeOfFlight = hubTimeOfFlightMap.get(lookaheadTurretToTargetDistance);
 
             double offsetX = turretVelocityX * timeOfFlight;
             double offsetY = turretVelocityY * timeOfFlight;
@@ -154,8 +186,6 @@ public class ShotCalculator {
 
         ShotInfo latestInfo =
             new ShotInfo(
-                lookaheadTurretToTargetDistance >= minDistance
-                    && lookaheadTurretToTargetDistance <= maxDistance,
                 turretToTargetDistance,
                 turretAngle,
                 turretVelocity,
@@ -183,7 +213,6 @@ public class ShotCalculator {
     }
 
     public record ShotInfo(
-        boolean isFeasibleShot,
         double turretToTargetDistance,
         Rotation2d turretFieldRelativeAngle,
         double turretVelocityRadPerSec,

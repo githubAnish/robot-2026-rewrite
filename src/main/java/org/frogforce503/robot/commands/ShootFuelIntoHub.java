@@ -1,5 +1,6 @@
 package org.frogforce503.robot.commands;
 
+import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
@@ -8,11 +9,13 @@ import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.TurretSetpoint;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
@@ -37,7 +40,9 @@ public class ShootFuelIntoHub extends Command {
     private final Flywheels flywheels;
     private final Hood hood;
 
-    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure) {
+    private final boolean isShooting;
+
+    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, boolean isShooting) {
         this.drive = drive;
         this.vision = vision;
 
@@ -49,6 +54,8 @@ public class ShootFuelIntoHub extends Command {
         this.turret = superstructure.getTurret();
         this.flywheels = superstructure.getFlywheels();
         this.hood = superstructure.getHood();
+
+        this.isShooting = isShooting;
 
         addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
     }
@@ -69,6 +76,7 @@ public class ShootFuelIntoHub extends Command {
 
         ShotPreset shotPreset = superstructure.getShotPreset();
 
+        // Calculate shot params
         switch (shotPreset) {
             case NONE:
                 ShotInfo shotInfo =
@@ -82,7 +90,7 @@ public class ShootFuelIntoHub extends Command {
                 flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
                 hoodAngleRad = shotInfo.hoodAngleRad();
                 hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();
-                isFeasibleShot = shotInfo.isFeasibleShot();
+                isFeasibleShot = MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceToHub, ShotCalculator.maxDistanceToHub);
                 break;
 
             case BATTER:
@@ -113,6 +121,7 @@ public class ShootFuelIntoHub extends Command {
                 break;
         }
 
+        // Calculate robot-relative turret setpoint
         TurretSetpoint turretSetpoint =
             ShotCalculator.calculateTurretRobotRelativeSetpoint(
                 turretFieldRelativeAngle,
@@ -120,15 +129,28 @@ public class ShootFuelIntoHub extends Command {
                 drive.getAngle(),
                 drive.getRobotVelocity().omegaRadiansPerSecond);
 
+        // Set shooter setpoints
         turret.setAngle(turretSetpoint.angleRad(), turretSetpoint.velocityRadPerSec());
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
 
-        // run the feeder and indexer when shooting and find out how to shoot
+        // Run indexer and feeder
+        if (isShooting) {
+            indexer.setVelocity(IndexerConstants.SHOOT);
+            feeder.setVelocity(FeederConstants.SHOOT);
+        }
+
+        // Check if subsystems at setpoint
+        boolean turretAtGoal = turret.isAtAngle(turretSetpoint.angleRad(), TurretConstants.kShootOnMoveTolerance);
+        boolean flywheelsAtGoal = flywheels.isAtVelocity(flywheelsVelocityRadPerSec, FlywheelsConstants.kTolerance);
+        boolean hoodAtGoal = hood.isAtAngle(hoodAngleRad, HoodConstants.kShootOnMoveTolerance);
+
+        isFeasibleShot = isFeasibleShot && turretAtGoal && flywheelsAtGoal && hoodAtGoal;
 
         superstructure.setFeasibleShot(isFeasibleShot);
 
-        if (RobotBase.isSimulation()) {
+        // Simulated shooting
+        if (RobotBase.isSimulation() && isFeasibleShot) {
             MapleSimUtil.scoreFuelIntoHub(
                 drive.getPose(),
                 drive.getFieldVelocity(),

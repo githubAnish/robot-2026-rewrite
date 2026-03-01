@@ -31,7 +31,8 @@ public final class TurretConstants {
             -0.1314196, 0.0, 0.2770674, new Rotation3d(0.0, Units.degreesToRadians(-22.5), 0.0)); // still from 6328 params
 
     // Setpoints
-    public static final double kTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot
+    public static final double kFixedTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot
+    public static final double kShootOnMoveTolerance = Units.degreesToRadians(5); // TODO Turret position has to be extremely accurate for consistent shot
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards

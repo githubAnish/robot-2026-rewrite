@@ -91,6 +91,12 @@ public class WarmupExecutor {
             drive.getFieldVelocity()
         );
 
+        ShotCalculator.calculateLobShotInfo(
+            drive.getPose(),
+            drive.getRobotVelocity(),
+            drive.getFieldVelocity()
+        );
+
         ShotCalculator.calculateTurretRobotRelativeSetpoint(
             Rotation2d.kZero,
             3,

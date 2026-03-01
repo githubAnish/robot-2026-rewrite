@@ -26,7 +26,8 @@ public final class HoodConstants {
     public static final Transform3d turretToHood = new Transform3d(0.104, 0, 0.09, Rotation3d.kZero); // Sim turret to hood, can change based on real robot CAD
     
     // Setpoints
-    public static final double kTolerance = Units.degreesToRadians(0.5); //TODO Hood position has to be extremely accurate for consistent shot
+    public static final double kFixedTolerance = Units.degreesToRadians(0.5); //TODO Hood position has to be extremely accurate for consistent shot
+    public static final double kShootOnMoveTolerance = Units.degreesToRadians(10); //TODO Hood position has to be extremely accurate for consistent shot
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(0);
