@@ -25,9 +25,6 @@ public class IndexerConstants {
 
     public static final double SHOOT = Units.rotationsPerMinuteToRadiansPerSecond(4000);
 
-    public static final double MIN_FREE_SPEED =
-        Units.rotationsPerMinuteToRadiansPerSecond(200); // tune on robot
-
-    public static final double COMPRESSION_CURRENT = 30.0; // amps, tune
+    public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(-2000);
 
 }

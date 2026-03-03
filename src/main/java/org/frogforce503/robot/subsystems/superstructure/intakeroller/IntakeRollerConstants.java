@@ -23,5 +23,5 @@ public class IntakeRollerConstants {
 
     public static final double INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(2000);
 
-    public static final double EJECT = -Units.rotationsPerMinuteToRadiansPerSecond(2000);
+    public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(-2000);
 }

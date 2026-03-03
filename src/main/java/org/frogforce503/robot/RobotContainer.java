@@ -9,13 +9,11 @@ import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
 import org.frogforce503.robot.commands.ClimbSequence;
-import org.frogforce503.robot.commands.EjectFuelFromFlywheels;
+import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
-import org.frogforce503.robot.commands.IntakeFuelFromOutpost;
-import org.frogforce503.robot.commands.LobFuelIntoAlliance;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
-import org.frogforce503.robot.commands.ShootFuelIntoHub;
+import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -123,17 +121,14 @@ public class RobotContainer {
 
     // Main Buttons
     final Trigger intakeGround = driverXbox.leftTrigger();
-    final Trigger intakeOutpost = driverXbox.leftBumper();
+    final Trigger ejectIntake = driverXbox.leftBumper(); // make this eject all
 
-    final Trigger shootHub = driverXbox.rightTrigger();
-    final Trigger shootLob = driverXbox.rightBumper();
-
-    final Trigger ejectIntake = driverXbox.leftPaddle();
-    final Trigger ejectFlywheels = driverXbox.rightPaddle();
+    final Trigger shoot = driverXbox.rightTrigger();
+    final Trigger ejectFlywheels = driverXbox.rightBumper(); // make this unjam
 
     final Trigger setBatterPreset = driverXbox.y();
-    final Trigger setTrenchPreset = driverXbox.a();
-    final Trigger setDepotPreset = driverXbox.x();
+    final Trigger setTrenchPreset = driverXbox.x();
+    final Trigger setDepotPreset = driverXbox.a();
 
     final Trigger climb = driverXbox.b();
 
@@ -313,7 +308,7 @@ public class RobotContainer {
     private void configureBindings() {
         // Create commands (that have / provide dependencies)
         final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround.or(intakeOutpost), shootHub.or(shootLob));
+        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shoot);
 
         // Apply default commands
         drive.setDefaultCommand(teleopDriveCommand);
@@ -324,22 +319,14 @@ public class RobotContainer {
 
         // Bind main controls
         intakeGround.whileTrue(
-            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, driverXbox, toggleAutoAssist, gameViz.getIntakeSimulation()));
+            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, driverXbox, autoAssistOverride, gameViz.getIntakeSimulation()));
 
-        intakeOutpost.whileTrue(
-            new IntakeFuelFromOutpost(
-                drive, vision, intakeRoller, driverXbox, toggleAutoAssist));
-
-        shootHub.whileTrue(
-            new ShootFuelIntoHub(
+        shoot.whileTrue(
+            new ShootFuelIntoHubOrLob(
                 drive, vision, feeder, turret, hood, flywheels, gameViz.getIntakeSimulation()));
 
-        shootLob.whileTrue(
-            new LobFuelIntoAlliance(
-                drive, vision, feeder, turret, hood, flywheels, gameViz.getIntakeSimulation()));
-
-        ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller));
-        ejectFlywheels.whileTrue(new EjectFuelFromFlywheels(flywheels));
+        ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
+        ejectFlywheels.whileTrue(new EjectFuelFromShooter(feeder, flywheels));
 
         bindShotPresets(setBatterPreset, ShotPreset.BATTER);
         bindShotPresets(setTrenchPreset, ShotPreset.TRENCH);
@@ -363,7 +350,7 @@ public class RobotContainer {
         shotFeasible
             .onTrue(
                 Commands.parallel(
-                    setDriverRumble(0.75, 0.25),
+                    rumbleController(0.75, 0.25),
                     blinkLeds(LedsConstants.READY_TO_SHOOT, 1)
             ).withName("Driver Rumble Feasible Shot"));
     }
@@ -385,7 +372,7 @@ public class RobotContainer {
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     }
 
-    private Command setDriverRumble(double value, double durationSec) {
+    private Command rumbleController(double value, double durationSec) {
         return
             Commands.run(() -> driverXbox.setRumble(RumbleType.kBothRumble, value))
                 .withTimeout(durationSec)

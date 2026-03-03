@@ -1,5 +1,9 @@
 package org.frogforce503.robot.commands;
 
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
@@ -7,21 +11,33 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 
 import edu.wpi.first.wpilibj2.command.Command;
 
+/** Runs the intake, indexer, and feeder in the opposite direction to unjam any stuck fuel. */
 public class EjectFuelFromIntake extends Command {
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
+    private final Indexer indexer;
+    private final Feeder feeder;
 
-    public EjectFuelFromIntake(IntakePivot intakePivot, IntakeRoller intakeRoller) {
+    public EjectFuelFromIntake(
+        IntakePivot intakePivot,
+        IntakeRoller intakeRoller,
+        Indexer indexer,
+        Feeder feeder
+    ) {
         this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
+        this.indexer = indexer;
+        this.feeder = feeder;
 
-        addRequirements(intakePivot, intakeRoller);
+        addRequirements(intakePivot, intakeRoller, indexer, feeder);
     }
 
     @Override
     public void initialize() {
         intakePivot.setAngle(IntakePivotConstants.EJECT);
         intakeRoller.setVelocity(IntakeRollerConstants.EJECT);
+        indexer.setVelocity(IndexerConstants.EJECT);
+        feeder.setVelocity(FeederConstants.EJECT_FROM_SHOOTER);
     }
 
     @Override
@@ -36,5 +52,7 @@ public class EjectFuelFromIntake extends Command {
     public void end(boolean interrupted) {
         intakePivot.stop();
         intakeRoller.stop();
+        indexer.stop();
+        feeder.stop();
     }
 }

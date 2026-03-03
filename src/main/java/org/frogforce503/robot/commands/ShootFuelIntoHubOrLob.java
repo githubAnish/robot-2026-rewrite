@@ -16,15 +16,14 @@ import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
-import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
 import org.ironmaple.simulation.IntakeSimulation;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ShootFuelIntoHub extends Command {
+public class ShootFuelIntoHubOrLob extends Command {
     private final Drive drive;
-    private final Vision vision;
 
     private final Feeder feeder;
     private final Turret turret;
@@ -34,7 +33,7 @@ public class ShootFuelIntoHub extends Command {
     // Sim
     private final IntakeSimulation intakeSimulation;
 
-    public ShootFuelIntoHub(
+    public ShootFuelIntoHubOrLob(
         Drive drive,
         Vision vision,
         Feeder feeder,
@@ -44,7 +43,6 @@ public class ShootFuelIntoHub extends Command {
         IntakeSimulation intakeSimulation
     ) {
         this.drive = drive;
-        this.vision = vision;
 
         this.feeder = feeder;
         this.turret = turret;
@@ -57,12 +55,12 @@ public class ShootFuelIntoHub extends Command {
     }
 
     @Override
-    public void initialize() {
-        vision.setDesiredAprilTagGoal(AprilTagGoal.TURRET_HUB_AIMING);
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
+        final boolean isHubShot = FieldConstants.inAllianceZone(drive.getPose()); // For checking whether to compute hub or lob shot info
+
         // Define shot params
         double flywheelsVelocityRadPerSec = 0.0;
         boolean isFeasibleShot = false;
@@ -73,13 +71,22 @@ public class ShootFuelIntoHub extends Command {
         switch (shotPreset) {
             case NONE:
                 ShotInfo shotInfo =
-                    ShotCalculator.getInstance().calculateHubShotInfo(
-                        drive.getPose(),
-                        drive.getRobotVelocity(),
-                        drive.getFieldVelocity());
+                    isHubShot
+                        ? ShotCalculator.getInstance().calculateHubShotInfo(
+                            drive.getPose(),
+                            drive.getRobotVelocity(),
+                            drive.getFieldVelocity())
+
+                        : ShotCalculator.getInstance().calculateLobShotInfo(
+                            drive.getPose(),
+                            drive.getRobotVelocity(),
+                            drive.getFieldVelocity());
 
                 flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
-                isFeasibleShot = MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot);
+                isFeasibleShot =
+                    isHubShot
+                        ? MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot)
+                        : MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceLobShoot, ShotCalculator.maxDistanceLobShoot);
                 break;
 
             case BATTER:
@@ -99,8 +106,8 @@ public class ShootFuelIntoHub extends Command {
         }
 
         // Run subsystems
-        flywheels.setVelocity(flywheelsVelocityRadPerSec);
         feeder.setVelocity(FeederConstants.SHOOT);
+        flywheels.setVelocity(flywheelsVelocityRadPerSec);
 
         // Check if subsystems at setpoint
         boolean turretAtGoal = turret.isAtAngle(turret.getRobotRelativeAngleRad(), TurretConstants.kShootOnMoveTolerance);
@@ -119,7 +126,10 @@ public class ShootFuelIntoHub extends Command {
                 turret.getFieldRelativeAngle(),
                 hood.getAngleRad(),
                 flywheelsVelocityRadPerSec,
-                () -> FieldConstants.Hub.getHubShotPose(),
+                () ->
+                    isHubShot
+                        ? FieldConstants.Hub.getHubShotPose()
+                        : new Translation3d(FieldConstants.Depot.getLobShotPose()),
                 intakeSimulation);
         }
     }
@@ -131,8 +141,6 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        vision.setDesiredAprilTagGoal(AprilTagGoal.GLOBAL_LOCALIZATION);
-
         feeder.stop();
         flywheels.stop();
     }

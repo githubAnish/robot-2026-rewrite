@@ -128,7 +128,9 @@ public class Turret extends FFSubsystemBase {
 
     /** Gets the turret's field-relative angle. */
     public Rotation2d getFieldRelativeAngle() {
-        return new Rotation2d(inputs.positionRad).plus(robotAngleSupplier.get());
+        return
+            new Rotation2d(inputs.positionRad)
+                .plus(robotAngleSupplier.get());
     }
 
     // Actions

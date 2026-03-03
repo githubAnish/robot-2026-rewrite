@@ -110,7 +110,10 @@ public class TuneShot extends Command {
                 turretFieldRelativeAngle,
                 hoodAngleRad,
                 flywheelsVelocityRadPerSec,
-                () -> tuningHubShot ? FieldConstants.Hub.getHubShotPose() : new Translation3d(FieldConstants.Depot.getLobShotPose()),
+                () ->
+                    tuningHubShot
+                        ? FieldConstants.Hub.getHubShotPose()
+                        : new Translation3d(FieldConstants.Depot.getLobShotPose()),
                 intakeSimulation);
         }
 

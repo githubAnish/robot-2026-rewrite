@@ -35,7 +35,7 @@ public class TrackTargetCommand extends Command {
     @Override
     public void initialize() {
         vision.setDesiredAprilTagGoal(
-            FieldConstants.inAllianceZone(drive.getPose())
+            FieldConstants.inAllianceZone(drive.getPose()) // check if should aim at hub
                 ? AprilTagGoal.TURRET_HUB_AIMING
                 : AprilTagGoal.GLOBAL_LOCALIZATION);
     }
@@ -101,7 +101,7 @@ public class TrackTargetCommand extends Command {
             hoodVelocityRadPerSec = 0.0;
         }
 
-        // Set shooter setpoints
+        // Run subsystems
         turret.setFieldRelativeAngle(turretFieldRelativeAngle, turretVelocityRadPerSec);
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
     }

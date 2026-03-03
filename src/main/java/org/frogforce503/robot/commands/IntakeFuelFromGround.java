@@ -148,7 +148,7 @@ public class IntakeFuelFromGround extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakePivot.stop();
+        intakePivot.setAngle(IntakePivotConstants.STOW);
         intakeRoller.stop();
 
         if (RobotBase.isSimulation()) {

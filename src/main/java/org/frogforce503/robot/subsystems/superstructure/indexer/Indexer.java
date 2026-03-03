@@ -64,14 +64,6 @@ public class Indexer extends FFSubsystemBase {
         return inputs.velocityRadPerSec;
     }
 
-    public boolean isCompressed() {
-        return
-            shouldRunVelocity &&
-            Math.abs(targetVelocityRadPerSec) > 1e-3 &&
-            getVelocityRadPerSec() < IndexerConstants.MIN_FREE_SPEED &&
-            inputs.statorCurrentAmps > IndexerConstants.COMPRESSION_CURRENT;
-    }
-
     // Actions
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
