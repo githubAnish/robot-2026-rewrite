@@ -1,6 +1,5 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
@@ -9,8 +8,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class EjectFuelFromFlywheels extends Command {
     private final Flywheels flywheels;
 
-    public EjectFuelFromFlywheels(Superstructure superstructure) {
-        this.flywheels = superstructure.getFlywheels();
+    public EjectFuelFromFlywheels(Flywheels flywheels) {
+        this.flywheels = flywheels;
+
+        addRequirements(flywheels);
     }
 
     @Override
@@ -19,9 +20,7 @@ public class EjectFuelFromFlywheels extends Command {
     }
 
     @Override
-    public void execute() {
-
-    }
+    public void execute() {}
 
     @Override
     public boolean isFinished() {

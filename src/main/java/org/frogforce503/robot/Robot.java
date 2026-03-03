@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.lib.subsystem.VirtualSubsystem;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -120,9 +119,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     LoggedTracer.reset();
-    
-    // Run virtual subsystems
-    VirtualSubsystem.periodicAll();
 
     // Run command scheduler
     CommandScheduler.getInstance().run();

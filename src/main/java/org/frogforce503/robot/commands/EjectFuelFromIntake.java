@@ -1,6 +1,5 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
@@ -12,9 +11,11 @@ public class EjectFuelFromIntake extends Command {
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
 
-    public EjectFuelFromIntake(Superstructure superstructure) {
-        this.intakePivot = superstructure.getIntakePivot();
-        this.intakeRoller = superstructure.getIntakeRoller();
+    public EjectFuelFromIntake(IntakePivot intakePivot, IntakeRoller intakeRoller) {
+        this.intakePivot = intakePivot;
+        this.intakeRoller = intakeRoller;
+
+        addRequirements(intakePivot, intakeRoller);
     }
 
     @Override
@@ -24,9 +25,7 @@ public class EjectFuelFromIntake extends Command {
     }
 
     @Override
-    public void execute() {
-
-    }
+    public void execute() {}
 
     @Override
     public boolean isFinished() {

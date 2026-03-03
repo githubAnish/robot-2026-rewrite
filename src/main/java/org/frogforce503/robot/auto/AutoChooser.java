@@ -3,50 +3,38 @@ package org.frogforce503.robot.auto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.frogforce503.lib.auto.choreo.ChoreoUtil;
 import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.robot.auto.autos.blue.BlueCenterDepotThenClimb;
-import org.frogforce503.robot.auto.autos.blue.BlueLeftTrenchGoToNZTwice;
-import org.frogforce503.robot.auto.autos.test.RandomAuto;
+import org.frogforce503.robot.auto.autos.RandomAuto;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
-import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import lombok.Getter;
 
 public class AutoChooser {
     // Requirements
     private final Drive drive;
     private final Vision vision;
-    private final Superstructure superstructure;
-    private final AutoFactory choreoAutoFactory;
 
     // Dashboard
-    @Getter private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
+    private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
 
     // State
     private Command autoCommand;
     private AutoMode lastSelectedAuto;
 
-    public AutoChooser(Drive drive, Vision vision, Superstructure superstructure) {
+    public AutoChooser(Drive drive, Vision vision) {
         this.drive = drive;
         this.vision = vision;
-        this.superstructure = superstructure;
-
-        // Configure Choreo
-        choreoAutoFactory = ChoreoUtil.createAutoFactory(drive);
 
         // Configure PathPlanner
         PathPlannerUtil.configureAutoBuilder(drive);
@@ -72,18 +60,9 @@ public class AutoChooser {
                 }
         });
 
-        routineChooser.addOption("Random", new RandomAuto(drive, vision, superstructure));
-
-        routineChooser.addOption("Blue Center Depot Then Climb", new BlueCenterDepotThenClimb(drive, vision, superstructure));
-        routineChooser.addOption("Blue Left Trench Go To NZ Twice", new BlueLeftTrenchGoToNZTwice(drive, vision, superstructure));
+        routineChooser.addOption("Random", new RandomAuto());
     }
 
-    private void logTrajectory(Pose2d... trajectory) {
-        drive.getViz().getObject("Trajectory").setPoses(trajectory);
-        Logger.recordOutput("Drive/Trajectory", trajectory);
-    }
-
-    // Public methods
     public void startAuto() {
         final AutoMode selectedAuto = routineChooser.get();
 
@@ -124,5 +103,10 @@ public class AutoChooser {
         if (autoCommand != null) {
             autoCommand.cancel();
         }
+    }
+
+    private void logTrajectory(Pose2d... trajectory) {
+        drive.getViz().getObject("Trajectory").setPoses(trajectory);
+        Logger.recordOutput("Drive/Trajectory", trajectory);
     }
 }

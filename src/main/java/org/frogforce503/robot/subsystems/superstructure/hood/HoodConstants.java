@@ -32,7 +32,9 @@ public final class HoodConstants {
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(0);
 
+    public static final double DUCK_UNDER_TRENCH = Units.degreesToRadians(0);
+
     public static final double BATTER = Units.degreesToRadians(0);
-    public static final double LOB_FROM_NZ = Units.degreesToRadians(0);
-    public static final double TOWER = Units.degreesToRadians(0);
+    public static final double TRENCH = Units.degreesToRadians(0);
+    public static final double DEPOT = Units.degreesToRadians(0);
 }

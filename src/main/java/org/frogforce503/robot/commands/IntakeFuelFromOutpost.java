@@ -11,9 +11,6 @@ import org.frogforce503.lib.swerve.SwervePathController;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
@@ -34,7 +31,6 @@ public class IntakeFuelFromOutpost extends Command {
     private final Vision vision;
 
     private final IntakeRoller intakeRoller;
-    private final Indexer indexer;
 
     private final CommandXboxController xboxController;
     private final BooleanSupplier autoAssistEnabled;
@@ -52,33 +48,24 @@ public class IntakeFuelFromOutpost extends Command {
     public IntakeFuelFromOutpost(
         Drive drive,
         Vision vision,
-        Superstructure superstructure,
+        IntakeRoller intakeRoller,
         CommandXboxController xboxController,
         BooleanSupplier autoAssistEnabled
     ) {
         this.drive = drive;
         this.vision = vision;
 
-        this.intakeRoller = superstructure.getIntakeRoller();
-        this.indexer = superstructure.getIndexer();
+        this.intakeRoller = intakeRoller;
 
         this.xboxController = xboxController;
         this.autoAssistEnabled = autoAssistEnabled;
 
-        addRequirements(drive, intakeRoller, indexer);
+        addRequirements(drive, intakeRoller);
     }
 
     @Override
     public void initialize() {
-        if (indexer.isCompressed()) {
-            return;
-        }
-
-        intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
-        indexer.setVelocity(IndexerConstants.INTAKE);
-
-        vision.setDesiredAprilTagGoal(AprilTagGoal.OUTPOST_ALIGNMENT);
-
+        // Create drive trajectory
         Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
 
         double linearVelocity =
@@ -102,6 +89,12 @@ public class IntakeFuelFromOutpost extends Command {
 
         trajectoryController.reset();
         trajectoryTimer.restart();
+
+        // Set vision goal
+        vision.setDesiredAprilTagGoal(AprilTagGoal.OUTPOST_ALIGNMENT);
+
+        // Run intake roller
+        intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
     }
 
     @Override
@@ -156,6 +149,5 @@ public class IntakeFuelFromOutpost extends Command {
         vision.setDesiredAprilTagGoal(AprilTagGoal.GLOBAL_LOCALIZATION);
 
         intakeRoller.stop();
-        indexer.setVelocity(IndexerConstants.SLOW_MIX); // TODO maybe slow mixing in order to prep for shooting
     }
 }

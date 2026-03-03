@@ -23,10 +23,10 @@ public class FlywheelsConstants {
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(50.0); // TODO Flywheel speed has to be extremely accurate for consistent shot
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
-    public static final double IDLE_SPEED = Units.rotationsPerMinuteToRadiansPerSecond(1500);
+    public static final double IDLE = Units.rotationsPerMinuteToRadiansPerSecond(1500);
     public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(1500);
 
     public static final double BATTER = Units.rotationsPerMinuteToRadiansPerSecond(0);
-    public static final double LOB_FROM_NZ = Units.rotationsPerMinuteToRadiansPerSecond(0);
-    public static final double TOWER = Units.rotationsPerMinuteToRadiansPerSecond(0);
+    public static final double TRENCH = Units.rotationsPerMinuteToRadiansPerSecond(0);
+    public static final double DEPOT = Units.rotationsPerMinuteToRadiansPerSecond(0);
 }

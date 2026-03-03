@@ -38,6 +38,6 @@ public final class TurretConstants {
     public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards
 
     public static final Rotation2d BATTER_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d LOB_FROM_NZ_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d TOWER_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d TRENCH_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
+    public static final Rotation2d DEPOT_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
 }

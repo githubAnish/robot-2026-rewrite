@@ -1,6 +1,7 @@
 package org.frogforce503.robot.constants.field;
 
 import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.Constants;
 
@@ -40,6 +41,20 @@ public class FieldConstants {
                 .toPose2d();
     }
 
+    public static boolean inAllianceZone(Pose2d pose) {
+        return
+            isRed()
+                ? pose.getX() > Lines.redInitLineX
+                : pose.getX() < Lines.blueInitLineX;
+    }
+
+    public static boolean underTrench(Pose2d pose) {
+        return
+            isRed()
+                ? MathUtils.inRange(pose.getX(), LeftBump.redFrontLeftCorner.getX(), Lines.redInitLineX)
+                : MathUtils.inRange(pose.getX(), Lines.blueInitLineX, LeftBump.blueFrontLeftCorner.getX());
+    }
+
     public static class Lines {
         public static final double blueInitLineX;
         public static final double redInitLineX;
@@ -69,6 +84,10 @@ public class FieldConstants {
 
             blueShotPose = blueCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
             redShotPose = redCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
+        }
+
+        public static Translation3d getHubShotPose() {
+            return isRed() ? redShotPose : blueShotPose;
         }
     }
 
@@ -105,6 +124,10 @@ public class FieldConstants {
             redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
             redFrontRightCorner = redFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
             redBackRightCorner = redFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+        }
+
+        public static Translation2d getLobShotPose() {
+            return isRed() ? redBackLeftCorner : blueBackLeftCorner;
         }
     }
 

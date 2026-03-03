@@ -54,7 +54,7 @@ public final class PathPlannerUtil {
         try {
             return PathPlannerPath.fromPathFile(name);
         } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
+            System.out.println("Error loading path " + name + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
             e.printStackTrace();
             return null;
         }
@@ -64,7 +64,7 @@ public final class PathPlannerUtil {
         try {
             return PathPlannerPath.fromChoreoTrajectory(name);
         } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error creating auto" + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
+            System.out.println("Error loading path " + name + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
             e.printStackTrace();
             return null;
         }

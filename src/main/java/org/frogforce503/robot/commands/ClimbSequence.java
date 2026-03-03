@@ -4,7 +4,6 @@ import java.util.function.BooleanSupplier;
 
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -26,8 +25,9 @@ public class ClimbSequence extends Command {
     private final Indexer indexer;
     private final Feeder feeder;
     private final Turret turret;
-    private final Flywheels flywheels;
     private final Hood hood;
+    private final Flywheels flywheels;
+    
     private final ClimberDeploy climberDeploy;
     private final ClimberHook climberHook;
 
@@ -39,6 +39,7 @@ public class ClimbSequence extends Command {
 
     private enum ClimbState {
         DISABLE_SUPERSTRUCTURE,
+        DEPLOY_CLIMBER,
         RAISE_FOR_L1,
         STOW_AT_L1,
         RAISE_FOR_L2,
@@ -48,25 +49,37 @@ public class ClimbSequence extends Command {
         FINISHED,
     }
     
-    public ClimbSequence(Superstructure superstructure, ClimberDeploy climberDeploy, ClimberHook climberHook, BooleanSupplier advanceButton) {
-        this.intakePivot = superstructure.getIntakePivot();
-        this.intakeRoller = superstructure.getIntakeRoller();
-        this.indexer = superstructure.getIndexer();
-        this.feeder = superstructure.getFeeder();
-        this.turret = superstructure.getTurret();
-        this.flywheels = superstructure.getFlywheels();
-        this.hood = superstructure.getHood();
+    public ClimbSequence(
+        IntakePivot intakePivot,
+        IntakeRoller intakeRoller,
+        Indexer indexer,
+        Feeder feeder,
+        Turret turret,
+        Hood hood,
+        Flywheels flywheels,
+        ClimberDeploy climberDeploy,
+        ClimberHook climberHook,
+        BooleanSupplier advanceButton
+    ) {
+        this.intakePivot = intakePivot;
+        this.intakeRoller = intakeRoller;
+        this.indexer = indexer;
+        this.feeder = feeder;
+        this.turret = turret;
+        this.flywheels = flywheels;
+        this.hood = hood;
 
         this.climberDeploy = climberDeploy;
         this.climberHook = climberHook;
 
         this.advanceButton = advanceButton;
 
-        addRequirements(climberDeploy);
+        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook);
     }
 
     @Override
     public void initialize() {
+        currentState = ClimbState.DISABLE_SUPERSTRUCTURE;
         lastButton = advanceButton.getAsBoolean();
     }
 
@@ -77,10 +90,17 @@ public class ClimbSequence extends Command {
                 intakePivot.setAngle(IntakePivotConstants.STOW);
                 intakeRoller.stop();
                 indexer.stop();
-                turret.setAngle(TurretConstants.CLIMB);
+                turret.setRobotRelativeAngle(TurretConstants.CLIMB);
                 flywheels.stop();
                 hood.setAngle(HoodConstants.CLIMB);
 
+                if (buttonPressedThisCycle()) {
+                    currentState = ClimbState.DEPLOY_CLIMBER;
+                }
+                break;
+
+            case DEPLOY_CLIMBER:
+                
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.RAISE_FOR_L1;
                 }
@@ -143,7 +163,16 @@ public class ClimbSequence extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        intakePivot.stop();
+        intakeRoller.stop();
+        indexer.stop();
+        feeder.stop();
+        turret.stop();
+        hood.stop();
+        flywheels.stop();
+        
         climberDeploy.stop();
+        climberHook.stop();
     }
 
     private boolean buttonPressedThisCycle() {

@@ -21,8 +21,6 @@ public class IndexerConstants {
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
 
-    public static final double SLOW_MIX = Units.rotationsPerMinuteToRadiansPerSecond(500);
-
     public static final double INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(2000);
 
     public static final double SHOOT = Units.rotationsPerMinuteToRadiansPerSecond(4000);

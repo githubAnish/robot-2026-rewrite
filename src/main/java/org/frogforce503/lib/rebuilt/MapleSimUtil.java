@@ -1,10 +1,12 @@
 package org.frogforce503.lib.rebuilt;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.function.Supplier;
+
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
@@ -19,6 +21,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 
 import org.ironmaple.simulation.IntakeSimulation;
@@ -44,10 +47,15 @@ public final class MapleSimUtil {
     private static final Rectangle2d redRightBump =
         new Rectangle2d(FieldConstants.RightBump.redBackLeftCorner, FieldConstants.RightBump.redFrontRightCorner);
 
+    // Intake Sim Constants
+    private static final int fuelCapacity = 24;
+    private static final Distance intakeWidth = Inches.of(27);
+    private static final Distance intakeLengthExtended = Inches.of(1);
+
     // Shoot Sim Constants
     private static final Timer shotTimer = new Timer();
     private static final Translation3d shotTolerance = new Translation3d(0.5, 0.5, 0.5);
-    public static final double shotFireRateBallsPerSec = 7; // How many balls can you fire within 1 sec?
+    private static final double shotFireRateBallsPerSec = 7; // How many balls can you fire within 1 sec?
 
     private MapleSimUtil() {}
 
@@ -78,24 +86,30 @@ public final class MapleSimUtil {
             robotVelocity.omegaRadiansPerSecond);
     }
 
-    public static void intakeFuelFromGround(SwerveDriveSimulation driveSimulation) {
-        IntakeSimulation x =
+    public static IntakeSimulation createIntake(SwerveDriveSimulation driveSimulation) {
+        return
             IntakeSimulation.OverTheBumperIntake(
                 "Fuel", 
                 driveSimulation,
-                null,
-                null,
-                IntakeSimulation.IntakeSide.BACK,
-                24);
+                intakeWidth,
+                intakeLengthExtended,
+                IntakeSimulation.IntakeSide.FRONT,
+                fuelCapacity);
     }
     
-    public static void scoreFuelIntoHub(
+    public static void shootFuel(
         Pose2d pose,
         ChassisSpeeds robotFieldRelativeVelocity,
         Rotation2d turretFieldRelativeAngle,
         double hoodAngleRad,
-        double flywheelsSpeedRadPerSec
+        double flywheelsSpeedRadPerSec,
+        Supplier<Translation3d> target,
+        IntakeSimulation intakeSimulation
     ) {
+        if (intakeSimulation.getGamePiecesAmount() <= 0) {
+            return; // Don't shoot balls if there are none
+        }
+
         double shotDelaySec = 1.0 / shotFireRateBallsPerSec;
 
         // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
@@ -103,18 +117,27 @@ public final class MapleSimUtil {
             return; // Cooldown not done; skip creating new projectile
         }
 
+        // Index fuel
+        intakeSimulation.obtainGamePieceFromIntake();
+
+        // Shoot fuel
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
-                pose.getTranslation().plus(TurretConstants.robotToTurret.getTranslation().toTranslation2d()),
-                HoodConstants.turretToHood.getTranslation().toTranslation2d(), // Using TurretConstants.robotToTurret causes the initial position to shift because the GamePieceProjectile constructor rotates the position about the origin (Z axis) by the shooter’s facing. Since robotPosition is only used to compute the game piece’s initial position and isn’t used elsewhere, it can be simplified by treating the turret’s position as the robot position (i.e., using Translation.kZero)
+                pose
+                    .plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret.plus(HoodConstants.turretToHood)))
+                    .getTranslation(),
+                Translation2d.kZero,
                 robotFieldRelativeVelocity,
                 turretFieldRelativeAngle,
-                TurretConstants.robotToTurret.plus(HoodConstants.turretToHood).getMeasureZ().plus(Inches.of(4)), // 4 inches is offset
+                TurretConstants.robotToTurret
+                    .plus(HoodConstants.turretToHood)
+                    .getMeasureZ()
+                    .plus(Inches.of(4)), // 4 inches offset
                 MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kSimRadiusMeters),
-                Radians.of(hoodAngleRad).plus(Degrees.of(0)));
+                Radians.of(hoodAngleRad));
 
         fuel
-            .withTargetPosition(() -> FieldConstants.isRed() ? FieldConstants.Hub.redShotPose : FieldConstants.Hub.blueShotPose)
+            .withTargetPosition(target)
             .withTargetTolerance(shotTolerance)
             .withProjectileTrajectoryDisplayCallBack(
                 pose3ds -> Logger.recordOutput("GameViz/SuccessfulFuelShot", pose3ds.toArray(Pose3d[]::new)),

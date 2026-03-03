@@ -2,28 +2,23 @@ package org.frogforce503.robot.commands;
 
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.TurretSetpoint;
+import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
+import org.ironmaple.simulation.IntakeSimulation;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -31,33 +26,34 @@ public class ShootFuelIntoHub extends Command {
     private final Drive drive;
     private final Vision vision;
 
-    private final Superstructure superstructure;
-    private final IntakePivot intakePivot;
-    private final IntakeRoller intakeRoller;
-    private final Indexer indexer;
     private final Feeder feeder;
     private final Turret turret;
-    private final Flywheels flywheels;
     private final Hood hood;
+    private final Flywheels flywheels;
 
-    private final boolean isShooting;
+    // Sim
+    private final IntakeSimulation intakeSimulation;
 
-    public ShootFuelIntoHub(Drive drive, Vision vision, Superstructure superstructure, boolean isShooting) {
+    public ShootFuelIntoHub(
+        Drive drive,
+        Vision vision,
+        Feeder feeder,
+        Turret turret,
+        Hood hood,
+        Flywheels flywheels,
+        IntakeSimulation intakeSimulation
+    ) {
         this.drive = drive;
         this.vision = vision;
 
-        this.superstructure = superstructure;
-        this.intakePivot = superstructure.getIntakePivot();
-        this.intakeRoller = superstructure.getIntakeRoller();
-        this.indexer = superstructure.getIndexer();
-        this.feeder = superstructure.getFeeder();
-        this.turret = superstructure.getTurret();
-        this.flywheels = superstructure.getFlywheels();
-        this.hood = superstructure.getHood();
+        this.feeder = feeder;
+        this.turret = turret;
+        this.hood = hood;
+        this.flywheels = flywheels;
 
-        this.isShooting = isShooting;
+        this.intakeSimulation = intakeSimulation;
 
-        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, flywheels, hood);
+        addRequirements(feeder, flywheels);
     }
 
     @Override
@@ -67,96 +63,64 @@ public class ShootFuelIntoHub extends Command {
 
     @Override
     public void execute() {
-        Rotation2d turretFieldRelativeAngle = Rotation2d.kZero;
-        double turretVelocityRadPerSec = 0.0;
+        // Define shot params
         double flywheelsVelocityRadPerSec = 0.0;
-        double hoodAngleRad = 0.0;
-        double hoodVelocityRadPerSec = 0.0;
         boolean isFeasibleShot = false;
 
-        ShotPreset shotPreset = superstructure.getShotPreset();
+        final ShotPreset shotPreset = ShotCalculator.getInstance().getShotPreset();
 
         // Calculate shot params
         switch (shotPreset) {
             case NONE:
                 ShotInfo shotInfo =
-                    ShotCalculator.calculateHubShotInfo(
+                    ShotCalculator.getInstance().calculateHubShotInfo(
                         drive.getPose(),
                         drive.getRobotVelocity(),
                         drive.getFieldVelocity());
 
-                turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
-                turretVelocityRadPerSec = shotInfo.turretVelocityRadPerSec();
                 flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
-                hoodAngleRad = shotInfo.hoodAngleRad();
-                hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();
-                isFeasibleShot = MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceToHub, ShotCalculator.maxDistanceToHub);
+                isFeasibleShot = MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot);
                 break;
 
             case BATTER:
-                turretFieldRelativeAngle = TurretConstants.BATTER_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
-                hoodAngleRad = HoodConstants.BATTER;
-                hoodVelocityRadPerSec = 0.0;
                 isFeasibleShot = true;
                 break;
 
-            case LOB_FROM_NZ:
-                turretFieldRelativeAngle = TurretConstants.LOB_FROM_NZ_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
-                flywheelsVelocityRadPerSec = FlywheelsConstants.LOB_FROM_NZ;
-                hoodAngleRad = HoodConstants.LOB_FROM_NZ;
-                hoodVelocityRadPerSec = 0.0;
+            case TRENCH:
+                flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
                 isFeasibleShot = true;
                 break;
 
-            case TOWER:
-                turretFieldRelativeAngle = TurretConstants.TOWER_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
-                flywheelsVelocityRadPerSec = FlywheelsConstants.TOWER;
-                hoodAngleRad = HoodConstants.TOWER;
-                hoodVelocityRadPerSec = 0.0;
+            case DEPOT:
+                flywheelsVelocityRadPerSec = FlywheelsConstants.DEPOT;
                 isFeasibleShot = true;
                 break;
         }
 
-        // Calculate robot-relative turret setpoint
-        TurretSetpoint turretSetpoint =
-            ShotCalculator.calculateTurretRobotRelativeSetpoint(
-                turretFieldRelativeAngle,
-                turretVelocityRadPerSec,
-                drive.getAngle(),
-                drive.getRobotVelocity().omegaRadiansPerSecond);
-
-        // Set shooter setpoints
-        turret.setAngle(turretSetpoint.angleRad(), turretSetpoint.velocityRadPerSec());
+        // Run subsystems
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
-        hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
-
-        // Run indexer and feeder
-        if (isShooting) {
-            indexer.setVelocity(IndexerConstants.SHOOT);
-            feeder.setVelocity(FeederConstants.SHOOT);
-        }
+        feeder.setVelocity(FeederConstants.SHOOT);
 
         // Check if subsystems at setpoint
-        boolean turretAtGoal = turret.isAtAngle(turretSetpoint.angleRad(), TurretConstants.kShootOnMoveTolerance);
+        boolean turretAtGoal = turret.isAtAngle(turret.getRobotRelativeAngleRad(), TurretConstants.kShootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(flywheelsVelocityRadPerSec, FlywheelsConstants.kTolerance);
-        boolean hoodAtGoal = hood.isAtAngle(hoodAngleRad, HoodConstants.kShootOnMoveTolerance);
+        boolean hoodAtGoal = hood.isAtAngle(hood.getAngleRad(), HoodConstants.kShootOnMoveTolerance);
 
         isFeasibleShot = isFeasibleShot && turretAtGoal && flywheelsAtGoal && hoodAtGoal;
 
-        superstructure.setFeasibleShot(isFeasibleShot);
+        ShotCalculator.getInstance().setFeasibleShot(isFeasibleShot);
 
-        // Simulated shooting
+        // Simulate shooting
         if (RobotBase.isSimulation() && isFeasibleShot) {
-            MapleSimUtil.scoreFuelIntoHub(
+            MapleSimUtil.shootFuel(
                 drive.getPose(),
                 drive.getFieldVelocity(),
-                turretFieldRelativeAngle,
-                hoodAngleRad,
-                flywheelsVelocityRadPerSec);
+                turret.getFieldRelativeAngle(),
+                hood.getAngleRad(),
+                flywheelsVelocityRadPerSec,
+                () -> FieldConstants.Hub.getHubShotPose(),
+                intakeSimulation);
         }
     }
 
@@ -168,5 +132,8 @@ public class ShootFuelIntoHub extends Command {
     @Override
     public void end(boolean interrupted) {
         vision.setDesiredAprilTagGoal(AprilTagGoal.GLOBAL_LOCALIZATION);
+
+        feeder.stop();
+        flywheels.stop();
     }
 }

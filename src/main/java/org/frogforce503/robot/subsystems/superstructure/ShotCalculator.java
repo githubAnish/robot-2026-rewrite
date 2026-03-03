@@ -10,6 +10,8 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.Constants;
@@ -18,65 +20,101 @@ import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculator {
-    private static final LinearFilter turretAngleFilter =
+    // Instance
+    private static ShotCalculator instance;
+
+    // Constants
+    private final LinearFilter turretAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
-    private static final LinearFilter hoodAngleFilter =
+    private final LinearFilter hoodAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
-    private static Rotation2d lastTurretAngle;
-    private static double lastHoodAngle;
-    private static Rotation2d turretAngle;
-    private static double hoodAngle = Double.NaN;
-    private static double turretVelocity;
-    private static double hoodVelocity;
+    private final double phaseDelay = 0.03;
 
-    public static final double minDistanceToHub = 1.263; // Update based on shotmap distance range
-    public static final double maxDistanceToHub = 5.427; // Update based on shotmap distance range
-    private static final double phaseDelay = 0.03;
+    public static final double minDistanceHubShoot = 1.263; // Update based on shotmap distance range
+    public static final double maxDistanceHubShoot = 5.427; // Update based on shotmap distance range
 
-    private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap =
+    public static final double minDistanceLobShoot = 0.0; // Update based on shotmap distance range
+    public static final double maxDistanceLobShoot = 20.0; // Update based on shotmap distance range
+
+    // Maps
+    private final InterpolatingTreeMap<Double, Rotation2d> hubHoodAngleMap =
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
         
-    private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
+    private final InterpolatingDoubleTreeMap hubFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
 
-    private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap =
+    private final InterpolatingDoubleTreeMap hubTimeOfFlightMap =
         new InterpolatingDoubleTreeMap();
 
-    private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap =
+    private final InterpolatingTreeMap<Double, Rotation2d> lobHoodAngleMap =
+        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+        
+    private final InterpolatingDoubleTreeMap lobFlywheelSpeedMap =
         new InterpolatingDoubleTreeMap();
 
-    static {
-        // Configure shotmaps (tuned in sim)
-        launchHoodAngleMap.put(1.263, Rotation2d.fromDegrees(80));
-        launchHoodAngleMap.put(2.056, Rotation2d.fromDegrees(70));
-        launchHoodAngleMap.put(2.585, Rotation2d.fromDegrees(64));
-        launchHoodAngleMap.put(2.905, Rotation2d.fromDegrees(60));
-        launchHoodAngleMap.put(3.110, Rotation2d.fromDegrees(57));
-        launchHoodAngleMap.put(3.716, Rotation2d.fromDegrees(55));
-        launchHoodAngleMap.put(4.360, Rotation2d.fromDegrees(54));
-        launchHoodAngleMap.put(4.950, Rotation2d.fromDegrees(50));
-        launchHoodAngleMap.put(5.427, Rotation2d.fromDegrees(49));
+    private final InterpolatingDoubleTreeMap lobTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
 
-        launchFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
-        launchFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
-        launchFlywheelSpeedMap.put(2.585, Units.rotationsPerMinuteToRadiansPerSecond(1650));
-        launchFlywheelSpeedMap.put(2.905, Units.rotationsPerMinuteToRadiansPerSecond(1750));
-        launchFlywheelSpeedMap.put(3.110, Units.rotationsPerMinuteToRadiansPerSecond(1775));
-        launchFlywheelSpeedMap.put(3.716, Units.rotationsPerMinuteToRadiansPerSecond(1900));
-        launchFlywheelSpeedMap.put(4.360, Units.rotationsPerMinuteToRadiansPerSecond(2000));
-        launchFlywheelSpeedMap.put(4.950, Units.rotationsPerMinuteToRadiansPerSecond(2100));
-        launchFlywheelSpeedMap.put(5.427, Units.rotationsPerMinuteToRadiansPerSecond(2200));
+    // State
+    private Rotation2d lastTurretAngle;
+    private double lastHoodAngle;
+    private Rotation2d turretAngle;
+    private double hoodAngle = Double.NaN;
+    private double turretVelocity;
+    private double hoodVelocity;
+
+    private ShotInfo latestInfo; // Cache latest params
+    
+    @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
+    @Setter @Getter private boolean isFeasibleShot = false;
+
+    public ShotCalculator() {
+        // Configure hub shotmaps (tuned in sim)
+        hubHoodAngleMap.put(1.263, Rotation2d.fromDegrees(80));
+        hubHoodAngleMap.put(2.056, Rotation2d.fromDegrees(70));
+        hubHoodAngleMap.put(2.585, Rotation2d.fromDegrees(64));
+        hubHoodAngleMap.put(2.905, Rotation2d.fromDegrees(60));
+        hubHoodAngleMap.put(3.110, Rotation2d.fromDegrees(57));
+        hubHoodAngleMap.put(3.716, Rotation2d.fromDegrees(55));
+        hubHoodAngleMap.put(4.360, Rotation2d.fromDegrees(54));
+        hubHoodAngleMap.put(4.950, Rotation2d.fromDegrees(50));
+        hubHoodAngleMap.put(5.427, Rotation2d.fromDegrees(49));
+
+        hubFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
+        hubFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
+        hubFlywheelSpeedMap.put(2.585, Units.rotationsPerMinuteToRadiansPerSecond(1650));
+        hubFlywheelSpeedMap.put(2.905, Units.rotationsPerMinuteToRadiansPerSecond(1750));
+        hubFlywheelSpeedMap.put(3.110, Units.rotationsPerMinuteToRadiansPerSecond(1775));
+        hubFlywheelSpeedMap.put(3.716, Units.rotationsPerMinuteToRadiansPerSecond(1900));
+        hubFlywheelSpeedMap.put(4.360, Units.rotationsPerMinuteToRadiansPerSecond(2000));
+        hubFlywheelSpeedMap.put(4.950, Units.rotationsPerMinuteToRadiansPerSecond(2100));
+        hubFlywheelSpeedMap.put(5.427, Units.rotationsPerMinuteToRadiansPerSecond(2200));
 
         hubTimeOfFlightMap.put(1.263, 0.62);
         hubTimeOfFlightMap.put(2.585, 0.71);
         hubTimeOfFlightMap.put(3.110, 0.75);
         hubTimeOfFlightMap.put(4.360, 0.95);
         hubTimeOfFlightMap.put(5.427, 1.1);
+
+        // Configure lob shotmaps (tuned in sim)
+        lobHoodAngleMap.put(8.095, Rotation2d.fromDegrees(45));
+        lobHoodAngleMap.put(9.861, Rotation2d.fromDegrees(45));
+
+        lobFlywheelSpeedMap.put(8.095, Units.rotationsPerMinuteToRadiansPerSecond(2250));
+        lobFlywheelSpeedMap.put(9.861, Units.rotationsPerMinuteToRadiansPerSecond(2500));
+
+        lobTimeOfFlightMap.put(8.095, 1.2);
+        lobTimeOfFlightMap.put(9.861, 1.4);
     }
 
-    public static ShotInfo calculateHubShotInfo(
+    public static ShotCalculator getInstance() {
+        if (instance == null) instance = new ShotCalculator();
+        return instance;
+    }
+
+    public ShotInfo calculateHubShotInfo(
         Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity
@@ -86,13 +124,13 @@ public class ShotCalculator {
                 pose,
                 robotRelativeVelocity,
                 fieldRelativeVelocity,
-                FieldConstants.isRed() 
-                    ? FieldConstants.Hub.redShotPose.toTranslation2d() 
-                    : FieldConstants.Hub.blueShotPose.toTranslation2d(),
+                FieldConstants.Hub.getHubShotPose().toTranslation2d(),
+                hubHoodAngleMap,
+                hubFlywheelSpeedMap,
                 hubTimeOfFlightMap);
     }
 
-    public static ShotInfo calculateLobShotInfo(
+    public ShotInfo calculateLobShotInfo(
         Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity
@@ -102,19 +140,25 @@ public class ShotCalculator {
                 pose,
                 robotRelativeVelocity,
                 fieldRelativeVelocity,
-                FieldConstants.isRed() 
-                    ? Translation2d.kZero 
-                    : Translation2d.kZero,
+                FieldConstants.Depot.getLobShotPose(),
+                lobHoodAngleMap,
+                lobFlywheelSpeedMap,
                 lobTimeOfFlightMap);
     }
 
-    private static ShotInfo calculateShotInfo(
+    private ShotInfo calculateShotInfo(
         Pose2d pose,
         ChassisSpeeds robotRelativeVelocity,
         ChassisSpeeds fieldRelativeVelocity,
         Translation2d target,
+        InterpolatingTreeMap<Double, Rotation2d> hoodAngleMap,
+        InterpolatingDoubleTreeMap flywheelSpeedMap,
         InterpolatingDoubleTreeMap timeOfFlightMap
     ) {
+        if (latestInfo != null) {
+            return latestInfo;
+        }
+
         // Calculate estimated pose while accounting for phase delay
         pose =
             pose.exp(
@@ -149,7 +193,7 @@ public class ShotCalculator {
         double lookaheadTurretToTargetDistance = turretToTargetDistance;
         
         for (int i = 0; i < 20; i++) {
-            timeOfFlight = hubTimeOfFlightMap.get(lookaheadTurretToTargetDistance);
+            timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
 
             double offsetX = turretVelocityX * timeOfFlight;
             double offsetY = turretVelocityY * timeOfFlight;
@@ -164,7 +208,7 @@ public class ShotCalculator {
 
         // Calculate parameters accounted for imparted velocity
         turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-        hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+        hoodAngle = hoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
 
         if (lastTurretAngle == null) {
             lastTurretAngle = turretAngle;
@@ -184,43 +228,33 @@ public class ShotCalculator {
         lastTurretAngle = turretAngle;
         lastHoodAngle = hoodAngle;
 
-        ShotInfo latestInfo =
+        latestInfo =
             new ShotInfo(
-                turretToTargetDistance,
                 turretAngle,
                 turretVelocity,
                 hoodAngle,
                 hoodVelocity,
-                launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
+                flywheelSpeedMap.get(lookaheadTurretToTargetDistance),
+                lookaheadTurretToTargetDistance);
 
         // Log calculated values
+        Logger.recordOutput("ShotCalculator/TargetTranslation", target);
         Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
         Logger.recordOutput("ShotCalculator/TurretToTargetDistance", lookaheadTurretToTargetDistance);
 
         return latestInfo;
     }
 
-    public static TurretSetpoint calculateTurretRobotRelativeSetpoint(
-        Rotation2d turretFieldAngle,
-        double turretFieldAngularVelocity,
-        Rotation2d robotAngle,
-        double robotOmega
-    ) {
-        double robotRelativeAngle = turretFieldAngle.minus(robotAngle).getRadians();
-        double robotRelativeVelocity = turretFieldAngularVelocity - robotOmega;
-
-        return new TurretSetpoint(robotRelativeAngle, robotRelativeVelocity);
+    public void clearShotInfo() {
+        latestInfo = null;
+        isFeasibleShot = false;
     }
 
     public record ShotInfo(
-        double turretToTargetDistance,
         Rotation2d turretFieldRelativeAngle,
         double turretVelocityRadPerSec,
         double hoodAngleRad,
         double hoodVelocityRadPerSec,
-        double flywheelsVelocityRadPerSec) {}
-
-    public record TurretSetpoint(
-        double angleRad,
-        double velocityRadPerSec) {}
+        double flywheelsVelocityRadPerSec,
+        double turretToTargetDistance) {}
 }

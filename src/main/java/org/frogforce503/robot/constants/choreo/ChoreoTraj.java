@@ -2,6 +2,7 @@
 package org.frogforce503.robot.constants.choreo;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map;
 import java.util.OptionalInt;
 
@@ -23,14 +24,20 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    
+    public static final ChoreoTraj WarmupPath = new ChoreoTraj(
+	    "WarmupPath",
+	    OptionalInt.empty(),
+	    2.44672,
+	    new Pose2d(3.028, 5.399, Rotation2d.fromRadians(0)),
+	    new Pose2d(6.322, 2.924, Rotation2d.fromRadians(-0.639))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    
+    	Map.entry("WarmupPath", WarmupPath)
     );
 
     /**

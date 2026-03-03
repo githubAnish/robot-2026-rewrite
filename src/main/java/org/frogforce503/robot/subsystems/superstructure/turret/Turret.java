@@ -4,12 +4,16 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.math.MathUtils;
@@ -21,6 +25,9 @@ import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOInputs
 public class Turret extends FFSubsystemBase {
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+
+    private final Supplier<Rotation2d> robotAngleSupplier;
+    private final DoubleSupplier robotOmegaSupplier;
 
     // Constants
     @Setter private SimpleMotorFeedforward feedforward;
@@ -35,8 +42,11 @@ public class Turret extends FFSubsystemBase {
     @Getter private State setpoint = new State();
     private boolean atGoal = false;
 
-    public Turret(TurretIO io) {
+    public Turret(TurretIO io, Supplier<Rotation2d> robotAngleSupplier, DoubleSupplier robotOmegaSupplier) {
         this.io = io;
+
+        this.robotAngleSupplier = robotAngleSupplier;
+        this.robotOmegaSupplier = robotOmegaSupplier;
 
         feedforward = TurretConstants.kFF.getSimpleMotorFF();
         profile = new TrapezoidProfile(TurretConstants.kConstraints);
@@ -96,7 +106,7 @@ public class Turret extends FFSubsystemBase {
             Logger.recordOutput("Turret/AtGoal", atGoal);
         } else {
             // Reset setpoint
-            setpoint = new State(getAngleRad(), 0.0);
+            setpoint = new State(getRobotRelativeAngleRad(), 0.0);
       
             // Clear logs
             Logger.recordOutput("Turret/Profile/SetpointPositionRad", 0.0);
@@ -105,21 +115,26 @@ public class Turret extends FFSubsystemBase {
             Logger.recordOutput("Turret/AtGoal", true);
         }
 
-        Logger.recordOutput("Turret/CurrentPositionRad", getAngleRad());
+        Logger.recordOutput("Turret/CurrentPositionRad", getRobotRelativeAngleRad());
 
         // Record cycle time
         LoggedTracer.record("Turret");
     }
 
     /** Gets the turret's robot-relative angle. */
-    public double getAngleRad() {
+    public double getRobotRelativeAngleRad() {
         return inputs.positionRad;
+    }
+
+    /** Gets the turret's field-relative angle. */
+    public Rotation2d getFieldRelativeAngle() {
+        return new Rotation2d(inputs.positionRad).plus(robotAngleSupplier.get());
     }
 
     // Actions
     public void seedRelativePosition() {
-        boolean inRange = MathUtils.inRange(getAngleRad(), -Math.PI, Math.PI);
-        boolean goingSlow = inputs.velocityRadPerSec < Units.degreesToRadians(2);
+        boolean inRange = MathUtils.inRange(getRobotRelativeAngleRad(), -Math.PI, Math.PI);
+        boolean goingSlow = Math.abs(inputs.velocityRadPerSec) < Units.degreesToRadians(2);
 
         if (inRange && goingSlow) { // only if relative encoder in range -180 deg to 180 deg & velocity low
             io.setRelativePosition(inputs.absolutePositionRad);
@@ -146,19 +161,32 @@ public class Turret extends FFSubsystemBase {
     }
 
     /** Sets the turret's robot-relative angle. */
-    public void setAngle(double angleRad) {
-        setAngle(angleRad, 0.0);
+    public void setRobotRelativeAngle(double angleRad) {
+        setRobotRelativeAngle(angleRad, 0.0);
     }
 
     /** Sets the turret's robot-relative angle and robot-relative velocity. */
-    public void setAngle(double angleRad, double velocityRadPerSec) {
+    public void setRobotRelativeAngle(double angleRad, double velocityRadPerSec) {
         this.shouldRunProfile = true;
         this.targetAngleRad = angleRad;
         this.targetVelocityRadPerSec = velocityRadPerSec;
     }
 
+    /** Sets the turret's field-relative angle. */
+    public void setFieldRelativeAngle(Rotation2d angle) {
+        setFieldRelativeAngle(angle, 0.0);
+    }
+
+    /** Sets the turret's field-relative angle and field-relative velocity. */
+    public void setFieldRelativeAngle(Rotation2d angle, double velocityRadPerSec) {
+        double robotRelativeAngle = angle.minus(robotAngleSupplier.get()).getRadians();
+        double robotRelativeVelocity = velocityRadPerSec - robotOmegaSupplier.getAsDouble();
+
+        setRobotRelativeAngle(robotRelativeAngle, robotRelativeVelocity);
+    }
+
     /** Checks if an angle is within tolerance of the turret's robot-relative angle. */
     public boolean isAtAngle(double angleRad, double tolerance) {
-        return MathUtil.isNear(angleRad, getAngleRad(), tolerance);
+        return MathUtil.isNear(angleRad, getRobotRelativeAngleRad(), tolerance);
     }
 }

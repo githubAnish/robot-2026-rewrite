@@ -1,12 +1,9 @@
-package org.frogforce503.robot.auto.autos.test;
+package org.frogforce503.robot.auto.autos;
 
 import java.util.List;
 
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.auto.AutoMode;
-import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.Superstructure;
-import org.frogforce503.robot.subsystems.vision.Vision;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -17,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RandomAuto implements AutoMode {
     private PathPlannerPath randomPath;
 
-    public RandomAuto(Drive drive, Vision vision, Superstructure superstructure) {
+    public RandomAuto() {
         randomPath = PathPlannerUtil.loadTrajectory("Test");
     }
 
