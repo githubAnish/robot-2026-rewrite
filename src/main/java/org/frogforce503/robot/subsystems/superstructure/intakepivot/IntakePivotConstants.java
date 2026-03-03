@@ -28,6 +28,6 @@ public class IntakePivotConstants {
     public static final double START = maxAngle;
 
     public static final double STOW = Units.degreesToRadians(89);
-    public static final double INTAKE = Units.degreesToRadians(45);
-    public static final double EJECT = Units.degreesToRadians(45);
+    public static final double INTAKE = Units.degreesToRadians(30);
+    public static final double EJECT = INTAKE;
 }

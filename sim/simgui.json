@@ -18,14 +18,10 @@
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/Scheduler": "Scheduler",
       "/SmartDashboard/VisionSystemSim-AprilTagSimulator/Sim Field": "Field2d",
-      "/SmartDashboard/VisionSystemSim-ObjectDetectionSimulator/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-ObjectDetectionSimulator/Sim Field": "Field2d",
+      "/SmartDashboard/hey": "Scheduler"
     },
     "windows": {
-      "/AdvantageKit/RealOutputs/SuperstructureViz/2D": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Alerts": {
         "window": {
           "visible": true
@@ -59,13 +55,11 @@
       "open": false
     },
     "transitory": {
-      "AdvantageKit": {
-        "open": true
-      },
       "SmartDashboard": {
         "Autochooser": {
           "open": true
-        }
+        },
+        "open": true
       },
       "photonvision": {
         "open": true

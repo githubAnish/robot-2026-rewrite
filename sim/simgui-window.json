@@ -53,7 +53,7 @@
     },
     "###/SmartDashboard/Scheduler": {
       "Collapsed": "0",
-      "Pos": "1512,701",
+      "Pos": "1513,701",
       "Size": "405,152"
     },
     "###FMS": {
@@ -64,16 +64,16 @@
     "###Joysticks": {
       "Collapsed": "0",
       "Pos": "199,700",
-      "Size": "796,155"
+      "Size": "796,73"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "10,50",
-      "Size": "300,560"
+      "Pos": "977,1",
+      "Size": "569,972"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "958,21",
+      "Pos": "959,23",
       "Size": "702,677"
     },
     "###NetworkTables Info": {
@@ -85,6 +85,11 @@
       "Collapsed": "0",
       "Pos": "1663,21",
       "Size": "253,677"
+    },
+    "###RoboRIO": {
+      "Collapsed": "0",
+      "Pos": "5,125",
+      "Size": "119,146"
     },
     "###System Joysticks": {
       "Collapsed": "0",

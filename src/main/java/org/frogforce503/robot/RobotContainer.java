@@ -123,7 +123,7 @@ public class RobotContainer {
     final Trigger intakeGround = driverXbox.leftTrigger();
     final Trigger ejectIntake = driverXbox.leftBumper(); // make this eject all
 
-    final Trigger shoot = driverXbox.rightTrigger();
+    final Trigger shootHubOrLob = driverXbox.rightTrigger();
     final Trigger ejectFlywheels = driverXbox.rightBumper(); // make this unjam
 
     final Trigger setBatterPreset = driverXbox.y();
@@ -306,9 +306,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Create commands (that have / provide dependencies)
+        // Create commands (that have or provide dependencies elsewhere)
         final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shoot);
+        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob);
 
         // Apply default commands
         drive.setDefaultCommand(teleopDriveCommand);
@@ -321,16 +321,16 @@ public class RobotContainer {
         intakeGround.whileTrue(
             new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, driverXbox, autoAssistOverride, gameViz.getIntakeSimulation()));
 
-        shoot.whileTrue(
+        shootHubOrLob.whileTrue(
             new ShootFuelIntoHubOrLob(
                 drive, vision, feeder, turret, hood, flywheels, gameViz.getIntakeSimulation()));
 
         ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
         ejectFlywheels.whileTrue(new EjectFuelFromShooter(feeder, flywheels));
 
-        bindShotPresets(setBatterPreset, ShotPreset.BATTER);
-        bindShotPresets(setTrenchPreset, ShotPreset.TRENCH);
-        bindShotPresets(setDepotPreset, ShotPreset.DEPOT);
+        bindShotPreset(setBatterPreset, ShotPreset.BATTER);
+        bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
+        bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
 
         bindClimbing(climb);
 
@@ -355,10 +355,10 @@ public class RobotContainer {
             ).withName("Driver Rumble Feasible Shot"));
     }
 
-    private void bindShotPresets(Trigger trigger, ShotPreset shotPreset) {
+    private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
         trigger
             .whileTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
-            .whileFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
+            .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
     }
 
     // Starts climb sequence and prevents other commands from interrupting it (including itself re-scheduling)
