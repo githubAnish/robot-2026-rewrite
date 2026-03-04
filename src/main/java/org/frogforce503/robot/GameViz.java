@@ -15,8 +15,11 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import lombok.Getter;
+import lombok.Setter;
 
 /** Simulates the field, including interaction with & movement of game elements. Implement physics simulation here. */
 public class GameViz {
@@ -31,6 +34,10 @@ public class GameViz {
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz;
 
+    // State
+    @Setter private double robotHeightMeters = 0.0;
+    
+    // Sim
     @Getter private final IntakeSimulation intakeSimulation;
     
     public GameViz(Drive drive, Turret turret, Hood hood, IntakePivot intakePivot, ClimberDeploy climberDeploy, VisionSimulator visionViz) {
@@ -55,12 +62,13 @@ public class GameViz {
     }
 
     public void update() {
-        Pose3d drivePose3d = new Pose3d(drive.getPose());
+        Pose3d drivePose3d =
+            new Pose3d(drive.getPose())
+                .plus(new Transform3d(new Translation3d(0.0, 0.0, robotHeightMeters), Rotation3d.kZero));
 
         visionViz.update(drive.getPose());
         
         superstructureViz.update(
-            drivePose3d,
             turret.getRobotRelativeAngleRad(),
             hood.getAngleRad(),
             intakePivot.getAngleRad(),

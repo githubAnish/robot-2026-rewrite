@@ -57,13 +57,6 @@ public class IntakePivotIOSpark implements IntakePivotIO {
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 .pid(IntakePivotConstants.kPID.kP(), IntakePivotConstants.kPID.kI(), IntakePivotConstants.kPID.kD());
 
-        config
-            .softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(IntakePivotConstants.maxAngle)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(IntakePivotConstants.minAngle);
-
         SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();

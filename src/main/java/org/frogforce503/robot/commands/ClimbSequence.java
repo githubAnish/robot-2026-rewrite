@@ -90,7 +90,7 @@ public class ClimbSequence extends Command {
                 intakePivot.setAngle(IntakePivotConstants.STOW);
                 intakeRoller.stop();
                 indexer.stop();
-                turret.setRobotRelativeAngle(TurretConstants.CLIMB);
+                turret.setRobotRelativeAngle(TurretConstants.CLIMB, 0.0);
                 flywheels.stop();
                 hood.setAngle(HoodConstants.CLIMB);
 

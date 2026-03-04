@@ -8,7 +8,7 @@ import edu.wpi.first.math.util.Units;
 
 public class ClimberDeployConstants {
     // Hardware / Configuration
-    public static final int id = 0;
+    public static final int id = 12;
     public static final double mechanismRatio = 1;
 
     public static final boolean inverted = false;

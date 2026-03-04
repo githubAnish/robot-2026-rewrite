@@ -26,7 +26,7 @@ public class SuperstructureViz {
 
     public SuperstructureViz() {}
 
-    public void update(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad, double climberDeployAngleRad) {
+    public void update(double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad, double climberDeployAngleRad) {
         var turretPose =
             Pose3d.kZero
                 .plus(robotToTurret)

@@ -55,13 +55,6 @@ public class HoodIOSpark implements HoodIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(HoodConstants.kPID.kP(), HoodConstants.kPID.kI(), HoodConstants.kPID.kD());
 
-        config
-            .softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(HoodConstants.maxAngle)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(HoodConstants.minAngle);
-
         SparkUtil.optimizeSignals(config, false, false);
 
         motor.clearFaults();

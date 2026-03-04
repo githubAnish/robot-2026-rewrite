@@ -87,7 +87,7 @@ public class TuneTurret extends Command {
         // Update setpoint only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> turret.setRobotRelativeAngle(Units.degreesToRadians(setpointAngleDeg.get())),
+            () -> turret.setRobotRelativeAngle(Units.degreesToRadians(setpointAngleDeg.get()), 0.0),
             setpointAngleDeg);
     }
 

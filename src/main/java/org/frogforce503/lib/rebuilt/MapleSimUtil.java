@@ -134,7 +134,7 @@ public final class MapleSimUtil {
                     .getMeasureZ()
                     .plus(Inches.of(4)), // 4 inches offset
                 MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kSimRadiusMeters),
-                Radians.of(hoodAngleRad));
+                Radians.of(HoodConstants.maxAngle - hoodAngleRad));
 
         fuel
             .withTargetPosition(target)

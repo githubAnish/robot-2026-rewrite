@@ -57,13 +57,6 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 .pid(ClimberDeployConstants.kPID.kP(), ClimberDeployConstants.kPID.kI(), ClimberDeployConstants.kPID.kD());
 
-        config
-            .softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(ClimberDeployConstants.maxAngle)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(ClimberDeployConstants.minAngle);
-
         SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();

@@ -67,13 +67,6 @@ public class TurretIOSpark implements TurretIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .pid(TurretConstants.kPID.kP(), TurretConstants.kPID.kI(), TurretConstants.kPID.kD());
 
-        config
-            .softLimit // TODO Soft limits especially important for a turret, as wires can snap due to over-rotation
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(TurretConstants.maxAngle)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(TurretConstants.minAngle);
-
         SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();
