@@ -27,8 +27,6 @@ public class Drive extends SubsystemBase {
     @Getter private final DriveViz viz = new DriveViz();
 
     // State
-    private ChassisSpeeds targetSpeeds = new ChassisSpeeds();
-    
     @Setter @Getter private boolean coastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {
@@ -41,8 +39,6 @@ public class Drive extends SubsystemBase {
         Logger.processInputs("Drive", inputs);
 
         viz.update(inputs);
-
-        Logger.recordOutput("Drive/TargetVelocity", targetSpeeds);
 
         // Record cycle time
         LoggedTracer.record("Drive");
@@ -136,7 +132,6 @@ public class Drive extends SubsystemBase {
         }
 
         io.runVelocity(speeds);
-        this.targetSpeeds = speeds;
     }
 
     /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
@@ -146,7 +141,6 @@ public class Drive extends SubsystemBase {
         }
 
         io.runVelocity(speeds, moduleForcesX, moduleForcesY);
-        this.targetSpeeds = speeds;
     }
 
     /** Runs the drive in a straight line with the specified drive output. */

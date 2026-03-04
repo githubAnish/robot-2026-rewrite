@@ -8,27 +8,28 @@ import com.revrobotics.sim.SparkMaxSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class ClimberDeployIOSim extends ClimberDeployIOSpark {
     // Control
     private final SparkMaxSim motorSim;
-    private final ElevatorSim physicsSim;
+    private final SingleJointedArmSim physicsSim;
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double simCarriageMass = Units.lbsToKilograms(16.895); // from CAD (Climber carriage (6.423 lb) + shoulder (3.000 lb) + arm (2.229 lb) + gripper (5.243 lb))
+    private final double length = Units.inchesToMeters(14.75); // TODO measure the length from the pivot point to the center of mass of the 4-bar intake
+    private final double moi = 0.62; // kg * m^2, TODO measure the moi from the pivot point
 
     public ClimberDeployIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
-            new ElevatorSim(
+            new SingleJointedArmSim(
                 motorModel,
                 ClimberDeployConstants.mechanismRatio,
-                simCarriageMass,
-                ClimberDeployConstants.sprocketPitchDiameter / 2,
-                ClimberDeployConstants.minHeight,
-                ClimberDeployConstants.maxHeight,
+                moi,
+                length,
+                ClimberDeployConstants.minAngle,
+                ClimberDeployConstants.maxAngle,
                 true,
                 ClimberDeployConstants.START);
 
@@ -46,16 +47,15 @@ public class ClimberDeployIOSim extends ClimberDeployIOSpark {
         physicsSim.update(Constants.loopPeriodSecs);
 
         // Update motor simulation
-        motorSim.iterate(physicsSim.getVelocityMetersPerSecond(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
-        motorSim.setPosition(physicsSim.getPositionMeters());
-        motorSim.setVelocity(physicsSim.getVelocityMetersPerSecond());
+        motorSim.iterate(physicsSim.getVelocityRadPerSec(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
+        motorSim.setPosition(physicsSim.getAngleRads());
+        motorSim.setVelocity(physicsSim.getVelocityRadPerSec());
 
         inputs.motorConnected = true;
-        inputs.positionMeters = motorSim.getPosition();
-        inputs.velocityMetersPerSec = motorSim.getVelocity();
+        inputs.positionRad = motorSim.getPosition();
+        inputs.velocityRadPerSec = motorSim.getVelocity();
         inputs.appliedVolts = appliedVolts;
         inputs.statorCurrentAmps = motorSim.getMotorCurrent();
         inputs.tempCelsius = 24.0;
-        inputs.limitSwitchPressed = motorSim.getPosition() == 0;
-    }
+    } 
 }

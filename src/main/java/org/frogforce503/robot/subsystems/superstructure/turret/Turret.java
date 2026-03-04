@@ -97,7 +97,7 @@ public class Turret extends FFSubsystemBase {
             atGoal = isAtAngle(goalState.position, TurretConstants.kFixedTolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
-            io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
+            io.runPosition(setpoint.position - TurretConstants.relativeEncoderZeroOffset, feedforward.calculate(setpoint.velocity, accel));
 
             // Log state
             Logger.recordOutput("Turret/Profile/SetpointPositionRad", setpoint.position);
@@ -123,14 +123,12 @@ public class Turret extends FFSubsystemBase {
 
     /** Gets the turret's robot-relative angle. */
     public double getRobotRelativeAngleRad() {
-        return inputs.positionRad;
+        return inputs.positionRad + TurretConstants.relativeEncoderZeroOffset;
     }
 
     /** Gets the turret's field-relative angle. */
     public Rotation2d getFieldRelativeAngle() {
-        return
-            new Rotation2d(inputs.positionRad)
-                .plus(robotAngleSupplier.get());
+        return new Rotation2d(getRobotRelativeAngleRad()).plus(robotAngleSupplier.get());
     }
 
     // Actions

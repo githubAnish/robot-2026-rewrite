@@ -23,7 +23,7 @@ public final class HoodConstants {
     public static final double minAngle = Units.degreesToRadians(0); // TODO 0 deg is when hood horizontal (ball shoots horizontally)
     public static final double maxAngle = Units.degreesToRadians(90);// TODO 90 deg is when hood vertical (ball shoots verticalally)
 
-    public static final Transform3d turretToHood = new Transform3d(0.104, 0, 0.09, Rotation3d.kZero); // Sim turret to hood, can change based on real robot CAD
+    public static final Transform3d turretToHood = new Transform3d(0.09, 0.0, 0.09, Rotation3d.kZero); // Sim turret to hood, can change based on real robot CAD
     
     // Setpoints
     public static final double kFixedTolerance = Units.degreesToRadians(0.5); //TODO Hood position has to be extremely accurate for consistent shot

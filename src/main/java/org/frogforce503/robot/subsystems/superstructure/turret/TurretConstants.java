@@ -2,6 +2,7 @@ package org.frogforce503.robot.subsystems.superstructure.turret;
 
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
+import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -16,7 +17,8 @@ public final class TurretConstants {
 
     public static final boolean inverted = false;
     public static final int statorCurrentLimit = 80;
-    public static final double zeroOffset = 0.0;
+    public static final double relativeEncoderZeroOffset;
+    public static final double absoluteEncoderZeroOffset;
 
     public static final PIDConfig kPID = new PIDConfig(2, 0, 0); // some basic pid value
     public static final FFConfig kFF = new FFConfig(0, 0, 2, 0);
@@ -25,10 +27,32 @@ public final class TurretConstants {
     public static final double minAngle = Units.degreesToRadians(-210.0); // Assume 6328 params here
     public static final double maxAngle = Units.degreesToRadians(210.0); // Assume 6328 params here
 
-    public static final Transform3d robotToTurret = new Transform3d(-0.16, -0.22, 0.395, Rotation3d.kZero); // Sim robot to turret, can change based on real robot CAD
+    public static final Transform3d robotToTurret =
+        new Transform3d(
+            Units.inchesToMeters(-6),
+            Units.inchesToMeters(-8.5),
+            Units.inchesToMeters(13.91),
+            Rotation3d.kZero);
+        
     public static final Transform3d turretToCamera =
         new Transform3d(
-            -0.1314196, 0.0, 0.2770674, new Rotation3d(0.0, Units.degreesToRadians(-22.5), 0.0)); // still from 6328 params
+            Units.inchesToMeters(5.493439),
+            Units.inchesToMeters(2.075000),
+            Units.inchesToMeters(6.244572),
+            new Rotation3d(0.0, Units.degreesToRadians(-15), 0.0));
+
+    static {
+        switch (Constants.getRobot()) {
+            case SimBot -> {
+                relativeEncoderZeroOffset = 0.0;
+                absoluteEncoderZeroOffset = 0.0;
+            }
+            default -> { // Use comp bot params
+                relativeEncoderZeroOffset = Units.degreesToRadians(90);
+                absoluteEncoderZeroOffset = 0.1788;
+            }
+        }
+    }
 
     // Setpoints
     public static final double kFixedTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot

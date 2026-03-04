@@ -300,7 +300,7 @@ public class RobotContainer {
         warmupExecutor = new WarmupExecutor(drive);
 
         // Create sim requirements
-        gameViz = new GameViz(drive, turret, hood, intakePivot, visionViz);
+        gameViz = new GameViz(drive, turret, hood, intakePivot, climberDeploy, visionViz);
 
         configureBindings();
     }

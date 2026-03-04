@@ -17,6 +17,7 @@ import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.ironmaple.simulation.IntakeSimulation;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -132,6 +133,9 @@ public class ShootFuelIntoHubOrLob extends Command {
                         : new Translation3d(FieldConstants.Depot.getLobShotPose()),
                 intakeSimulation);
         }
+        
+        // Log data
+        Logger.recordOutput("ShootFuelIntoHubOrLob/Is Hub Shot?", isHubShot);
     }
 
     @Override

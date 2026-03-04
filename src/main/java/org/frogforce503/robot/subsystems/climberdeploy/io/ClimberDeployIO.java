@@ -6,12 +6,11 @@ public interface ClimberDeployIO {
     @AutoLog
     class ClimberDeployIOInputs {
         public boolean motorConnected = false;
-        public double positionMeters = 0.0;
-        public double velocityMetersPerSec = 0.0;
+        public double positionRad = 0.0;
+        public double velocityRadPerSec = 0.0;
         public double appliedVolts = 0.0;
         public double statorCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
-        public boolean limitSwitchPressed = false;
     }
 
     default void updateInputs(ClimberDeployIOInputs inputs) {}
@@ -20,13 +19,11 @@ public interface ClimberDeployIO {
 
     default void runVolts(double volts) {}
 
-    default void runPosition(double positionMeters, double feedforward) {}
+    default void runPosition(double positionRad, double feedforward) {}
 
     default void stop() {}
 
     default void setPID(double kP, double kI, double kD) {}
 
     default void setBrakeMode(boolean enabled) {}
-
-    default void resetEncoder() {}
 }

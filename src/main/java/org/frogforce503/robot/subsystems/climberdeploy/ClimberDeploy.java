@@ -1,30 +1,30 @@
 package org.frogforce503.robot.subsystems.climberdeploy;
 
-import org.frogforce503.lib.logging.LoggedTracer;
-import org.frogforce503.lib.subsystem.FFSubsystemBase;
-import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOInputsAutoLogged;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.subsystem.FFSubsystemBase;
+import org.frogforce503.robot.Constants;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
+import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOInputsAutoLogged;
+
 public class ClimberDeploy extends FFSubsystemBase {
     private final ClimberDeployIO io;
     private final ClimberDeployIOInputsAutoLogged inputs = new ClimberDeployIOInputsAutoLogged();
 
     // Constants
-    @Setter private ElevatorFeedforward feedforward;
-    
+    @Setter private ArmFeedforward feedforward;
+
     // Control
-    private double targetHeightMeters = ClimberDeployConstants.START;
-    private double lastHeightMeters = 0.0;
+    private double targetAngleRad = ClimberDeployConstants.START;
 
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
@@ -33,8 +33,8 @@ public class ClimberDeploy extends FFSubsystemBase {
 
     public ClimberDeploy(ClimberDeployIO io) {
         this.io = io;
-        
-        feedforward = ClimberDeployConstants.kFF.getElevatorFF();
+
+        feedforward = ClimberDeployConstants.kFF.getArmFF();
         profile = new TrapezoidProfile(ClimberDeployConstants.kConstraints);
     }
 
@@ -43,54 +43,47 @@ public class ClimberDeploy extends FFSubsystemBase {
         super.periodic();
 
         io.updateInputs(inputs);
-        Logger.processInputs("Climber", inputs);
-
-        // Reset encoder if limit switch pressed & Climber is going down
-        if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
-            io.resetEncoder();
-            setpoint = new State(0.0, 0.0);
-        }
+        Logger.processInputs("ClimberDeploy", inputs);
 
         // Update profile
         if (shouldRunProfile && RobotState.isEnabled()) {
             var goalState =
                 new State(
-                    MathUtil.clamp(targetHeightMeters, ClimberDeployConstants.minHeight, ClimberDeployConstants.maxHeight),
+                    MathUtil.clamp(targetAngleRad, ClimberDeployConstants.minAngle, ClimberDeployConstants.maxAngle),
                     0.0);
 
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtHeight(goalState.position, ClimberDeployConstants.kTolerance);
+            atGoal = isAtAngle(goalState.position, ClimberDeployConstants.kTolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
-            io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
+            io.runPosition(setpoint.position, feedforward.calculate(setpoint.position, setpoint.velocity, accel));
 
-            /// Log state
-            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", setpoint.position);
-            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", setpoint.velocity);
-            Logger.recordOutput("Climber/Profile/GoalPositionMeters", goalState.position);
-            Logger.recordOutput("Climber/AtGoal", atGoal);
+            // Log state
+            Logger.recordOutput("ClimberDeploy/Profile/SetpointPositionRad", setpoint.position);
+            Logger.recordOutput("ClimberDeploy/Profile/SetpointVelocityRadPerSec", setpoint.velocity);
+            Logger.recordOutput("ClimberDeploy/Profile/GoalPositionRad", goalState.position);
+            Logger.recordOutput("ClimberDeploy/AtGoal", atGoal);
         } else {
             // Reset setpoint
-            setpoint = new State(getHeightMeters(), 0.0);
+            setpoint = new State(getAngleRad(), 0.0);
       
             // Clear logs
-            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", 0.0);
-            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", 0.0);
-            Logger.recordOutput("Climber/Profile/GoalPositionMeters", 0.0);
-            Logger.recordOutput("Climber/AtGoal", true);
+            Logger.recordOutput("ClimberDeploy/Profile/SetpointPositionRad", 0.0);
+            Logger.recordOutput("ClimberDeploy/Profile/SetpointVelocityRadPerSec", 0.0);
+            Logger.recordOutput("ClimberDeploy/Profile/GoalPositionRad", 0.0);
+            Logger.recordOutput("ClimberDeploy/AtGoal", true);
         }
 
-        Logger.recordOutput("Climber/CurrentPositionMeters", getHeightMeters());
-        lastHeightMeters = getHeightMeters();
+        Logger.recordOutput("ClimberDeploy/CurrentPositionRad", getAngleRad());
 
         // Record cycle time
-        LoggedTracer.record("Climber");
+        LoggedTracer.record("ClimberDeploy");
     }
 
-    public double getHeightMeters() {
-        return inputs.positionMeters;
+    public double getAngleRad() {
+        return inputs.positionRad;
     }
 
     // Actions
@@ -109,22 +102,16 @@ public class ClimberDeploy extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        shouldRunProfile = false;
-
-        // Prevent downward motion into the limit switch
-        if (inputs.limitSwitchPressed && volts < 0) {
-            volts = 0;
-        }
-
+        this.shouldRunProfile = false;
         io.runVolts(volts);
     }
 
-    public void setHeight(double heightMeters) {
+    public void setAngle(double angleRad) {
         this.shouldRunProfile = true;
-        this.targetHeightMeters = heightMeters;
+        this.targetAngleRad = angleRad;
     }
 
-    public boolean isAtHeight(double heightMeters, double tolerance) {
-        return MathUtil.isNear(heightMeters, getHeightMeters(), tolerance);
+    public boolean isAtAngle(double angleRad, double tolerance) {
+        return MathUtil.isNear(angleRad, getAngleRad(), tolerance);
     }
 }

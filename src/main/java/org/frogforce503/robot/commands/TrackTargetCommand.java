@@ -11,6 +11,7 @@ import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -104,6 +105,10 @@ public class TrackTargetCommand extends Command {
         // Run subsystems
         turret.setFieldRelativeAngle(turretFieldRelativeAngle, turretVelocityRadPerSec);
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
+
+        // Log data
+        Logger.recordOutput("TrackTargetCommand/Tracking Hub?", trackingHub);
+        Logger.recordOutput("TrackTargetCommand/Under Trench?", underTrench);
     }
 
     @Override

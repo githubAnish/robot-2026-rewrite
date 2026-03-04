@@ -3,6 +3,7 @@ package org.frogforce503.robot;
 import java.util.Arrays;
 
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -20,21 +21,26 @@ import lombok.Getter;
 /** Simulates the field, including interaction with & movement of game elements. Implement physics simulation here. */
 public class GameViz {
     private final Drive drive;
+
     private final Turret turret;
     private final Hood hood;
     private final IntakePivot intakePivot;
+    
+    private final ClimberDeploy climberDeploy;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz;
 
     @Getter private final IntakeSimulation intakeSimulation;
     
-    public GameViz(Drive drive, Turret turret, Hood hood, IntakePivot intakePivot, VisionSimulator visionViz) {
+    public GameViz(Drive drive, Turret turret, Hood hood, IntakePivot intakePivot, ClimberDeploy climberDeploy, VisionSimulator visionViz) {
         this.drive = drive;
 
         this.turret = turret;
         this.hood = hood;
         this.intakePivot = intakePivot;
+
+        this.climberDeploy = climberDeploy;
 
         this.visionViz = visionViz;
         this.superstructureViz = new SuperstructureViz();
@@ -49,13 +55,16 @@ public class GameViz {
     }
 
     public void update() {
+        Pose3d drivePose3d = new Pose3d(drive.getPose());
+
         visionViz.update(drive.getPose());
         
         superstructureViz.update(
-            new Pose3d(drive.getPose()),
+            drivePose3d,
             turret.getRobotRelativeAngleRad(),
             hood.getAngleRad(),
-            intakePivot.getAngleRad());
+            intakePivot.getAngleRad(),
+            climberDeploy.getAngleRad());
 
         Translation3d[] fuelTranslations = // Convert fuel poses to translations to lower data processed by NetworkTables
             Arrays
@@ -63,6 +72,7 @@ public class GameViz {
                 .map(Pose3d::getTranslation)
                 .toArray(Translation3d[]::new);
 
+        Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
         Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
         Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
     }

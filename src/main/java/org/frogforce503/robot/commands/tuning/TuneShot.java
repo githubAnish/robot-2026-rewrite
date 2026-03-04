@@ -127,6 +127,8 @@ public class TuneShot extends Command {
             recordShot.set(false);
         }
 
+        // Log data
+        Logger.recordOutput("TuneShot/Tuning Hub Shot?", tuningHubShot);
         Logger.recordOutput("TuneShot/ShotInfo", shotInfo);
     }
 

@@ -48,9 +48,9 @@ public final class MapleSimUtil {
         new Rectangle2d(FieldConstants.RightBump.redBackLeftCorner, FieldConstants.RightBump.redFrontRightCorner);
 
     // Intake Sim Constants
-    private static final int fuelCapacity = 24;
-    private static final Distance intakeWidth = Inches.of(27);
-    private static final Distance intakeLengthExtended = Inches.of(1);
+    private static final int fuelCapacity = 30;
+    private static final Distance intakeWidth = Inches.of(25.5);
+    private static final Distance intakeLengthExtended = Inches.of(9.5);
 
     // Shoot Sim Constants
     private static final Timer shotTimer = new Timer();

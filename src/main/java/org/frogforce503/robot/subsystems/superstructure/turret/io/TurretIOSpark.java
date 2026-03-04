@@ -55,7 +55,7 @@ public class TurretIOSpark implements TurretIO {
 
         config
             .absoluteEncoder
-                .zeroOffset(TurretConstants.zeroOffset)
+                .zeroOffset(TurretConstants.absoluteEncoderZeroOffset)
                 .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of turret
                 .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of turret
                 .zeroCentered(true)

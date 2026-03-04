@@ -1,32 +1,26 @@
 package org.frogforce503.robot.subsystems.climberdeploy.io;
 
-import java.time.Duration;
-
 import org.frogforce503.lib.motorcontrol.SparkUtil;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 
 import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.wpilibj.DigitalGlitchFilter;
-import edu.wpi.first.wpilibj.DigitalInput;
 import lombok.Getter;
 
 public class ClimberDeployIOSpark implements ClimberDeployIO {
     // Hardware
     @Getter private final SparkMax motor;
-    private final RelativeEncoder encoder;
-
-    private final DigitalInput limitSwitch;
+    private final SparkAbsoluteEncoder encoder;
 
     // Control
     private final SparkClosedLoopController controller;
@@ -36,18 +30,12 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
 
     // Filters
     private final Debouncer connectedDebouncer = new Debouncer(.5);
-    private final DigitalGlitchFilter limitSwitchFilter = new DigitalGlitchFilter();
 
     public ClimberDeployIOSpark() {
         // Initialize motor
         motor = new SparkMax(ClimberDeployConstants.id, MotorType.kBrushless);
-        encoder = motor.getEncoder();
+        encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
-
-        // Initialize limit switch
-        limitSwitch = new DigitalInput(ClimberDeployConstants.climberLimitSwitchId);
-        limitSwitchFilter.setPeriodNanoSeconds(Duration.ofMillis(100).toNanos());
-        limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
         config.inverted(ClimberDeployConstants.inverted);
@@ -56,36 +44,42 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
         config.voltageCompensation(12.0);
 
         config
-            .encoder
-                .positionConversionFactor((1 / ClimberDeployConstants.mechanismRatio) * (Math.PI * ClimberDeployConstants.sprocketPitchDiameter)) // convert rotations to meters
-                .velocityConversionFactor((1 / ClimberDeployConstants.mechanismRatio) * (Math.PI * ClimberDeployConstants.sprocketPitchDiameter) / 60) // convert RPM to meters/sec
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+            .absoluteEncoder
+                .zeroOffset(ClimberDeployConstants.zeroOffset)
+                .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .zeroCentered(true)
+                .averageDepth(2)
+                .setSparkMaxDataPortConfig();
 
         config
             .closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 .pid(ClimberDeployConstants.kPID.kP(), ClimberDeployConstants.kPID.kI(), ClimberDeployConstants.kPID.kD());
 
-        SparkUtil.optimizeSignals(config, false, false);
+        config
+            .softLimit
+                .forwardSoftLimitEnabled(true)
+                .forwardSoftLimit(ClimberDeployConstants.maxAngle)
+                .reverseSoftLimitEnabled(true)
+                .reverseSoftLimit(ClimberDeployConstants.minAngle);
+
+        SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();
 
         // Apply configuration
         SparkUtil.configure(motor, config, true);
-
-        resetEncoder();
     }
 
     @Override
     public void updateInputs(ClimberDeployIOInputs inputs) {
         inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
-        inputs.positionMeters = encoder.getPosition();
-        inputs.velocityMetersPerSec = encoder.getVelocity();
+        inputs.positionRad = encoder.getPosition();
+        inputs.velocityRadPerSec = encoder.getVelocity();
         inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
         inputs.statorCurrentAmps = motor.getOutputCurrent();
         inputs.tempCelsius = motor.getMotorTemperature();
-        inputs.limitSwitchPressed = !limitSwitch.get();
     }
 
     @Override
@@ -99,8 +93,8 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
     }
 
     @Override
-    public void runPosition(double positionMeters, double feedforward) {
-        controller.setSetpoint(positionMeters, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
+    public void runPosition(double positionRad, double feedforward) {
+        controller.setSetpoint(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
     }
 
     @Override
@@ -118,10 +112,5 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
     public void setBrakeMode(boolean enabled) {
         config.idleMode(enabled ? IdleMode.kBrake : IdleMode.kCoast);
         SparkUtil.configure(motor, config, false);
-    }
-
-    @Override
-    public void resetEncoder() {
-        encoder.setPosition(0.0);
     }
 }

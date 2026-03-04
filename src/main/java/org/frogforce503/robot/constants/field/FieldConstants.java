@@ -49,10 +49,12 @@ public class FieldConstants {
     }
 
     public static boolean underTrench(Pose2d pose) {
+        final double offset = Units.inchesToMeters(6.0); // So hood can duck earlier
+
         return
             isRed()
-                ? MathUtils.inRange(pose.getX(), LeftBump.redFrontLeftCorner.getX(), Lines.redInitLineX)
-                : MathUtils.inRange(pose.getX(), Lines.blueInitLineX, LeftBump.blueFrontLeftCorner.getX());
+                ? MathUtils.inRange(pose.getX(), LeftBump.redFrontLeftCorner.getX() - offset, Lines.redInitLineX + offset)
+                : MathUtils.inRange(pose.getX(), Lines.blueInitLineX - offset, LeftBump.blueFrontLeftCorner.getX() + offset);
     }
 
     public static class Lines {
