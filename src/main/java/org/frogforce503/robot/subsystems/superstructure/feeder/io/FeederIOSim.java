@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.superstructure.feeder.io;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 
-import com.revrobotics.spark.SparkSim;
+import com.revrobotics.sim.SparkMaxSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -12,15 +12,15 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class FeederIOSim extends FeederIOSpark {
     // Control
-    private final SparkSim motorSim;
+    private final SparkMaxSim motorSim;
     private final FlywheelSim physicsSim;
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.001;
+    private final double moi = 0.0008156798616; // from CAD
 
     public FeederIOSim() {
-        motorSim = new SparkSim(super.getMotor(), motorModel);
+        motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(motorModel, moi, FeederConstants.mechanismRatio),

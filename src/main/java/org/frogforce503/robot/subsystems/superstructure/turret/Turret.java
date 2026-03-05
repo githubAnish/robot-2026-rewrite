@@ -133,10 +133,11 @@ public class Turret extends FFSubsystemBase {
 
     // Actions
     public void seedRelativePosition() {
-        boolean inRange = MathUtils.inRange(getRobotRelativeAngleRad(), -Math.PI, Math.PI);
-        boolean goingSlow = Math.abs(inputs.velocityRadPerSec) < Units.degreesToRadians(2);
+        boolean allDevicesConnected = inputs.motorConnected; // Checks if absolute encoder connected
+        boolean inRange = MathUtils.inRange(getRobotRelativeAngleRad(), -Math.PI, Math.PI); // Ensures within absolute encoder range
+        boolean goingSlow = Math.abs(inputs.velocityRadPerSec) < Units.degreesToRadians(2); // Velocity should be low for accurate seeding
 
-        if (inRange && goingSlow) { // only if relative encoder in range -180 deg to 180 deg & velocity low
+        if (allDevicesConnected && inRange && goingSlow) {
             io.setRelativePosition(inputs.absolutePositionRad);
         }
     }

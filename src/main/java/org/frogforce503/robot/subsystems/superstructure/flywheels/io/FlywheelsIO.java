@@ -5,11 +5,17 @@ import org.littletonrobotics.junction.AutoLog;
 public interface FlywheelsIO {
     @AutoLog
     class FlywheelsIOInputs {
-        public boolean motorConnected = false;
-        public double velocityRadPerSec = 0.0;
-        public double appliedVolts = 0.0;
-        public double statorCurrentAmps = 0.0;
-        public double tempCelsius = 0.0;
+        public boolean leaderConnected = false;
+        public double leaderVelocityRadPerSec = 0.0;
+        public double leaderAppliedVolts = 0.0;
+        public double leaderStatorCurrentAmps = 0.0;
+        public double leaderTempCelsius = 0.0;
+
+        public boolean followerConnected = false;
+        public double followerVelocityRadPerSec = 0.0;
+        public double followerAppliedVolts = 0.0;
+        public double followerStatorCurrentAmps = 0.0;
+        public double followerTempCelsius = 0.0;
     }
 
     default void updateInputs(FlywheelsIOInputs inputs) {}

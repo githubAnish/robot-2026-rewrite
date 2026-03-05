@@ -11,6 +11,7 @@ public interface ClimberDeployIO {
         public double appliedVolts = 0.0;
         public double statorCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
+        public boolean limitSwitchPressed = false;
     }
 
     default void updateInputs(ClimberDeployIOInputs inputs) {}

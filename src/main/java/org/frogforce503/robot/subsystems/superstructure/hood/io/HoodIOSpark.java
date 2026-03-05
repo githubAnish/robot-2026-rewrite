@@ -4,7 +4,6 @@ import org.frogforce503.lib.motorcontrol.SparkUtil;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
 import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -12,6 +11,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.filter.Debouncer;
@@ -20,7 +20,7 @@ import lombok.Getter;
 public class HoodIOSpark implements HoodIO {
     // Hardware
     @Getter private final SparkMax motor;
-    private final RelativeEncoder encoder;
+    private final SparkAbsoluteEncoder encoder;
 
     // Control
     private final SparkClosedLoopController controller;
@@ -34,28 +34,31 @@ public class HoodIOSpark implements HoodIO {
     public HoodIOSpark() {
         // Initialize motor
         motor = new SparkMax(HoodConstants.id, MotorType.kBrushless);
-        encoder = motor.getEncoder();
+        encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(HoodConstants.inverted);
+        config.inverted(HoodConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(HoodConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
-            .encoder
-                .positionConversionFactor((1 / HoodConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / HoodConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+            .absoluteEncoder
+                .inverted(HoodConstants.absoluteEncoderInverted)
+                .zeroOffset(HoodConstants.absoluteEncoderZeroOffset)
+                .positionConversionFactor((1 / HoodConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians
+                .velocityConversionFactor((1 / HoodConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec
+                .zeroCentered(true)
+                .averageDepth(2)
+                .setSparkMaxDataPortConfig();
 
         config
             .closedLoop
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 .pid(HoodConstants.kPID.kP(), HoodConstants.kPID.kI(), HoodConstants.kPID.kD());
 
-        SparkUtil.optimizeSignals(config, false, false);
+        SparkUtil.optimizeSignals(config, true, false);
 
         motor.clearFaults();
 

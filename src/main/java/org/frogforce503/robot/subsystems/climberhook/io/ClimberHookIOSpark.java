@@ -26,7 +26,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
     @Getter private final SparkMax motor;
     private final RelativeEncoder encoder;
 
-    private final DigitalInput limitSwitch;
+    @Getter private final DigitalInput limitSwitch;
 
     // Control
     private final SparkClosedLoopController controller;
@@ -45,7 +45,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
         controller = motor.getClosedLoopController();
 
         // Initialize limit switch
-        limitSwitch = new DigitalInput(ClimberHookConstants.climberLimitSwitchId);
+        limitSwitch = new DigitalInput(ClimberHookConstants.limitSwitchId);
         limitSwitchFilter.setPeriodNanoSeconds(Duration.ofMillis(100).toNanos());
         limitSwitchFilter.add(limitSwitch);
 
@@ -57,8 +57,8 @@ public class ClimberHookIOSpark implements ClimberHookIO {
 
         config
             .encoder
-                .positionConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (Math.PI * ClimberHookConstants.sprocketPitchDiameter)) // convert rotations to meters
-                .velocityConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (Math.PI * ClimberHookConstants.sprocketPitchDiameter) / 60) // convert RPM to meters/sec
+                .positionConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (ClimberHookConstants.sprocketPitchDiameter * Math.PI)) // convert rotations to meters
+                .velocityConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (ClimberHookConstants.sprocketPitchDiameter * Math.PI) / 60) // convert RPM to meters/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

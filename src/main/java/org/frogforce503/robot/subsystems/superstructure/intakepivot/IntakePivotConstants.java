@@ -10,10 +10,12 @@ public class IntakePivotConstants {
     // Hardware / Configuration
     public static final int id = 2;
     public static final double mechanismRatio = 20.0;
+    public static final double absoluteEncoderMechanismRatio = 1.0;
+    public static final int statorCurrentLimit = 80;
 
     public static final boolean motorInverted = false;
     public static final boolean absoluteEncoderInverted = true;
-    public static final int statorCurrentLimit = 80;
+
     public static final double absoluteEncoderZeroOffset = 0.787;
 
     public static final PIDConfig kPID = new PIDConfig();
@@ -21,7 +23,7 @@ public class IntakePivotConstants {
     public static final Constraints kConstraints = new Constraints(0, 0);
 
     public static final double minAngle = Units.degreesToRadians(-5.0);
-    public static final double maxAngle = Units.degreesToRadians(90);
+    public static final double maxAngle = Units.degreesToRadians(100);
 
     // Setpoints
     public static final double kTolerance = Units.degreesToRadians(3.0);

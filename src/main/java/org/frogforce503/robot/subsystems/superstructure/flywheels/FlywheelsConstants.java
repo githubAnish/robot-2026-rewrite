@@ -7,15 +7,17 @@ import edu.wpi.first.math.util.Units;
 
 public class FlywheelsConstants {
     // Hardware / Configuration
-    public static final int id = 5;
-    public static final double mechanismRatio = 1;
+    public static final int leaderId = 9;
+    public static final int followerId = 8;
+    public static final double mechanismRatio = 0.75; // from CAD
 
-    public static final boolean inverted = false;
+    public static final boolean leaderInverted = true;
+    public static final boolean followerInverted = true;
     public static final int statorCurrentLimit = 80;
     
-    public static final PIDConfig kPID = new PIDConfig(0.1, 0, 0);
-    public static final FFConfig kFF = new FFConfig(0, 0, 0.0224, 0);
-    public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(6000);
+    public static final PIDConfig kPID = new PIDConfig();
+    public static final FFConfig kFF = new FFConfig();
+    public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(0);
 
     public static final double kSimRadiusMeters = Units.inchesToMeters(1.5);
 

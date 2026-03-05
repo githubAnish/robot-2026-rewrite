@@ -8,13 +8,13 @@ import edu.wpi.first.math.util.Units;
 public class IntakeRollerConstants {
     // Hardware / Configuration
     public static final int id = 3;
-    public static final double mechanismRatio = 1;
+    public static final double mechanismRatio = 1.78; // from CAD
 
-    public static final boolean motorInverted = false;
-    public static final int statorCurrentLimit = 80;
+    public static final boolean motorInverted = true;
+    public static final int statorCurrentLimit = 60;
     
-    public static final PIDConfig kPID = new PIDConfig(0.00001, 0, 0);
-    public static final FFConfig kFF = new FFConfig(0, 0, 0.0225, 0);
+    public static final PIDConfig kPID = new PIDConfig();
+    public static final FFConfig kFF = new FFConfig();
 
     // Setpoints
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0); // TODO may change based on real robot

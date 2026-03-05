@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.superstructure.flywheels.io;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 
-import com.revrobotics.spark.SparkSim;
+import com.revrobotics.sim.SparkFlexSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -12,15 +12,15 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class FlywheelsIOSim extends FlywheelsIOSpark {
     // Control
-    private final SparkSim motorSim;
+    private final SparkFlexSim motorSim;
     private final FlywheelSim physicsSim;
     
     // Constants
-    private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.025;
+    private final DCMotor motorModel = DCMotor.getNeoVortex(2); // leader = 1 motor, follower = 1 motor, total 2 motors
+    private final double moi = 0.00400419546112; // from CAD
 
     public FlywheelsIOSim() {
-        motorSim = new SparkSim(super.getMotor(), motorModel);
+        motorSim = new SparkFlexSim(super.getLeader(), motorModel);
         physicsSim =
             new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(motorModel, moi, FlywheelsConstants.mechanismRatio),
@@ -42,10 +42,16 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
         motorSim.iterate(physicsSim.getAngularVelocityRadPerSec(), RobotController.getBatteryVoltage(), Constants.loopPeriodSecs);
         motorSim.setVelocity(physicsSim.getAngularVelocityRadPerSec());
         
-        inputs.motorConnected = true;
-        inputs.velocityRadPerSec = motorSim.getVelocity();
-        inputs.appliedVolts = appliedVolts;
-        inputs.statorCurrentAmps = motorSim.getMotorCurrent();
-        inputs.tempCelsius = 24.0;
+        inputs.leaderConnected = true;
+        inputs.leaderVelocityRadPerSec = motorSim.getVelocity();
+        inputs.leaderAppliedVolts = appliedVolts;
+        inputs.leaderStatorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.leaderTempCelsius = 24.0;
+
+        inputs.followerConnected = true;
+        inputs.followerVelocityRadPerSec = motorSim.getVelocity();
+        inputs.followerAppliedVolts = appliedVolts;
+        inputs.followerStatorCurrentAmps = motorSim.getMotorCurrent();
+        inputs.followerTempCelsius = 24.0;
     }
 }

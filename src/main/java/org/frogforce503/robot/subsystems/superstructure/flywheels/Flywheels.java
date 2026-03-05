@@ -75,7 +75,7 @@ public class Flywheels extends FFSubsystemBase {
     }
 
     public double getVelocityRadPerSec() {
-        return inputs.velocityRadPerSec;
+        return inputs.leaderVelocityRadPerSec;
     }
 
     // Actions

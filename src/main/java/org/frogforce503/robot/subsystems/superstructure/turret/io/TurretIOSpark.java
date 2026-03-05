@@ -41,7 +41,7 @@ public class TurretIOSpark implements TurretIO {
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(TurretConstants.inverted);
+        config.inverted(TurretConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(TurretConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
@@ -56,8 +56,8 @@ public class TurretIOSpark implements TurretIO {
         config
             .absoluteEncoder
                 .zeroOffset(TurretConstants.absoluteEncoderZeroOffset)
-                .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of turret
-                .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of turret
+                .positionConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of turret
+                .velocityConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of turret
                 .zeroCentered(true)
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();

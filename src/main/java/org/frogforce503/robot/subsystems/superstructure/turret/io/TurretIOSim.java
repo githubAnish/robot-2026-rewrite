@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.superstructure.turret.io;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 
-import com.revrobotics.spark.SparkSim;
+import com.revrobotics.sim.SparkMaxSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -12,15 +12,15 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class TurretIOSim extends TurretIOSpark {
     // Control
-    private final SparkSim motorSim;
+    private final SparkMaxSim motorSim;
     private final DCMotorSim physicsSim;
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.001;
+    private final double moi = 0.0731942122498; // from CAD
 
     public TurretIOSim() {
-        motorSim = new SparkSim(super.getMotor(), motorModel);
+        motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, TurretConstants.mechanismRatio), motorModel);
 
         // Sync physics and motor sim positions

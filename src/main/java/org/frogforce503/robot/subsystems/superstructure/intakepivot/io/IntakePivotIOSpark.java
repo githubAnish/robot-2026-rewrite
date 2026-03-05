@@ -47,8 +47,8 @@ public class IntakePivotIOSpark implements IntakePivotIO {
             .absoluteEncoder
                 .inverted(IntakePivotConstants.absoluteEncoderInverted)
                 .zeroOffset(IntakePivotConstants.absoluteEncoderZeroOffset)
-                .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
-                .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .positionConversionFactor((1 / IntakePivotConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians
+                .velocityConversionFactor((1 / IntakePivotConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec
                 .zeroCentered(true)
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();

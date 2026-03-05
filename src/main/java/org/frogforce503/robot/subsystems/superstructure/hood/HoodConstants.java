@@ -10,18 +10,22 @@ import edu.wpi.first.math.util.Units;
 
 public final class HoodConstants {
     // Hardware / Configuration
-    public static final int id = 6;
-    public static final double mechanismRatio = 1;
+    public static final int id = 7;
+    public static final double mechanismRatio = 15.0;
+    public static final double absoluteEncoderMechanismRatio = 1.0;
 
-    public static final boolean inverted = false;
-    public static final int statorCurrentLimit = 80;
+    public static final boolean motorInverted = false;
+    public static final boolean absoluteEncoderInverted = false;
+    public static final int statorCurrentLimit = 20;
 
-    public static final PIDConfig kPID = new PIDConfig(0.007, 0, 0.0058);
+    public static final double absoluteEncoderZeroOffset = 0.651;
+
+    public static final PIDConfig kPID = new PIDConfig();
     public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(480), Units.degreesToRadians(960));
+    public static final Constraints kConstraints = new Constraints(0, 0);
     
     public static final double minAngle = Units.degreesToRadians(0); // TODO 0 deg is when hood horizontal (ball shoots horizontally)
-    public static final double maxAngle = Units.degreesToRadians(90);// TODO 90 deg is when hood vertical (ball shoots verticalally)
+    public static final double maxAngle = Units.degreesToRadians(37);// TODO 90 deg is when hood vertical (ball shoots verticalally)
 
     public static final Transform3d turretToHood = new Transform3d(0.09, 0.0, 0.09, Rotation3d.kZero); // Sim turret to hood, can change based on real robot CAD
     

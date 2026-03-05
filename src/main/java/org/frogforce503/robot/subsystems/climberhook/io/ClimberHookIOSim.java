@@ -17,7 +17,7 @@ public class ClimberHookIOSim extends ClimberHookIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double simCarriageMass = Units.lbsToKilograms(16.895); // from CAD (Climber carriage (6.423 lb) + shoulder (3.000 lb) + arm (2.229 lb) + gripper (5.243 lb))
+    private final double simCarriageMass = Units.lbsToKilograms(87.4200862); // from CAD, has to lift robot weight
 
     public ClimberHookIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
@@ -56,6 +56,6 @@ public class ClimberHookIOSim extends ClimberHookIOSpark {
         inputs.appliedVolts = appliedVolts;
         inputs.statorCurrentAmps = motorSim.getMotorCurrent();
         inputs.tempCelsius = 24.0;
-        inputs.limitSwitchPressed = motorSim.getPosition() == 0;
+        inputs.limitSwitchPressed = !super.getLimitSwitch().get();
     }
 }

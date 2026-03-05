@@ -1,5 +1,7 @@
 package org.frogforce503.robot.subsystems.climberdeploy.io;
 
+import java.time.Duration;
+
 import org.frogforce503.lib.motorcontrol.SparkUtil;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 
@@ -15,12 +17,16 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.wpilibj.DigitalGlitchFilter;
+import edu.wpi.first.wpilibj.DigitalInput;
 import lombok.Getter;
 
 public class ClimberDeployIOSpark implements ClimberDeployIO {
     // Hardware
     @Getter private final SparkMax motor;
     private final SparkAbsoluteEncoder encoder;
+    
+    @Getter private final DigitalInput limitSwitch;
 
     // Control
     private final SparkClosedLoopController controller;
@@ -30,12 +36,18 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
 
     // Filters
     private final Debouncer connectedDebouncer = new Debouncer(.5);
+    private final DigitalGlitchFilter limitSwitchFilter = new DigitalGlitchFilter();
 
     public ClimberDeployIOSpark() {
         // Initialize motor
         motor = new SparkMax(ClimberDeployConstants.id, MotorType.kBrushless);
         encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
+
+        // Initialize limit switch
+        limitSwitch = new DigitalInput(ClimberDeployConstants.limitSwitchId);
+        limitSwitchFilter.setPeriodNanoSeconds(Duration.ofMillis(100).toNanos());
+        limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
         config.inverted(ClimberDeployConstants.inverted);
@@ -45,9 +57,10 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
 
         config
             .absoluteEncoder
+                .inverted(ClimberDeployConstants.absoluteEncoderInverted)
                 .zeroOffset(ClimberDeployConstants.zeroOffset)
-                .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
-                .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .positionConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
+                .velocityConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .zeroCentered(true)
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();
@@ -73,6 +86,7 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
         inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
         inputs.statorCurrentAmps = motor.getOutputCurrent();
         inputs.tempCelsius = motor.getMotorTemperature();
+        inputs.limitSwitchPressed = !limitSwitch.get();
     }
 
     @Override

@@ -43,9 +43,9 @@ public class ClimberHook extends FFSubsystemBase {
         super.periodic();
 
         io.updateInputs(inputs);
-        Logger.processInputs("Climber", inputs);
+        Logger.processInputs("ClimberHook", inputs);
 
-        // Reset encoder if limit switch pressed & Climber is going down
+        // Reset encoder if limit switch pressed & climber is going down
         if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
             io.resetEncoder();
             setpoint = new State(0.0, 0.0);
@@ -67,26 +67,26 @@ public class ClimberHook extends FFSubsystemBase {
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
 
             /// Log state
-            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", setpoint.position);
-            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", setpoint.velocity);
-            Logger.recordOutput("Climber/Profile/GoalPositionMeters", goalState.position);
-            Logger.recordOutput("Climber/AtGoal", atGoal);
+            Logger.recordOutput("ClimberHook/Profile/SetpointPositionMeters", setpoint.position);
+            Logger.recordOutput("ClimberHook/Profile/SetpointVelocityMetersPerSec", setpoint.velocity);
+            Logger.recordOutput("ClimberHook/Profile/GoalPositionMeters", goalState.position);
+            Logger.recordOutput("ClimberHook/AtGoal", atGoal);
         } else {
             // Reset setpoint
             setpoint = new State(getHeightMeters(), 0.0);
       
             // Clear logs
-            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", 0.0);
-            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", 0.0);
-            Logger.recordOutput("Climber/Profile/GoalPositionMeters", 0.0);
-            Logger.recordOutput("Climber/AtGoal", true);
+            Logger.recordOutput("ClimberHook/Profile/SetpointPositionMeters", 0.0);
+            Logger.recordOutput("ClimberHook/Profile/SetpointVelocityMetersPerSec", 0.0);
+            Logger.recordOutput("ClimberHook/Profile/GoalPositionMeters", 0.0);
+            Logger.recordOutput("ClimberHook/AtGoal", true);
         }
 
-        Logger.recordOutput("Climber/CurrentPositionMeters", getHeightMeters());
+        Logger.recordOutput("ClimberHook/CurrentPositionMeters", getHeightMeters());
         lastHeightMeters = getHeightMeters();
 
         // Record cycle time
-        LoggedTracer.record("Climber");
+        LoggedTracer.record("ClimberHook");
     }
 
     public double getHeightMeters() {

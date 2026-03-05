@@ -6,7 +6,6 @@ import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -20,7 +19,7 @@ import lombok.Getter;
 
 public class IndexerIOSpark implements IndexerIO {
     // Hardware
-    @Getter private final SparkBase motor;
+    @Getter private final SparkMax motor;
     private final RelativeEncoder encoder;
 
     // Control

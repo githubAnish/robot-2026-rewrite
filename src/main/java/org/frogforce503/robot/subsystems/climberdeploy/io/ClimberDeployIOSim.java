@@ -17,8 +17,8 @@ public class ClimberDeployIOSim extends ClimberDeployIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double length = Units.inchesToMeters(14.75); // TODO measure the length from the pivot point to the center of mass of the 4-bar intake
-    private final double moi = 0.62; // kg * m^2, TODO measure the moi from the pivot point
+    private final double length = Units.inchesToMeters(6.0); // from CAD
+    private final double moi = 0.126086426615; // from CAD
 
     public ClimberDeployIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
@@ -57,5 +57,6 @@ public class ClimberDeployIOSim extends ClimberDeployIOSpark {
         inputs.appliedVolts = appliedVolts;
         inputs.statorCurrentAmps = motorSim.getMotorCurrent();
         inputs.tempCelsius = 24.0;
+        inputs.limitSwitchPressed = !super.getLimitSwitch().get();
     } 
 }
