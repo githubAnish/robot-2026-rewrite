@@ -31,8 +31,8 @@ public final class DriveConstants {
     public static final double maxLinearSpeed;
     public static final double maxOmega;
 
-    public static final double massLbs = 90.0;
-    public static final double wheelCOF = 1.2;
+    public static final double mass = Units.lbsToKilograms(87.4200862); // from CAD
+    public static final double wheelCOF = 2.2; // from comp bot
     public static final double bumperLength = Units.inchesToMeters(35);
     public static final double bumperWidth = Units.inchesToMeters(30);
 

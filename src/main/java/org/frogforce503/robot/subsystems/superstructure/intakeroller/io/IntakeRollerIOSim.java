@@ -23,7 +23,7 @@ public class IntakeRollerIOSim extends IntakeRollerIOSpark {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, IntakeRollerConstants.mechanismRatio),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, IntakeRollerConstants.motorMechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

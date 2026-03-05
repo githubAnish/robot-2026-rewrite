@@ -11,14 +11,16 @@ import edu.wpi.first.math.util.Units;
 
 public final class TurretConstants {
     // Hardware / Configuration
-    public static final int id = 6;
-    public static final double mechanismRatio = 250.0;
+    public static final int motorId = 6;
+
+    public static final double motorMechanismRatio = 250.0;
     public static final double absoluteEncoderMechanismRatio = 1.0;
     
     public static final boolean motorInverted = true;
     public static final boolean absoluteEncoderInverted = true;
 
     public static final int statorCurrentLimit = 35;
+
     public static final double relativeEncoderZeroOffset = Units.degreesToRadians(90);
     public static final double absoluteEncoderZeroOffset = 0.1788;
 
@@ -35,13 +37,6 @@ public final class TurretConstants {
             Units.inchesToMeters(-8.5),
             Units.inchesToMeters(13.91),
             Rotation3d.kZero);
-        
-    public static final Transform3d turretToCamera =
-        new Transform3d(
-            Units.inchesToMeters(5.493439),
-            Units.inchesToMeters(2.075000),
-            Units.inchesToMeters(6.244572),
-            new Rotation3d(0.0, Units.degreesToRadians(-15), 0.0));
 
     // Setpoints
     public static final double kFixedTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot

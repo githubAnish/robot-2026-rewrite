@@ -35,7 +35,7 @@ public class TurretIOSpark implements TurretIO {
 
     public TurretIOSpark() {
         // Initialize motor
-        motor = new SparkMax(TurretConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(TurretConstants.motorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
         absoluteEncoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
@@ -48,8 +48,8 @@ public class TurretIOSpark implements TurretIO {
 
         config
             .encoder
-                .positionConversionFactor((1 / TurretConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / TurretConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / TurretConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / TurretConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

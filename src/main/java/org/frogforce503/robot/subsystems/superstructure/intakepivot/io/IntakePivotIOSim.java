@@ -25,7 +25,7 @@ public class IntakePivotIOSim extends IntakePivotIOSpark {
         physicsSim =
             new SingleJointedArmSim(
                 motorModel,
-                IntakePivotConstants.mechanismRatio,
+                IntakePivotConstants.motorMechanismRatio,
                 moi,
                 length,
                 IntakePivotConstants.minAngle,

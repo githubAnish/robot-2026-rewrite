@@ -23,7 +23,7 @@ public class FeederIOSim extends FeederIOSpark {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, FeederConstants.mechanismRatio),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, FeederConstants.motorMechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

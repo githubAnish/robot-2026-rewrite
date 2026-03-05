@@ -53,8 +53,8 @@ public class FlywheelsIOSpark implements FlywheelsIO {
 
         leaderConfig
             .encoder
-                .positionConversionFactor((1 / FlywheelsConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / FlywheelsConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / FlywheelsConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / FlywheelsConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

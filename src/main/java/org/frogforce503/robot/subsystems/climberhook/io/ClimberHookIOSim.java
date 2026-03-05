@@ -2,11 +2,11 @@ package org.frogforce503.robot.subsystems.climberhook.io;
 
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHookConstants;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
@@ -17,7 +17,7 @@ public class ClimberHookIOSim extends ClimberHookIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double simCarriageMass = Units.lbsToKilograms(87.4200862); // from CAD, has to lift robot weight
+    private final double simCarriageMass = DriveConstants.mass; // has to lift robot weight
 
     public ClimberHookIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);

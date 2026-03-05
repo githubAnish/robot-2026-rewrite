@@ -25,7 +25,7 @@ public class ClimberDeployIOSim extends ClimberDeployIOSpark {
         physicsSim =
             new SingleJointedArmSim(
                 motorModel,
-                ClimberDeployConstants.mechanismRatio,
+                ClimberDeployConstants.motorMechanismRatio,
                 moi,
                 length,
                 ClimberDeployConstants.minAngle,

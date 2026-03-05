@@ -3,15 +3,15 @@ package org.frogforce503.robot.subsystems.superstructure;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
+import org.frogforce503.robot.subsystems.vision.VisionConstants;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod({GeomUtil.class})
 public class SuperstructureViz {
     // Constants
     private final Transform3d robotToTurret =
@@ -26,7 +26,8 @@ public class SuperstructureViz {
 
     public SuperstructureViz() {}
 
-    public void update(double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad, double climberDeployAngleRad) {
+    public void update(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad, double climberDeployAngleRad) {
+        // Calculate subsystem poses
         var turretPose =
             Pose3d.kZero
                 .plus(robotToTurret)
@@ -57,6 +58,36 @@ public class SuperstructureViz {
                 .plus(climberDeployMainPivotToSecondaryPivot)
                 .plus(new Transform3d(Translation3d.kZero, new Rotation3d(-climberDeployAngleRad, 0.0, 0.0)));
 
-        Logger.recordOutput("SuperstructureViz/Components", turretPose, hoodPose, intakePivotPose, hopperExtenderPose, climberDeployFourBarPose, climberHookPose);
+        Logger.recordOutput(
+            "SuperstructureViz/Components",
+            turretPose, hoodPose, intakePivotPose, hopperExtenderPose, climberDeployFourBarPose, climberHookPose);
+
+        // Calculate camera poses
+        var turretCameraPose =
+            drivePose3d
+                .plus(GeomUtil.toTransform3d(turretPose))
+                .plus(VisionConstants.turretToTurretCameraOffsets.get(CameraName.TURRET_CAMERA));
+
+        var leftCameraPose =
+            drivePose3d
+                .plus(VisionConstants.robotToFixedCameraOffsets.get(CameraName.LEFT_CAMERA));
+
+        var rightCameraPose =
+            drivePose3d
+                .plus(VisionConstants.robotToFixedCameraOffsets.get(CameraName.RIGHT_CAMERA));
+
+        var backCameraPose =
+            drivePose3d
+                .plus(VisionConstants.robotToFixedCameraOffsets.get(CameraName.BACK_CAMERA));
+
+        var fuelCameraPose =
+            drivePose3d
+                .plus(VisionConstants.robotToFixedCameraOffsets.get(CameraName.FUEL_CAMERA));
+
+        Logger.recordOutput("SuperstructureViz/TurretCameraPose", turretCameraPose);
+        Logger.recordOutput("SuperstructureViz/LeftCameraPose", leftCameraPose);
+        Logger.recordOutput("SuperstructureViz/RightCameraPose", rightCameraPose);
+        Logger.recordOutput("SuperstructureViz/BackCameraPose", backCameraPose);
+        Logger.recordOutput("SuperstructureViz/FuelCameraPose", fuelCameraPose);
     }
 }

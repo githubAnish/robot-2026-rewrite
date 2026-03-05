@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 
 /**
  * Utility class for vision with useful static methods.
@@ -81,21 +80,15 @@ public class VisionUtils {
     /**
      * @param robotToCameraOffset The offset from the robot to the camera in meters and radians
      * @param objectHeight The height of the object in meters
-     * @param objectPitch The pitch of the object in degrees, from the camera lens where up is positive
-     * @param objectYaw The yaw of the object in degrees, from the camera lens where right is positive
+     * @param objectPitch The pitch of the object in radians
+     * @param objectYaw The yaw of the object in radians
      * 
      * @return The 2d translation from the center of the robot (x is forward, y is left) to the object in meters
     */
     public static Translation2d getRobotToObject(Transform3d robotToCameraOffset, double objectHeight, double objectPitch, double objectYaw) {
-        double cameraToObjectDistance = PhotonUtils.calculateDistanceToTargetMeters(
-            robotToCameraOffset.getZ(), 
-            objectHeight, 
-            -robotToCameraOffset.getRotation().getY(), 
-            Units.degreesToRadians(objectPitch)
-        );
-
-        Translation2d cameraToObject = PhotonUtils.estimateCameraToTargetTranslation(cameraToObjectDistance, Rotation2d.fromDegrees(-objectYaw));
-        Translation2d robotToObject =  robotToCameraOffset.getTranslation().toTranslation2d().plus(cameraToObject);
+        double cameraToObjectDistance = PhotonUtils.calculateDistanceToTargetMeters(robotToCameraOffset.getZ(), objectHeight, robotToCameraOffset.getRotation().getY(), objectYaw);
+        Translation2d cameraToObject = PhotonUtils.estimateCameraToTargetTranslation(cameraToObjectDistance, new Rotation2d(-objectYaw));
+        Translation2d robotToObject =  cameraToObject.plus(robotToCameraOffset.getTranslation().toTranslation2d());
 
         return robotToObject;
     }

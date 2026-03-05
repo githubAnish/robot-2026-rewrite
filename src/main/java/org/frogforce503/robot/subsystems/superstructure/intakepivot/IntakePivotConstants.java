@@ -8,13 +8,15 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakePivotConstants {
     // Hardware / Configuration
-    public static final int id = 2;
-    public static final double mechanismRatio = 20.0;
+    public static final int motorId = 2;
+
+    public static final double motorMechanismRatio = 20.0; // from comp bot
     public static final double absoluteEncoderMechanismRatio = 1.0;
-    public static final int statorCurrentLimit = 80;
 
     public static final boolean motorInverted = false;
     public static final boolean absoluteEncoderInverted = true;
+
+    public static final int statorCurrentLimit = 80;
 
     public static final double absoluteEncoderZeroOffset = 0.787;
 

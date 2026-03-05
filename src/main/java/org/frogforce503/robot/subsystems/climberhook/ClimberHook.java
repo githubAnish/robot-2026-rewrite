@@ -47,8 +47,10 @@ public class ClimberHook extends FFSubsystemBase {
 
         // Reset encoder if limit switch pressed & climber is going down
         if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
-            io.resetEncoder();
-            setpoint = new State(0.0, 0.0);
+            double heightAtLimitSwitch = ClimberHookConstants.minHeight; // assume limit switch at bottom
+
+            io.setRelativePosition(heightAtLimitSwitch);
+            setpoint = new State(heightAtLimitSwitch, 0.0);
         }
 
         // Update profile
@@ -111,7 +113,7 @@ public class ClimberHook extends FFSubsystemBase {
     public void runVolts(double volts) {
         shouldRunProfile = false;
 
-        // Prevent downward motion into the limit switch
+        // Prevent downward motion into limit switch
         if (inputs.limitSwitchPressed && volts < 0) {
             volts = 0;
         }

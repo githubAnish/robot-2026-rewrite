@@ -28,5 +28,5 @@ public interface ClimberHookIO {
 
     default void setBrakeMode(boolean enabled) {}
 
-    default void resetEncoder() {}
+    default void setRelativePosition(double positionMeters) {}
 }

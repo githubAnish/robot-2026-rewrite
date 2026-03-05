@@ -33,7 +33,7 @@ public class HoodIOSpark implements HoodIO {
 
     public HoodIOSpark() {
         // Initialize motor
-        motor = new SparkMax(HoodConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(HoodConstants.motorId, MotorType.kBrushless);
         encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
@@ -46,10 +46,10 @@ public class HoodIOSpark implements HoodIO {
         config
             .absoluteEncoder
                 .inverted(HoodConstants.absoluteEncoderInverted)
+                .zeroCentered(true)
                 .zeroOffset(HoodConstants.absoluteEncoderZeroOffset)
                 .positionConversionFactor((1 / HoodConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians
                 .velocityConversionFactor((1 / HoodConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec
-                .zeroCentered(true)
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();
 

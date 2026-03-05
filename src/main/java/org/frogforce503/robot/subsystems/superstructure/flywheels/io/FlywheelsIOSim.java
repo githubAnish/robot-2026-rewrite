@@ -23,7 +23,7 @@ public class FlywheelsIOSim extends FlywheelsIOSpark {
         motorSim = new SparkFlexSim(super.getLeader(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, FlywheelsConstants.mechanismRatio),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, FlywheelsConstants.motorMechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

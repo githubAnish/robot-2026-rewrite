@@ -7,10 +7,12 @@ import edu.wpi.first.math.util.Units;
 
 public class IndexerConstants {
     // Hardware / Configuration
-    public static final int id = 4;
-    public static final double mechanismRatio = 3.27272727; // from CAD
+    public static final int motorId = 4;
 
-    public static final boolean inverted = true;
+    public static final double motorMechanismRatio = 3.27272727; // from CAD
+
+    public static final boolean motorInverted = true;
+    
     public static final int statorCurrentLimit = 80;
     
     public static final PIDConfig kPID = new PIDConfig();

@@ -24,7 +24,7 @@ public class VisionSimulator {
     private VisionSystemSim objectDetectionSimulator;
 
     // Fuel represented as a sphere with a diameter of 5.91 inches
-    private final TargetModel fuelModel = new TargetModel(VisionConstants.FUEL_DIAMETER);
+    private final TargetModel fuelModel = new TargetModel(0.150);
 
     /**
      * @param aprilTagFieldLayout The AprilTagFieldLayout to use for AprilTag detection simulation.

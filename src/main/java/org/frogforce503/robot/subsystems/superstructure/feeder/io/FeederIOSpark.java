@@ -33,20 +33,20 @@ public class FeederIOSpark implements FeederIO {
     
     public FeederIOSpark() {
         // Initialize motor
-        motor = new SparkMax(FeederConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(FeederConstants.motorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(FeederConstants.inverted);
+        config.inverted(FeederConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(FeederConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / FeederConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / FeederConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / FeederConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / FeederConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

@@ -41,14 +41,14 @@ public class VisionConstants {
             CameraName.TURRET_CAMERA,
             new Transform3d(
                 new Translation3d(
+                    Units.inchesToMeters(5.493439), 
                     Units.inchesToMeters(2.075000), 
-                    Units.inchesToMeters(  5.493439), 
-                    Units.inchesToMeters( 6.244572)
+                    Units.inchesToMeters(6.244572)
                 ),
                 new Rotation3d(
                     Units.degreesToRadians(0), 
                     Units.degreesToRadians(-15), 
-                    Units.degreesToRadians(0) 
+                    Units.degreesToRadians(0)
                 )
             )
         );
@@ -68,24 +68,22 @@ public class VisionConstants {
                 )
             )
         );
-
-
+       
         robotToFixedCameraOffsets.put(
             CameraName.RIGHT_CAMERA,
             new Transform3d(
                 new Translation3d(
-                    Units.inchesToMeters(0), 
-                    Units.inchesToMeters(0), 
-                    Units.inchesToMeters(0)
+                    Units.inchesToMeters(-4.325), 
+                    Units.inchesToMeters(-14.596770), 
+                    Units.inchesToMeters(11.922189)
                 ),
                 new Rotation3d(
                     Units.degreesToRadians(0), 
-                    Units.degreesToRadians(0), 
-                    Units.degreesToRadians(0)
+                    Units.degreesToRadians(-15), 
+                    Units.degreesToRadians(270)
                 )
             )
         );
-
 
         robotToFixedCameraOffsets.put(
             CameraName.BACK_CAMERA,
@@ -106,16 +104,8 @@ public class VisionConstants {
         robotToFixedCameraOffsets.put(
             CameraName.FUEL_CAMERA,
             new Transform3d(
-                new Translation3d(
-                    Units.inchesToMeters(10.0),
-                    Units.inchesToMeters(-4.5),
-                    Units.inchesToMeters(13.5)
-                ),
-                new Rotation3d(
-                    Units.degreesToRadians(0), 
-                    Units.degreesToRadians(15), 
-                    Units.degreesToRadians(0)
-                )
+                new Translation3d(0, 0, 0),
+                new Rotation3d(0, 0, 0)
             )
         );
     }
@@ -137,11 +127,7 @@ public class VisionConstants {
         // Object Detection Cameras
         FUEL_CAMERA
     }
-    // OBJECT DETECTION
-    public static final double FUEL_SPACING_IN_CLUSTER = Units.inchesToMeters(15); // distance between fuel in a cluster
-    public static final double FUEL_DIAMETER = Units.inchesToMeters(5.91);
 
-    // APRIL TAG DETECTION
     public static final Set<Integer> RED_TOWER_TAGS = Set.of(15, 16);
     public static final Set<Integer> RED_HUB_TAGS = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
     public static final Set<Integer> RED_OUTPOST_TAGS = Set.of(13, 14);
@@ -167,7 +153,7 @@ public class VisionConstants {
             EnumSet.of(
                 CameraName.LEFT_CAMERA, 
                 CameraName.RIGHT_CAMERA, 
-                CameraName.TURRET_CAMERA,
+                // CameraName.TURRET_CAMERA,
                 CameraName.BACK_CAMERA
             ),
 
@@ -204,7 +190,7 @@ public class VisionConstants {
          */
         STANDARD_HUB_AIM(
             EnumSet.of(
-                CameraName.TURRET_CAMERA, 
+                // CameraName.TURRET_CAMERA, 
                 CameraName.LEFT_CAMERA,
                 CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA

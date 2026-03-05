@@ -1,11 +1,7 @@
 package org.frogforce503.robot.subsystems.vision;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -16,24 +12,19 @@ import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagInputsAutoLogged;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
-import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO.ObjectDetectionInputs;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionInputsAutoLogged;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.vision.VisionUtils;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
-import org.frogforce503.lib.vision.objectdetection.TrackedObject;
-import org.frogforce503.lib.vision.objectdetection.ObjectSortingMode;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
@@ -61,9 +52,6 @@ public class Vision extends SubsystemBase {
     private EnumMap<CameraName, ObjectDetectionIO> objectDetectionIOMap = new EnumMap<>(CameraName.class);
     // Maps camera names to their corresponding ObjectDetectionInputs instances.
     private EnumMap<CameraName, ObjectDetectionInputsAutoLogged> objectDetectionInputsMap = new EnumMap<>(CameraName.class);
-
-    // Sorting mode for tracked objects being used by object detection cameras, defaulting to sorting by closest to the robot.
-    private ObjectSortingMode objectSortingMode = ObjectSortingMode.Centermost;
     
     /**
      * @param visionConsumer The consumer that will fuse vision measurements into the robot pose
@@ -72,7 +60,6 @@ public class Vision extends SubsystemBase {
      * @param aprilTagIOs Array of AprilTagIO for AprilTag detection
      * @param objectDetectionIOs Array of ObjectDetectionIO for object detection
      */
-
     public Vision(
         Consumer<VisionMeasurement> visionConsumer, 
         Supplier<Pose2d> robotPoseSupplier, 
@@ -83,11 +70,6 @@ public class Vision extends SubsystemBase {
         this.visionConsumer = visionConsumer;
         this.robotPoseSupplier = robotPoseSupplier;
         this.turretAngleSupplier = turretAngleSupplier;
-
-        this.objectSortingMode = ObjectSortingMode.Custom;
-        objectSortingMode.setComparator(
-            Comparator.comparingDouble(target -> getRobotToFuel(target).getNorm())
-        );
 
         //Populate maps
         for (int i = 0; i < aprilTagIOs.length; i++) {
@@ -100,13 +82,12 @@ public class Vision extends SubsystemBase {
         for (int i = 0; i < objectDetectionIOs.length; i++) {
             objectDetectionIOMap.put(objectDetectionIOs[i].getCameraName(), objectDetectionIOs[i]);
             objectDetectionInputsMap.put(objectDetectionIOs[i].getCameraName(), new ObjectDetectionInputsAutoLogged());
-
-            objectDetectionIOs[i].setSortingMode(objectSortingMode);
         }
     }
 
     @Override
     public void periodic() {
+        LoggedTracer.reset();
         /************************************ APRILTAG DETECTION LOGIC ************************************/
         EnumSet<AprilTagGoal> aprilTagGoalsRan = EnumSet.noneOf(AprilTagGoal.class); // Set to track which AprilTag goals have been run this periodic cycle.
         boolean anyAprilTagCamerasUsed = false; // Boolean to track if any AprilTag cameras were used for the current goal.
@@ -124,7 +105,7 @@ public class Vision extends SubsystemBase {
             if (VisionConstants.turretToTurretCameraOffsets.containsKey(cameraName)) {
                 Transform3d robotToTurretCameraOffset = calculateRobotToTurretCameraOffset(turretAngleSupplier.get(), cameraName);
                 aprilTagIO.setRobotToCameraOffset(robotToTurretCameraOffset);
-            } 
+            }
 
             // Update the inputs for the AprilTagIO and log them.
             aprilTagIO.updateInputs(aprilTagInputs);
@@ -202,14 +183,6 @@ public class Vision extends SubsystemBase {
             Logger.processInputs("Vision/Object Detection/" + cameraName.name() + "/Inputs", objectDetectionInputs);
         }
 
-        // Log poses of fuel based on their cluster
-        ObjectDetectionInputs fuelCameraInputs = objectDetectionInputsMap.get(CameraName.FUEL_CAMERA);
-        logClusterPoses(fuelCameraInputs.trackedObjects);
-
-        // Log pose of the closest fuel in the best cluster
-        Logger.recordOutput("Vision/Object Detection/Best Cluster Pose", new Pose2d(getFieldToBestCluster(), new Rotation2d()));
-
-        // Record cycle time
         LoggedTracer.record("Vision");
     }
 
@@ -219,36 +192,6 @@ public class Vision extends SubsystemBase {
         this.desiredAprilTagGoal = goal;
     }
 
-    /**
-     * Gets the field-relative translation to the best cluster of fuel from the fuel camera.
-     * Clusters are formed by grouping fuel that are within a certain distance of each other.
-     * The best cluster has the most fuel
-     * 
-     * @return Translation2d representing the field-relative translation to the best cluster of fuel, or the robot's current translation if no fuel is detected.
-     */
-    public Translation2d getFieldToBestCluster() {
-        ObjectDetectionIO fuelCameraIO = objectDetectionIOMap.get(CameraName.FUEL_CAMERA);
-        ObjectDetectionInputsAutoLogged fuelCameraInputs = objectDetectionInputsMap.get(CameraName.FUEL_CAMERA);
-
-        if (fuelCameraIO == null || fuelCameraInputs == null || !fuelCameraInputs.hasTargets) {
-            return robotPoseSupplier.get().getTranslation();
-        }
-
-        TrackedObject[] fuel = fuelCameraInputs.trackedObjects;
-        List<List<TrackedObject>> clusters = getFuelClusters(fuel);
-
-        List<TrackedObject> bestCluster = new ArrayList<>();
-        // double bestClusterDistance = Double.MAX_VALUE;
-
-        for (List<TrackedObject> cluster : clusters) {
-            if (cluster.size() > bestCluster.size()) {
-                bestCluster = cluster;
-                // bestClusterDistance = getRobotToFuel(cluster.get(0)).getNorm();
-            }
-        }
-
-        return bestCluster.size() > 0 ? getFieldToFuel(bestCluster.get(0)) : robotPoseSupplier.get().getTranslation();
-    }
 
     /************************************ PRIVATE METHODS ************************************/
 
@@ -299,6 +242,7 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/AprilTag Detection/" + aprilTagIO.getCameraName().name() + "/Pose Observation/Used April Tags", poseObservation.usedAprilTags());
     }
     
+    
     /**
      * Calculates the robot to turret camera offset based on the turret angle and the camera name.
      * Gets the turret to turret camera offset from the robot's vision hardware, rotates it based on the turret angle.
@@ -318,94 +262,5 @@ public class Vision extends SubsystemBase {
         Rotation3d turretRotation = new Rotation3d(0, 0, turretAngleRadians);
 
         return VisionUtils.calculateRobotToTurretCameraOffset(robotToTurretBaseOffset, turretToTurretCameraOffset, turretRotation);
-    }
-
-    /**
-     * Calculates the robot-relative translation to a fuel cell based on the fuel's pitch and yaw from the fuel camera.
-     * @param fuel The TrackedObject representing the fuel cell detected by the fuel camera for which to calculate the robot-relative translation
-     * @return Translation2d representing the robot-relative translation to the fuel cell
-     */
-    private Translation2d getRobotToFuel(TrackedObject fuel) {
-        return VisionUtils.getRobotToObject(
-            VisionConstants.robotToFixedCameraOffsets.get(CameraName.FUEL_CAMERA), 
-            VisionConstants.FUEL_DIAMETER/2, 
-            fuel.pitch(), 
-            fuel.yaw()
-        );
-    }
-
-    /**
-     * Calculates the field-relative translation to a fuel cell based on the fuel's pitch and yaw from the fuel camera and the robot's current pose.
-     * @param fuel The TrackedObject representing the fuel cell detected by the fuel camera for which to calculate the field-relative translation
-     * @return Translation2d representing the field-relative translation to the fuel cell
-     */
-    private Translation2d getFieldToFuel(TrackedObject fuel) {
-        return VisionUtils.getFieldToObject(
-            robotPoseSupplier.get(), 
-            VisionConstants.robotToFixedCameraOffsets.get(CameraName.FUEL_CAMERA), 
-            VisionConstants.FUEL_DIAMETER/2, 
-            fuel.pitch(), 
-            fuel.yaw()
-        );
-    }
-
-    /**
-     * Calculates the distance between two fuel cells based on their field-relative translations.
-     * @param fuelA The first TrackedObject representing a fuel cell detected by the fuel camera
-     * @param fuelB The second TrackedObject representing a fuel cell detected by the fuel camera
-     * @return double representing the distance between the two fuel cells in meters
-     */
-    private double getDistanceBetweenFuel(TrackedObject fuelA, TrackedObject fuelB) {
-        Translation2d fieldToFuelA = getFieldToFuel(fuelA);
-        Translation2d fieldToFuelB = getFieldToFuel(fuelB);
-
-        return fieldToFuelA.getDistance(fieldToFuelB);
-    }
-
-    /**
-     * Groups fuel cells detected by the fuel camera into clusters based on their distance from each other.
-     * @param fuel The array of TrackedObjects representing fuel cells detected by the fuel camera
-     * @return List of Lists of TrackedObjects representing a list of clusters of fuel cells
-     */
-    private List<List<TrackedObject>> getFuelClusters(TrackedObject[] fuel) {
-        List<List<TrackedObject>> clusters = new ArrayList<>();
-        int[] clusterOfFuel = new int[fuel.length];
-
-        int clusterCount = 0;
-
-        for (int i = 0; i < fuel.length; i++) {
-            if (clusterOfFuel[i] == 0) {
-                clusterCount++;
-                clusterOfFuel[i] = clusterCount;
-
-                clusters.add(new LinkedList<>());
-                clusters.get(clusterCount - 1).add(fuel[i]);
-            }
-
-            for (int j = 0; j < fuel.length; j++) {
-                if (j != i && 
-                    clusterOfFuel[j] == 0 && 
-                    getDistanceBetweenFuel(fuel[i], fuel[j]) < VisionConstants.FUEL_SPACING_IN_CLUSTER
-                ) {
-                    clusterOfFuel[j] = clusterCount;
-                    clusters.get(clusterCount - 1).add(fuel[j]);
-                }
-            }
-        }
-
-        return clusters;
-    }
-
-    private void logClusterPoses(TrackedObject[] fuel) {
-        List<List<TrackedObject>> clusters = getFuelClusters(fuel);
-
-        Pose2d[][] fuelPoses = clusters.stream()
-            .map(
-                cluster -> cluster.stream()
-                    .map(fuelInCluster -> new Pose2d(getFieldToFuel(fuelInCluster), new Rotation2d()))
-                    .toArray(Pose2d[]::new)
-            ).toArray(Pose2d[][]::new);
-        
-        Logger.recordOutput("Vision/Object Detection/Cluster Poses", fuelPoses);
     }
 }

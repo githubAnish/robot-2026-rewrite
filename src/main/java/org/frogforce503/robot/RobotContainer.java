@@ -69,8 +69,10 @@ import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonVision;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
+import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonVision;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
@@ -173,32 +175,31 @@ public class RobotContainer {
                             visionEstimateConsumer,
                             drive::getPose,
                             turret::getRobotRelativeAngleRad,
-                            new AprilTagIO[] {},
-                            new ObjectDetectionIO[] {});
+                            new AprilTagIO[] {
+                                new AprilTagIOPhotonVision(
+                                    CameraName.TURRET_CAMERA
+                                ),
+                                new AprilTagIOPhotonVision(
+                                    CameraName.LEFT_CAMERA
+                                ),
+                                new AprilTagIOPhotonVision(
+                                    CameraName.RIGHT_CAMERA
+                                ),
+                                new AprilTagIOPhotonVision(
+                                    CameraName.BACK_CAMERA
+                                ),
+                            },
+                            new ObjectDetectionIO[] {
+                                new ObjectDetectionIOPhotonVision(
+                                    CameraName.FUEL_CAMERA
+                                )
+                            });
                 }
                 case PracticeBot -> {
-                    drive = new Drive(new DriveIOPhoenix());
-
-                    intakePivot = new IntakePivot(new IntakePivotIOSpark());
-                    intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-                    indexer = new Indexer(new IndexerIOSpark());
-                    feeder = new Feeder(new FeederIOSpark());
-                    turret = new Turret(new TurretIOSpark(), drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-                    flywheels = new Flywheels(new FlywheelsIOSpark());
-                    hood = new Hood(new HoodIOSpark());
-
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
-                    climberHook = new ClimberHook(new ClimberHookIOSpark());
                     
-                    leds = new Leds(new LedsIOCANdle());
-
-                    vision =
-                        new Vision(
-                            visionEstimateConsumer,
-                            drive::getPose,
-                            turret::getRobotRelativeAngleRad,
-                            new AprilTagIO[] {},
-                            new ObjectDetectionIO[] {});
+                }
+                case ProgrammingBot -> {
+                    
                 }
                 case SimBot -> {
                     drive = new Drive(new DriveIOMapleSim());
@@ -234,6 +235,10 @@ public class RobotContainer {
                                     CameraName.RIGHT_CAMERA,
                                     visionViz
                                 ),
+                                new AprilTagIOPhotonSim(
+                                    CameraName.BACK_CAMERA,
+                                    visionViz
+                                ),
                             },
                             new ObjectDetectionIO[] {
                                 new ObjectDetectionIOPhotonSim(
@@ -241,30 +246,6 @@ public class RobotContainer {
                                     visionViz
                                 )
                             });
-                }
-                case ProgrammingBot -> {
-                    drive = new Drive(new DriveIOPhoenix());
-
-                    intakePivot = new IntakePivot(new IntakePivotIO() {});
-                    intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-                    indexer = new Indexer(new IndexerIO() {});
-                    feeder = new Feeder(new FeederIO() {});
-                    turret = new Turret(new TurretIO() {}, drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-                    flywheels = new Flywheels(new FlywheelsIO() {});
-                    hood = new Hood(new HoodIO() {});
-
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
-                    climberHook = new ClimberHook(new ClimberHookIO() {});
-                    
-                    leds = new Leds(new LedsIO() {});
-
-                    vision =
-                        new Vision(
-                            visionEstimateConsumer,
-                            drive::getPose,
-                            turret::getRobotRelativeAngleRad,
-                            new AprilTagIO[] {},
-                            new ObjectDetectionIO[] {});
                 }
             }
         }

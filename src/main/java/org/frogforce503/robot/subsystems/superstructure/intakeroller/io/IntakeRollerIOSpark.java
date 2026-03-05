@@ -33,7 +33,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
     
     public IntakeRollerIOSpark() {
         // Initialize motor
-        motor = new SparkMax(IntakeRollerConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(IntakeRollerConstants.motorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
@@ -45,8 +45,8 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
 
         config
             .encoder
-                .positionConversionFactor((1 / IntakeRollerConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / IntakeRollerConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / IntakeRollerConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / IntakeRollerConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

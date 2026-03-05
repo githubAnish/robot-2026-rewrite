@@ -9,13 +9,10 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.controls.ControlRequest;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import lombok.Setter;
 
 public class Leds extends SubsystemBase {
     private final LedsIO io;
     private final LedsIOInputsAutoLogged inputs = new LedsIOInputsAutoLogged();
-
-    @Setter private boolean cameraDisconnected = false;
 
     public Leds(LedsIO io) {
         this.io = io;
@@ -28,10 +25,6 @@ public class Leds extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Leds", inputs);
 
-        if (cameraDisconnected) {
-            io.runPattern(LedsConstants.CAMERA_DISCONNECTED);
-        }
-
         // Record cycle time
         LoggedTracer.record("Leds");
     }
@@ -43,10 +36,10 @@ public class Leds extends SubsystemBase {
 
     /** Runs the specified LED pattern. See {@link LedsConstants} for available patterns. */
     public void runPattern(ControlRequest pattern) {
-        if (cameraDisconnected) {
-            return;
-        }
-
         io.runPattern(pattern);
+    }
+
+    public void cameraDisconnected() {
+        io.runPattern(LedsConstants.CAMERA_DISCONNECTED);
     }
 }

@@ -23,7 +23,7 @@ public class IndexerIOSim extends IndexerIOSpark {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new FlywheelSim(
-                LinearSystemId.createFlywheelSystem(motorModel, moi, IndexerConstants.mechanismRatio),
+                LinearSystemId.createFlywheelSystem(motorModel, moi, IndexerConstants.motorMechanismRatio),
                 motorModel);
 
         // Sync physics and motor sim positions

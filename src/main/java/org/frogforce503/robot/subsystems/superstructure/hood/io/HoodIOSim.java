@@ -25,7 +25,7 @@ public class HoodIOSim extends HoodIOSpark {
         physicsSim =
             new SingleJointedArmSim(
                 motorModel,
-                HoodConstants.mechanismRatio,
+                HoodConstants.motorMechanismRatio,
                 moi,
                 length,
                 HoodConstants.minAngle,

@@ -33,20 +33,20 @@ public class IndexerIOSpark implements IndexerIO {
     
     public IndexerIOSpark() {
         // Initialize motor
-        motor = new SparkMax(IndexerConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(IndexerConstants.motorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(IndexerConstants.inverted);
+        config.inverted(IndexerConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(IndexerConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .encoder
-                .positionConversionFactor((1 / IndexerConstants.mechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / IndexerConstants.mechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / IndexerConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / IndexerConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 

@@ -69,6 +69,7 @@ public class GameViz {
         visionViz.update(drive.getPose());
         
         superstructureViz.update(
+            drivePose3d,
             turret.getRobotRelativeAngleRad(),
             hood.getAngleRad(),
             intakePivot.getAngleRad(),

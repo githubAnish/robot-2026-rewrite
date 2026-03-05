@@ -40,7 +40,7 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
 
     public ClimberDeployIOSpark() {
         // Initialize motor
-        motor = new SparkMax(ClimberDeployConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(ClimberDeployConstants.motorId, MotorType.kBrushless);
         encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 
@@ -50,7 +50,7 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
         limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
-        config.inverted(ClimberDeployConstants.inverted);
+        config.inverted(ClimberDeployConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(ClimberDeployConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
@@ -58,10 +58,10 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
         config
             .absoluteEncoder
                 .inverted(ClimberDeployConstants.absoluteEncoderInverted)
-                .zeroOffset(ClimberDeployConstants.zeroOffset)
-                .positionConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
-                .velocityConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .zeroCentered(true)
+                .zeroOffset(ClimberDeployConstants.absoluteEncoderZeroOffset)
+                .positionConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians
+                .velocityConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();
 

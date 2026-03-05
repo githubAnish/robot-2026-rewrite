@@ -74,7 +74,7 @@ public class IntakeFuelFromGround extends Command {
     public void execute() {
         // Get inputs
         Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
-        Translation2d target = vision.getFieldToBestCluster();
+        Translation2d target = new Translation2d(); // Use object detection for vision.getFieldToBestCluster();
 
         // Calculate default teleop velocities
         Translation2d driverLinearVelocity = xboxController.getLinearVelocityFromJoysticks();

@@ -7,17 +7,19 @@ import edu.wpi.first.math.util.Units;
 
 public class FeederConstants {
     // Hardware / Configuration
-    public static final int id = 5;
-    public static final double mechanismRatio = 1.0; // from CAD
+    public static final int motorId = 5;
 
-    public static final boolean inverted = false;
+    public static final double motorMechanismRatio = 1.0; // from CAD
+
+    public static final boolean motorInverted = false;
+
     public static final int statorCurrentLimit = 80;
     
     public static final PIDConfig kPID = new PIDConfig();
     public static final FFConfig kFF = new FFConfig();
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0); // TODO may change based on real robot
+    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double EJECT_FROM_INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(-1500);

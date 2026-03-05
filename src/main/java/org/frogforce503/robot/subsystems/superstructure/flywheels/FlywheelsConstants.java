@@ -9,20 +9,22 @@ public class FlywheelsConstants {
     // Hardware / Configuration
     public static final int leaderId = 9;
     public static final int followerId = 8;
-    public static final double mechanismRatio = 0.75; // from CAD
+
+    public static final double motorMechanismRatio = 0.75; // from CAD
 
     public static final boolean leaderInverted = true;
     public static final boolean followerInverted = true;
+
     public static final int statorCurrentLimit = 80;
     
     public static final PIDConfig kPID = new PIDConfig();
     public static final FFConfig kFF = new FFConfig();
     public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(0);
 
-    public static final double kSimRadiusMeters = Units.inchesToMeters(1.5);
+    public static final double kRadiusMeters = Units.inchesToMeters(1.5);
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(50.0); // TODO Flywheel speed has to be extremely accurate for consistent shot
+    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(50.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double IDLE = Units.rotationsPerMinuteToRadiansPerSecond(1500);

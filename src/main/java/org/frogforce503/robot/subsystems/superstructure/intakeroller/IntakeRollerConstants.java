@@ -7,10 +7,12 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakeRollerConstants {
     // Hardware / Configuration
-    public static final int id = 3;
-    public static final double mechanismRatio = 1.78; // from CAD
+    public static final int motorId = 3;
+
+    public static final double motorMechanismRatio = 1.78; // from CAD
 
     public static final boolean motorInverted = true;
+    
     public static final int statorCurrentLimit = 60;
     
     public static final PIDConfig kPID = new PIDConfig();

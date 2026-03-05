@@ -21,7 +21,7 @@ public class TurretIOSim extends TurretIOSpark {
 
     public TurretIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
-        physicsSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, TurretConstants.mechanismRatio), motorModel);
+        physicsSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(motorModel, moi, TurretConstants.motorMechanismRatio), motorModel);
 
         // Sync physics and motor sim positions
         motorSim.setPosition(TurretConstants.START);

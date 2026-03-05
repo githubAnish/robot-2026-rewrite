@@ -7,11 +7,14 @@ import edu.wpi.first.math.util.Units;
 
 public final class ClimberHookConstants {
     // Hardware / Configuration
-    public static final int id = 11;
+    public static final int motorId = 11;
+    public static final int limitSwitchId = 1;
+
     public static final double mechanismRatio = 27.0;
     public static final double sprocketPitchDiameter = Units.inchesToMeters(2.0);
 
-    public static final boolean inverted = false;
+    public static final boolean motorInverted = false;
+    
     public static final int statorCurrentLimit = 60;
 
     public static final PIDConfig kPID = new PIDConfig();
@@ -20,8 +23,6 @@ public final class ClimberHookConstants {
     
     public static final double minHeight = Units.inchesToMeters(-10);
     public static final double maxHeight = Units.inchesToMeters(10);
-
-    public static final int limitSwitchId = 1;
 
     // Setpoints
     public static final double kTolerance = Units.inchesToMeters(0.25);

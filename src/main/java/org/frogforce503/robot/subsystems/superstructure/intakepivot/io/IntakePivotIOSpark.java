@@ -33,7 +33,7 @@ public class IntakePivotIOSpark implements IntakePivotIO {
 
     public IntakePivotIOSpark() {
         // Initialize motor
-        motor = new SparkMax(IntakePivotConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(IntakePivotConstants.motorId, MotorType.kBrushless);
         encoder = motor.getAbsoluteEncoder();
         controller = motor.getClosedLoopController();
 

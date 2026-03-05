@@ -40,7 +40,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
 
     public ClimberHookIOSpark() {
         // Initialize motor
-        motor = new SparkMax(ClimberHookConstants.id, MotorType.kBrushless);
+        motor = new SparkMax(ClimberHookConstants.motorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
         controller = motor.getClosedLoopController();
 
@@ -50,7 +50,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
         limitSwitchFilter.add(limitSwitch);
 
         // Configure motor
-        config.inverted(ClimberHookConstants.inverted);
+        config.inverted(ClimberHookConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(ClimberHookConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
@@ -74,7 +74,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
         // Apply configuration
         SparkUtil.configure(motor, config, true);
 
-        resetEncoder();
+        setRelativePosition(0.0);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
     }
 
     @Override
-    public void resetEncoder() {
-        encoder.setPosition(0.0);
+    public void setRelativePosition(double positionMeters) {
+        encoder.setPosition(positionMeters);
     }
 }

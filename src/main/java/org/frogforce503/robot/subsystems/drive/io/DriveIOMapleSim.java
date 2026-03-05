@@ -1,7 +1,7 @@
 package org.frogforce503.robot.subsystems.drive.io;
 
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
@@ -33,7 +33,7 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
         drivetrain =
             new MapleSimSwerveDrivetrain(
                 Seconds.of(kSimLoopPeriod),
-                Pounds.of(DriveConstants.massLbs),
+                Kilograms.of(DriveConstants.mass),
                 Meters.of(DriveConstants.bumperLength),
                 Meters.of(DriveConstants.bumperWidth),
                 DCMotor.getKrakenX60Foc(1),
