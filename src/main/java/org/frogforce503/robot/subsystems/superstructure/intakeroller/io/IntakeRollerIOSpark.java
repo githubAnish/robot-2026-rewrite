@@ -6,7 +6,6 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -20,7 +19,7 @@ import lombok.Getter;
 
 public class IntakeRollerIOSpark implements IntakeRollerIO {
     // Hardware
-    @Getter private final SparkBase motor;
+    @Getter private final SparkMax motor;
     private final RelativeEncoder encoder;
 
     // Control
@@ -39,7 +38,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(IntakeRollerConstants.inverted);
+        config.inverted(IntakeRollerConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(IntakeRollerConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);

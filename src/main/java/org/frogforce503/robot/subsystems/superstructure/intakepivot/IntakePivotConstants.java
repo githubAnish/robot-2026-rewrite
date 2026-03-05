@@ -8,22 +8,23 @@ import edu.wpi.first.math.util.Units;
 
 public class IntakePivotConstants {
     // Hardware / Configuration
-    public static final int id = 0;
-    public static final double mechanismRatio = 1;
+    public static final int id = 2;
+    public static final double mechanismRatio = 20.0;
 
-    public static final boolean inverted = false;
+    public static final boolean motorInverted = false;
+    public static final boolean absoluteEncoderInverted = true;
     public static final int statorCurrentLimit = 80;
-    public static final double zeroOffset = 0.0;
+    public static final double absoluteEncoderZeroOffset = 0.787;
 
     public static final PIDConfig kPID = new PIDConfig();
     public static final FFConfig kFF = new FFConfig();
     public static final Constraints kConstraints = new Constraints(0, 0);
 
-    public static final double minAngle = Units.degreesToRadians(0); // TODO Can't say main linkage bar is 0 deg, but can change once block CAD / real CAD comes out
-    public static final double maxAngle = Units.degreesToRadians(90); // TODO basically when the 4-bar intake is stowed, the main linkage bar is at 90 deg
+    public static final double minAngle = Units.degreesToRadians(-5.0);
+    public static final double maxAngle = Units.degreesToRadians(90);
 
     // Setpoints
-    public static final double kTolerance = Units.degreesToRadians(3.0); // TODO pivot doesn't need to be as accurate
+    public static final double kTolerance = Units.degreesToRadians(3.0);
 
     public static final double START = maxAngle;
 

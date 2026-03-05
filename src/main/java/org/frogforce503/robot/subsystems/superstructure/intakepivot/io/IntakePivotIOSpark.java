@@ -38,14 +38,15 @@ public class IntakePivotIOSpark implements IntakePivotIO {
         controller = motor.getClosedLoopController();
 
         // Configure motor
-        config.inverted(IntakePivotConstants.inverted);
+        config.inverted(IntakePivotConstants.motorInverted);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(IntakePivotConstants.statorCurrentLimit);
         config.voltageCompensation(12.0);
 
         config
             .absoluteEncoder
-                .zeroOffset(IntakePivotConstants.zeroOffset)
+                .inverted(IntakePivotConstants.absoluteEncoderInverted)
+                .zeroOffset(IntakePivotConstants.absoluteEncoderZeroOffset)
                 .positionConversionFactor(2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .velocityConversionFactor(2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of intake pivot
                 .zeroCentered(true)

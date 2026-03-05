@@ -17,8 +17,8 @@ public class IntakePivotIOSim extends IntakePivotIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double length = Units.inchesToMeters(14.75); // TODO measure the length from the pivot point to the center of mass of the 4-bar intake
-    private final double moi = 0.62; // kg * m^2, TODO measure the moi from the pivot point
+    private final double length = Units.inchesToMeters(13.0); // from CAD
+    private final double moi = 0.311214153; // from CAD
 
     public IntakePivotIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
