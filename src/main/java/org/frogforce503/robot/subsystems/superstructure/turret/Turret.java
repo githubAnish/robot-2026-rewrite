@@ -123,7 +123,7 @@ public class Turret extends FFSubsystemBase {
 
     /** Gets the turret's robot-relative angle. */
     public double getRobotRelativeAngleRad() {
-        return inputs.positionRad + TurretConstants.relativeEncoderZeroOffset;
+        return inputs.positionRad;
     }
 
     /** Gets the turret's field-relative angle. */
@@ -163,7 +163,7 @@ public class Turret extends FFSubsystemBase {
     /** Sets the turret's robot-relative angle and robot-relative velocity. */
     public void setRobotRelativeAngle(double angleRad, double velocityRadPerSec) {
         this.shouldRunProfile = true;
-        this.targetAngleRad = angleRad - TurretConstants.relativeEncoderZeroOffset;
+        this.targetAngleRad = angleRad;
         this.targetVelocityRadPerSec = velocityRadPerSec;
     }
 

@@ -44,7 +44,7 @@ public final class TurretConstants {
     static {
         switch (Constants.getRobot()) {
             case SimBot -> {
-                relativeEncoderZeroOffset = 0.0;
+                relativeEncoderZeroOffset = Units.degreesToRadians(90);
                 absoluteEncoderZeroOffset = 0.0;
             }
             default -> { // Use comp bot params
