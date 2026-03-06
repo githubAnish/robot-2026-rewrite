@@ -241,6 +241,7 @@ public class ShotCalculator {
         Logger.recordOutput("ShotCalculator/TargetTranslation", target);
         Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
         Logger.recordOutput("ShotCalculator/TurretToTargetDistance", lookaheadTurretToTargetDistance);
+        Logger.recordOutput("ShotCalculator/LatestInfo", latestInfo);
 
         return latestInfo;
     }

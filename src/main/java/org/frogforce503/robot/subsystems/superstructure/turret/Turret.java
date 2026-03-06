@@ -180,4 +180,9 @@ public class Turret extends FFSubsystemBase {
     public boolean isAtAngle(double angleRad, double tolerance) {
         return MathUtil.isNear(angleRad, getRobotRelativeAngleRad(), tolerance);
     }
+
+    /** Checks if an angle is within tolerance of the turret's field-relative angle. */
+    public boolean isAtAngle(Rotation2d angle, double tolerance) {
+        return MathUtil.isNear(angle.getRadians(), getFieldRelativeAngle().getRadians(), tolerance);
+    }
 }

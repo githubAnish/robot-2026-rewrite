@@ -40,7 +40,7 @@ public class TuneFlywheels extends Command {
         this.kV = new LoggedTunableNumber("Flywheels/kV", initialFF.kV());
         this.kA = new LoggedTunableNumber("Flywheels/kA", initialFF.kA());
 
-        this.maxAccelerationRpmPerSec = new LoggedTunableNumber("Flywheels/MaxVelocityRpmPerSec", Units.radiansPerSecondToRotationsPerMinute(initialRateLimit));
+        this.maxAccelerationRpmPerSec = new LoggedTunableNumber("Flywheels/MaxAccelerationRpmPerSec", Units.radiansPerSecondToRotationsPerMinute(initialRateLimit));
 
         this.setpointVelocityRpm = new LoggedTunableNumber("Flywheels/SetpointRpm", Units.radiansPerSecondToRotationsPerMinute(FlywheelsConstants.START));
 

@@ -17,9 +17,9 @@ public class FlywheelsConstants {
 
     public static final int statorCurrentLimit = 80;
     
-    public static final PIDConfig kPID = new PIDConfig();
-    public static final FFConfig kFF = new FFConfig();
-    public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(0);
+    public static final PIDConfig kPID = new PIDConfig(0.005, 0, 0);
+    public static final FFConfig kFF = new FFConfig(0, 0, 0.014, 0);
+    public static final double kRateLimit = Units.rotationsPerMinuteToRadiansPerSecond(5000);
 
     public static final double kRadiusMeters = Units.inchesToMeters(1.5);
 

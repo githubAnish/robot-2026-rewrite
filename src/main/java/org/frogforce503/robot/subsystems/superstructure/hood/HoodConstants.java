@@ -24,7 +24,7 @@ public final class HoodConstants {
 
     public static final PIDConfig kPID = new PIDConfig();
     public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(0, 0);
+    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(0), Units.degreesToRadians(0));
     
     public static final double minAngle = Units.degreesToRadians(0);
     public static final double maxAngle = Units.degreesToRadians(37);

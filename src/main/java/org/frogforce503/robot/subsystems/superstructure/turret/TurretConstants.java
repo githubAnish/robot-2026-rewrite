@@ -24,9 +24,9 @@ public final class TurretConstants {
     // public static final double relativeEncoderZeroOffsetRad = Units.degreesToRadians(90);
     public static final double absoluteEncoderZeroOffset = 0.1788;
 
-    public static final PIDConfig kPID = new PIDConfig();
-    public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(0, 0);
+    public static final PIDConfig kPID = new PIDConfig(8, 0, 0.2);
+    public static final FFConfig kFF = new FFConfig(0, 0, 8, 0);
+    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(720));
     
     public static final double minAngle = Units.degreesToRadians(-132.0);
     public static final double maxAngle = Units.degreesToRadians(200.0);

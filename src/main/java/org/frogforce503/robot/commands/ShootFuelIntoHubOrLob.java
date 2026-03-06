@@ -19,6 +19,7 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -63,6 +64,8 @@ public class ShootFuelIntoHubOrLob extends Command {
         final boolean isHubShot = FieldConstants.inAllianceZone(drive.getPose()); // For checking whether to compute hub or lob shot info
 
         // Define shot params
+        Rotation2d turretFieldRelativeAngle = Rotation2d.kZero;
+        double hoodAngleRad = 0.0;
         double flywheelsVelocityRadPerSec = 0.0;
         boolean isFeasibleShot = false;
 
@@ -83,6 +86,8 @@ public class ShootFuelIntoHubOrLob extends Command {
                             drive.getRobotVelocity(),
                             drive.getFieldVelocity());
 
+                turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
+                hoodAngleRad = shotInfo.hoodAngleRad();
                 flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
                 isFeasibleShot =
                     isHubShot
@@ -91,16 +96,22 @@ public class ShootFuelIntoHubOrLob extends Command {
                 break;
 
             case BATTER:
+                turretFieldRelativeAngle = TurretConstants.BATTER_FIELD_RELATIVE;
+                hoodAngleRad = HoodConstants.BATTER;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
                 isFeasibleShot = true;
                 break;
 
             case TRENCH:
+                turretFieldRelativeAngle = TurretConstants.TRENCH_FIELD_RELATIVE;
+                hoodAngleRad = HoodConstants.TRENCH;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
                 isFeasibleShot = true;
                 break;
 
             case DEPOT:
+                turretFieldRelativeAngle = TurretConstants.DEPOT_FIELD_RELATIVE;
+                hoodAngleRad = HoodConstants.DEPOT;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.DEPOT;
                 isFeasibleShot = true;
                 break;
@@ -111,11 +122,11 @@ public class ShootFuelIntoHubOrLob extends Command {
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
 
         // Check if subsystems at setpoint
-        boolean turretAtGoal = turret.isAtAngle(turret.getRobotRelativeAngleRad(), TurretConstants.kShootOnMoveTolerance);
+        boolean turretAtGoal = turret.isAtAngle(turretFieldRelativeAngle, TurretConstants.kShootOnMoveTolerance);
+        boolean hoodAtGoal = hood.isAtAngle(hoodAngleRad, HoodConstants.kShootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(flywheelsVelocityRadPerSec, FlywheelsConstants.kTolerance);
-        boolean hoodAtGoal = hood.isAtAngle(hood.getAngleRad(), HoodConstants.kShootOnMoveTolerance);
 
-        isFeasibleShot = isFeasibleShot && turretAtGoal && flywheelsAtGoal && hoodAtGoal;
+        isFeasibleShot = isFeasibleShot && turretAtGoal && hoodAtGoal && flywheelsAtGoal;
 
         ShotCalculator.getInstance().setFeasibleShot(isFeasibleShot);
 
@@ -136,6 +147,9 @@ public class ShootFuelIntoHubOrLob extends Command {
         
         // Log data
         Logger.recordOutput("ShootFuelIntoHubOrLob/Is Hub Shot?", isHubShot);
+        Logger.recordOutput("ShootFuelIntoHubOrLob/Turret At Goal?", turretAtGoal);
+        Logger.recordOutput("ShootFuelIntoHubOrLob/Hood At Goal?", hoodAtGoal);
+        Logger.recordOutput("ShootFuelIntoHubOrLob/Flywheels At Goal?", flywheelsAtGoal);
     }
 
     @Override
