@@ -32,9 +32,9 @@ public final class DriveConstants {
     public static final double maxOmega;
 
     public static final double mass = Units.lbsToKilograms(87.4200862); // from CAD
-    public static final double wheelCOF = 2.2; // from comp bot
-    public static final double bumperLength = Units.inchesToMeters(35);
-    public static final double bumperWidth = Units.inchesToMeters(30);
+    public static final double wheelCOF = 1.9;
+    public static final double bumperLength = Units.inchesToMeters(30);
+    public static final double bumperWidth = Units.inchesToMeters(35);
 
     // Swerve Control
     public static final SwerveDriveKinematics kinematics;

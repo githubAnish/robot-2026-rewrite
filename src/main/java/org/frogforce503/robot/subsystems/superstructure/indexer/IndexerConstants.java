@@ -15,11 +15,11 @@ public class IndexerConstants {
     
     public static final int statorCurrentLimit = 80;
     
-    public static final PIDConfig kPID = new PIDConfig();
-    public static final FFConfig kFF = new FFConfig();
+    public static final PIDConfig kPID = new PIDConfig(0.00001, 0, 0);
+    public static final FFConfig kFF = new FFConfig(0, 0, 0.073, 0);
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0); // TODO may change based on real robot
+    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
 

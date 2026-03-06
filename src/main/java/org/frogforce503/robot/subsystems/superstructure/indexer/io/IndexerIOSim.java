@@ -17,7 +17,7 @@ public class IndexerIOSim extends IndexerIOSpark {
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.0411294891315; // from CAD
+    private final double moi = 0.00070467243776; // from CAD
 
     public IndexerIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);

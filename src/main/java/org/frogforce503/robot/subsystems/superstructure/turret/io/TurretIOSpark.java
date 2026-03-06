@@ -73,14 +73,12 @@ public class TurretIOSpark implements TurretIO {
 
         // Apply configuration
         SparkUtil.configure(motor, config, true);
-
-        setRelativePosition(absoluteEncoder.getPosition());
     }
 
     @Override
     public void updateInputs(TurretIOInputs inputs) {
         inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
-        inputs.positionRad = encoder.getPosition() + TurretConstants.relativeEncoderZeroOffset;
+        inputs.positionRad = encoder.getPosition();
         inputs.absolutePositionRad = absoluteEncoder.getPosition();
         inputs.velocityRadPerSec = encoder.getVelocity();
         inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
@@ -100,7 +98,7 @@ public class TurretIOSpark implements TurretIO {
 
     @Override
     public void runPosition(double positionRad, double feedforward) {
-        controller.setSetpoint(positionRad - TurretConstants.relativeEncoderZeroOffset, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
+        controller.setSetpoint(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
     }
 
     @Override

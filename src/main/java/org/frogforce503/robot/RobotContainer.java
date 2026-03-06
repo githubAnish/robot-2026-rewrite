@@ -16,6 +16,11 @@ import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.commands.tuning.TuneFeeder;
+import org.frogforce503.robot.commands.tuning.TuneIndexer;
+import org.frogforce503.robot.commands.tuning.TuneIntakePivot;
+import org.frogforce503.robot.commands.tuning.TuneIntakeRoller;
+import org.frogforce503.robot.commands.tuning.TuneTurret;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
@@ -84,6 +89,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import lombok.experimental.ExtensionMethod;
 
@@ -283,7 +289,7 @@ public class RobotContainer {
         // Create sim requirements
         gameViz = new GameViz(drive, turret, hood, intakePivot, climberDeploy, visionViz);
 
-        configureBindings();
+        // configureBindings();
     }
 
     private void configureBindings() {
@@ -346,7 +352,7 @@ public class RobotContainer {
     private void bindClimbing(Trigger advanceTrigger) {
         Command climbSequence =
             new ClimbSequence(
-                intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook, advanceTrigger);
+                intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook, advanceTrigger, gameViz::setRobotHeightMeters);
 
         advanceTrigger.onTrue(
             climbSequence
@@ -409,5 +415,10 @@ public class RobotContainer {
         //         new TuneShot(drive, turret, hood, flywheels, gameViz.getIntakeSimulation(), false)
         //     ).withName("RobotContainer Test Cmd")
         // );
+        RobotModeTriggers.teleop().onTrue(
+            Commands.sequence(
+                new TuneTurret(turret)
+            ).withName("RobotContainer Test Cmd")
+        );
     }
 }

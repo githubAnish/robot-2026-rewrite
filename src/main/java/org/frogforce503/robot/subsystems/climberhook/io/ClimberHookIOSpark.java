@@ -74,7 +74,7 @@ public class ClimberHookIOSpark implements ClimberHookIO {
         // Apply configuration
         SparkUtil.configure(motor, config, true);
 
-        setRelativePosition(0.0);
+        setRelativePosition(ClimberHookConstants.START);
     }
 
     @Override

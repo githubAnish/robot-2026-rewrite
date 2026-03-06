@@ -21,7 +21,7 @@ public final class TurretConstants {
 
     public static final int statorCurrentLimit = 35;
 
-    public static final double relativeEncoderZeroOffset = Units.degreesToRadians(90);
+    // public static final double relativeEncoderZeroOffsetRad = Units.degreesToRadians(90);
     public static final double absoluteEncoderZeroOffset = 0.1788;
 
     public static final PIDConfig kPID = new PIDConfig();

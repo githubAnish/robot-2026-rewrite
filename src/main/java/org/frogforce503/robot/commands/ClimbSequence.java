@@ -1,6 +1,7 @@
 package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleConsumer;
 
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
@@ -16,6 +17,7 @@ import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimbSequence extends Command {
@@ -32,6 +34,8 @@ public class ClimbSequence extends Command {
     private final ClimberHook climberHook;
 
     private final BooleanSupplier advanceButton;
+
+    private final DoubleConsumer simHeightSetter;
 
     // State
     private ClimbState currentState;
@@ -59,7 +63,8 @@ public class ClimbSequence extends Command {
         Flywheels flywheels,
         ClimberDeploy climberDeploy,
         ClimberHook climberHook,
-        BooleanSupplier advanceButton
+        BooleanSupplier advanceButton,
+        DoubleConsumer simHeightSetter
     ) {
         this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
@@ -73,6 +78,8 @@ public class ClimbSequence extends Command {
         this.climberHook = climberHook;
 
         this.advanceButton = advanceButton;
+
+        this.simHeightSetter = simHeightSetter;
 
         addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook);
     }
@@ -107,6 +114,9 @@ public class ClimbSequence extends Command {
                 break;
 
             case RAISE_FOR_L1:
+                if (RobotBase.isSimulation()) {
+                    simHeightSetter.accept(1);
+                }
 
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.STOW_AT_L1;

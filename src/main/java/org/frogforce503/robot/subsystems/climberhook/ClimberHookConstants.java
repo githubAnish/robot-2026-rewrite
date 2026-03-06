@@ -11,7 +11,7 @@ public final class ClimberHookConstants {
     public static final int limitSwitchId = 1;
 
     public static final double mechanismRatio = 27.0;
-    public static final double sprocketPitchDiameter = Units.inchesToMeters(2.0);
+    public static final double sprocketPitchDiameter = Units.inchesToMeters(1.89); // from JVN calc
 
     public static final boolean motorInverted = false;
     

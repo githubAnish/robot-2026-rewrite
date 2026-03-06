@@ -15,8 +15,8 @@ public class FeederConstants {
 
     public static final int statorCurrentLimit = 80;
     
-    public static final PIDConfig kPID = new PIDConfig();
-    public static final FFConfig kFF = new FFConfig();
+    public static final PIDConfig kPID = new PIDConfig(0.001, 0, 0);
+    public static final FFConfig kFF = new FFConfig(0, 0, 0.0225, 0);
 
     // Setpoints
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);

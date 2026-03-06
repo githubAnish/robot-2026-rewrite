@@ -17,7 +17,7 @@ public class IntakeRollerIOSim extends IntakeRollerIOSpark {
     
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double moi = 0.0223591592; // from CAD
+    private final double moi = 0.00007543644656; // from CAD
 
     public IntakeRollerIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
