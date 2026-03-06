@@ -72,7 +72,7 @@ public class ShotCalculator {
 
     public ShotCalculator() {
         // Configure hub shotmaps (tuned in sim)
-        hubHoodAngleMap.put(1.263, Rotation2d.fromDegrees(90 - 80));
+        hubHoodAngleMap.put(1.205, Rotation2d.fromDegrees(90 - 80));
         hubHoodAngleMap.put(2.056, Rotation2d.fromDegrees(90 - 70));
         hubHoodAngleMap.put(2.585, Rotation2d.fromDegrees(90 - 64));
         hubHoodAngleMap.put(2.905, Rotation2d.fromDegrees(90 - 60));

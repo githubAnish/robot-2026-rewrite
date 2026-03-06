@@ -62,7 +62,6 @@ public class TuneShot extends Command {
         this.tuningHubShot = tuningHubShot;
 
         addRequirements(turret, hood, flywheels);
-        withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // Makes sure normal turret tracking & regular shooting cmds don't schedule themselves
     }
 
     @Override
@@ -114,7 +113,8 @@ public class TuneShot extends Command {
                     tuningHubShot
                         ? FieldConstants.Hub.getHubShotPose()
                         : new Translation3d(FieldConstants.Depot.getLobShotPose()),
-                intakeSimulation);
+                intakeSimulation,
+                false);
         }
 
         if (recordShot.get()) {

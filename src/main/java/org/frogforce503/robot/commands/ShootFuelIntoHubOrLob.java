@@ -142,7 +142,8 @@ public class ShootFuelIntoHubOrLob extends Command {
                     isHubShot
                         ? FieldConstants.Hub.getHubShotPose()
                         : new Translation3d(FieldConstants.Depot.getLobShotPose()),
-                intakeSimulation);
+                intakeSimulation,
+                true);
         }
         
         // Log data

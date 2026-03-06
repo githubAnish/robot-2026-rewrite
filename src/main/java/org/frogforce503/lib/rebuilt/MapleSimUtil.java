@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -104,9 +105,10 @@ public final class MapleSimUtil {
         double hoodAngleRad,
         double flywheelsSpeedRadPerSec,
         Supplier<Translation3d> target,
-        IntakeSimulation intakeSimulation
+        IntakeSimulation intakeSimulation,
+        boolean requiresFuelForShoot
     ) {
-        if (intakeSimulation.getGamePiecesAmount() <= 0) {
+        if (requiresFuelForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
             return; // Don't shoot balls if there are none
         }
 
@@ -134,7 +136,7 @@ public final class MapleSimUtil {
                     .getMeasureZ()
                     .plus(Inches.of(4)), // 4 inches offset
                 MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kRadiusMeters),
-                Radians.of(HoodConstants.maxAngle - hoodAngleRad));
+                Radians.of(Units.degreesToRadians(90) - hoodAngleRad));
 
         fuel
             .withTargetPosition(target)

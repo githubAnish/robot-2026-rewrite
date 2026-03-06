@@ -403,12 +403,8 @@ public class RobotContainer {
     }
 
     public void test() {
-        // Schedule the TuneShot command (helps tune shotmaps) by uncommenting the following 5 lines
+        // Schedule the TuneShot command (helps tune shotmaps) by uncommenting the following 2 lines
         // RobotModeTriggers.teleop().onTrue(
-        //     Commands.sequence(
-        //         new TuneShot(drive, turret, hood, flywheels, gameViz.getIntakeSimulation(), false)
-        //     ).withName("RobotContainer Test Cmd")
-        // );
-        // RobotModeTriggers.teleop().onTrue(new TuneTurret(turret));
+        //     new TuneShot(drive, turret, hood, flywheels, gameViz.getIntakeSimulation(), true).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     }
 }
