@@ -62,15 +62,15 @@ public class ShotCalculator {
 
     static {
         // Configure hub shotmaps (tuned in sim)
-        hubHoodAngleMap.put(1.205, Rotation2d.fromDegrees(90 - 80));
-        hubHoodAngleMap.put(2.056, Rotation2d.fromDegrees(90 - 70));
-        hubHoodAngleMap.put(2.585, Rotation2d.fromDegrees(90 - 64));
-        hubHoodAngleMap.put(2.905, Rotation2d.fromDegrees(90 - 60));
-        hubHoodAngleMap.put(3.110, Rotation2d.fromDegrees(90 - 57));
-        hubHoodAngleMap.put(3.716, Rotation2d.fromDegrees(90 - 55));
-        hubHoodAngleMap.put(4.360, Rotation2d.fromDegrees(90 - 54));
-        hubHoodAngleMap.put(4.950, Rotation2d.fromDegrees(90 - 50));
-        hubHoodAngleMap.put(5.427, Rotation2d.fromDegrees(90 - 49));
+        hubHoodAngleMap.put(1.205, Rotation2d.fromDegrees(10));
+        hubHoodAngleMap.put(2.056, Rotation2d.fromDegrees(20));
+        hubHoodAngleMap.put(2.585, Rotation2d.fromDegrees(26));
+        hubHoodAngleMap.put(2.905, Rotation2d.fromDegrees(30));
+        hubHoodAngleMap.put(3.110, Rotation2d.fromDegrees(33));
+        hubHoodAngleMap.put(3.716, Rotation2d.fromDegrees(35));
+        hubHoodAngleMap.put(4.360, Rotation2d.fromDegrees(36));
+        hubHoodAngleMap.put(4.950, Rotation2d.fromDegrees(40));
+        hubHoodAngleMap.put(5.427, Rotation2d.fromDegrees(41));
 
         hubFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
         hubFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
@@ -89,10 +89,10 @@ public class ShotCalculator {
         hubTimeOfFlightMap.put(5.427, 1.1);
 
         // Configure lob shotmaps (tuned in sim)
-        lobHoodAngleMap.put(8.095, Rotation2d.fromDegrees(90 - 45));
-        lobHoodAngleMap.put(9.861, Rotation2d.fromDegrees(90 - 45));
+        lobHoodAngleMap.put(8.095, Rotation2d.fromDegrees(45));
+        lobHoodAngleMap.put(9.861, Rotation2d.fromDegrees(45));
 
-        lobFlywheelSpeedMap.put(8.095, Units.rotationsPerMinuteToRadiansPerSecond(2250));
+        lobFlywheelSpeedMap.put(8.095, Units.rotationsPerMinuteToRadiansPerSecond(2000));
         lobFlywheelSpeedMap.put(9.861, Units.rotationsPerMinuteToRadiansPerSecond(2500));
 
         lobTimeOfFlightMap.put(8.095, 1.2);

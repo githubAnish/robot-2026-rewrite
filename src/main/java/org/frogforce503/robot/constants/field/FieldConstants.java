@@ -116,6 +116,8 @@ public class FieldConstants {
         public static final Rectangle2d blue;
         public static final Rectangle2d red;
 
+        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(18), 0);
+
         static {
             final double depotLength = Units.inchesToMeters(26.7);
             final double depotWidth = Units.inchesToMeters(42.0);
@@ -135,7 +137,10 @@ public class FieldConstants {
         }
 
         private static Translation2d getLobShotPose() {
-            return isRed() ? red.getCenter().getTranslation() : blue.getCenter().getTranslation();
+            return
+                isRed()
+                    ? red.getCenter().getTranslation().minus(lobShotPoseOffset)
+                    : blue.getCenter().getTranslation().plus(lobShotPoseOffset);
         }
     }
 
