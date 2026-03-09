@@ -22,8 +22,8 @@ public class FeederConstants {
     public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
-    public static final double EJECT_FROM_INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(-1500);
-    public static final double EJECT_FROM_SHOOTER = Units.rotationsPerMinuteToRadiansPerSecond(1500);
+    public static final double EJECT_FROM_INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(-100);
+    public static final double EJECT_FROM_SHOOTER = Units.rotationsPerMinuteToRadiansPerSecond(100);
 
     public static final double SHOOT = Units.rotationsPerMinuteToRadiansPerSecond(2000);
 }

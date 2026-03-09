@@ -114,20 +114,16 @@ public class Waypoint {
     }
 
     public Waypoint withDriveRotation(Rotation2d newHeading) {
-        this.driveRotation = newHeading;
+        driveRotation = newHeading;
         return this;
     }
 
     public Waypoint withHolonomicRotation(Rotation2d newHeading) {
-        this.holonomicRotation = newHeading;
+        holonomicRotation = newHeading;
         return this;
     }
 
     public Waypoint plus(Translation2d t) {
-        return
-            new Waypoint(
-                translation.plus(t),
-                driveRotation,
-                holonomicRotation);
+        return new Waypoint(translation.plus(t), driveRotation, holonomicRotation);
     }
 }

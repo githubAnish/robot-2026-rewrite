@@ -102,13 +102,13 @@ public class IntakePivot extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        this.shouldRunProfile = false;
+        shouldRunProfile = false;
         io.runVolts(volts);
     }
 
     public void setAngle(double angleRad) {
-        this.shouldRunProfile = true;
-        this.targetAngleRad = angleRad;
+        shouldRunProfile = true;
+        targetAngleRad = angleRad;
     }
 
     public boolean isAtAngle(double angleRad, double tolerance) {

@@ -162,10 +162,8 @@ public class DriveToPose1323 extends Command {
         // Command speeds
         var driveVelocity =
             GeomUtil
-                .toPose2d(
-                    driveOutput.getAngle())
-                .transformBy(
-                    GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
+                .toPose2d(driveOutput.getAngle())
+                .plus(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
                 .getTranslation();
 
         // Scale feedback velocities by input ff

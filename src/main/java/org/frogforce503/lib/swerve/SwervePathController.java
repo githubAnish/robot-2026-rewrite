@@ -29,16 +29,16 @@ public class SwervePathController {
         this.thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Set default tolerance
-        this.poseTolerance =
+        poseTolerance =
             new Pose2d(
                 new Translation2d(Units.inchesToMeters(0.1), Units.inchesToMeters(0.0254)),
                 Rotation2d.fromDegrees(1));
     }
 
     public void reset() {
-        this.xController.reset();
-        this.yController.reset();
-        this.thetaController.reset();
+        xController.reset();
+        yController.reset();
+        thetaController.reset();
     }
 
     public boolean atReference() {

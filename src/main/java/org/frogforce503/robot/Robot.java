@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.lib.util.Elastic;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -92,7 +93,7 @@ public class Robot extends LoggedRobot {
       DriverStationSim.notifyNewData();
     }
 
-    // Set field for MapleSim
+    // Set field up for MapleSim
     MapleSimUtil.initializeArena();
 
     // Initialize RobotContainer
@@ -130,6 +131,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     robotContainer.teleopInit();
+    Elastic.selectTab("Teleop");
   }
 
   @Override
@@ -138,6 +140,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     robotContainer.disabledInit();
+    Elastic.selectTab("Autonomous");
   }
 
   @Override

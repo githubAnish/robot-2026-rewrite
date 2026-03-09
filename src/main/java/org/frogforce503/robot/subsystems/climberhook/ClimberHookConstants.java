@@ -17,15 +17,15 @@ public final class ClimberHookConstants {
     
     public static final int statorCurrentLimit = 60;
 
-    public static final PIDConfig kPID = new PIDConfig();
-    public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(0, 0);
+    public static final PIDConfig kPID = new PIDConfig(10, 0, 0);
+    public static final FFConfig kFF = new FFConfig(0, 1.794, 15, 0);
+    public static final Constraints kConstraints = new Constraints(Units.inchesToMeters(45), Units.inchesToMeters(90));
     
     public static final double minHeight = Units.inchesToMeters(-10);
     public static final double maxHeight = Units.inchesToMeters(10);
 
     // Setpoints
-    public static final double kTolerance = Units.inchesToMeters(0.25);
+    public static final double kTolerance = Units.inchesToMeters(1);
 
     public static final double START = Units.inchesToMeters(0);
 }

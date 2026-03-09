@@ -12,7 +12,7 @@ public final class HoodConstants {
     // Hardware / Configuration
     public static final int motorId = 7;
 
-    public static final double motorMechanismRatio = 15.0; // from CAD
+    public static final double motorMechanismRatio = 15.0; // from CAD, actually could be 1.54545174 from teams
     public static final double absoluteEncoderMechanismRatio = 1.0;
 
     public static final boolean motorInverted = false;

@@ -8,6 +8,8 @@ import org.frogforce503.lib.auto.planned_path.PlannedPath;
 import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.subsystems.drive.Drive;
 
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -30,6 +32,14 @@ public final class AutoUtil {
                 .flatMap(path -> path.getDriveTrajectory().getStates().stream())
                 .map(state -> state.poseMeters)
                 .toList();
+    }
+
+    public static List<Pose2d> getPoses(PathPlannerPath... pathPlannerPaths) {
+        return
+            Arrays
+                .stream(pathPlannerPaths)
+                .flatMap(traj -> traj.getPathPoses().stream())
+                .collect(Collectors.toList());
     }
 
     public static List<Pose2d> getPoses(AutoTrajectory... choreoTrajectories) {

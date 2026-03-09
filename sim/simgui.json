@@ -58,11 +58,7 @@
       "SmartDashboard": {
         "Autochooser": {
           "open": true
-        },
-        "open": true
-      },
-      "photonvision": {
-        "open": true
+        }
       }
     }
   },

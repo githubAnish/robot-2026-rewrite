@@ -1,10 +1,13 @@
 package org.frogforce503.robot.commands;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleConsumer;
 
+import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
+import org.frogforce503.robot.subsystems.climberhook.ClimberHookConstants;
+import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -22,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimbSequence extends Command {
     // Requirements
+    private final Drive drive;
+
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
@@ -33,9 +38,9 @@ public class ClimbSequence extends Command {
     private final ClimberDeploy climberDeploy;
     private final ClimberHook climberHook;
 
-    private final BooleanSupplier advanceButton;
+    private final GameViz gameViz;
 
-    private final DoubleConsumer simHeightSetter;
+    private final BooleanSupplier advanceButton;
 
     // State
     private ClimbState currentState;
@@ -54,6 +59,7 @@ public class ClimbSequence extends Command {
     }
     
     public ClimbSequence(
+        Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
         Indexer indexer,
@@ -63,9 +69,10 @@ public class ClimbSequence extends Command {
         Flywheels flywheels,
         ClimberDeploy climberDeploy,
         ClimberHook climberHook,
-        BooleanSupplier advanceButton,
-        DoubleConsumer simHeightSetter
+        GameViz gameViz,
+        BooleanSupplier advanceButton
     ) {
+        this.drive = drive;
         this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
         this.indexer = indexer;
@@ -73,15 +80,13 @@ public class ClimbSequence extends Command {
         this.turret = turret;
         this.flywheels = flywheels;
         this.hood = hood;
-
         this.climberDeploy = climberDeploy;
         this.climberHook = climberHook;
+        this.gameViz = gameViz;
 
         this.advanceButton = advanceButton;
 
-        this.simHeightSetter = simHeightSetter;
-
-        addRequirements(intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook);
+        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook);
     }
 
     @Override
@@ -101,58 +106,103 @@ public class ClimbSequence extends Command {
                 flywheels.stop();
                 hood.setAngle(HoodConstants.CLIMB);
 
+                if (RobotBase.isSimulation()) {
+                    gameViz.setRobotHeightMeters(0.0);
+                }
+
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.DEPLOY_CLIMBER;
                 }
                 break;
 
             case DEPLOY_CLIMBER:
-                
+                climberDeploy.setAngle(ClimberDeployConstants.CLIMB);
+                climberHook.setHeight(ClimberHookConstants.minHeight);
+
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.RAISE_FOR_L1;
+
+                    if (RobotBase.isSimulation()) {
+                        gameViz.startClimb();
+                    }
                 }
                 break;
 
             case RAISE_FOR_L1:
+                climberHook.setHeight(ClimberHookConstants.maxHeight);
+
                 if (RobotBase.isSimulation()) {
-                    simHeightSetter.accept(1);
+                    gameViz.climb();
                 }
 
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.STOW_AT_L1;
+                    
+                    resetClimberPosition();
+
+                    if (RobotBase.isSimulation()) {
+                        gameViz.stopClimb();
+                    }
                 }
                 break;
 
             case STOW_AT_L1:
-            
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.RAISE_FOR_L2;
+                    
+                    if (RobotBase.isSimulation()) {
+                        gameViz.startClimb();
+                    }
                 }
                 break;
 
             case RAISE_FOR_L2:
+                climberHook.setHeight(ClimberHookConstants.maxHeight);
+
+                if (RobotBase.isSimulation()) {
+                    gameViz.climb();
+                }
 
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.STOW_AT_L2;
+
+                    resetClimberPosition();
+                    
+                    if (RobotBase.isSimulation()) {
+                        gameViz.stopClimb();
+                    }
                 }
                 break;
 
             case STOW_AT_L2:
-
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.RAISE_FOR_L3;
+                    
+                    if (RobotBase.isSimulation()) {
+                        gameViz.startClimb();
+                    }
                 }
                 break;
 
             case RAISE_FOR_L3:
+                climberHook.setHeight(ClimberHookConstants.maxHeight);
+
+                if (RobotBase.isSimulation()) {
+                    gameViz.climb();
+                }
 
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.STOW_AT_L3;
+
+                    resetClimberPosition();
+                    
+                    if (RobotBase.isSimulation()) {
+                        gameViz.stopClimb();
+                    }
                 }
                 break;
 
             case STOW_AT_L3:
-
                 if (buttonPressedThisCycle()) {
                     currentState = ClimbState.FINISHED;
                 }
@@ -173,6 +223,7 @@ public class ClimbSequence extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        drive.stop();
         intakePivot.stop();
         intakeRoller.stop();
         indexer.stop();
@@ -180,7 +231,6 @@ public class ClimbSequence extends Command {
         turret.stop();
         hood.stop();
         flywheels.stop();
-        
         climberDeploy.stop();
         climberHook.stop();
     }
@@ -190,5 +240,11 @@ public class ClimbSequence extends Command {
         boolean pressed = current && !lastButton;
         lastButton = current;
         return pressed;
+    }
+
+    private void resetClimberPosition() {
+        climberHook.stop();
+        climberHook.setRelativePosition(ClimberHookConstants.minHeight);
+        climberHook.setHeight(ClimberHookConstants.minHeight);
     }
 }

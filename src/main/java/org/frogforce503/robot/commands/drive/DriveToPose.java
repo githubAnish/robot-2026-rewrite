@@ -147,7 +147,7 @@ public class DriveToPose extends Command {
                     .getTranslation()
                     .minus(targetPose.getTranslation())
                     .getAngle())
-            .transformBy(
+            .plus(
                 GeomUtil.toTransform2d(driveController.getSetpoint().position, 0.0))
             .getTranslation();
 
@@ -172,13 +172,8 @@ public class DriveToPose extends Command {
         // Command speeds
         var driveVelocity =
             GeomUtil
-                .toPose2d(
-                    currentPose
-                        .getTranslation()
-                        .minus(targetPose.getTranslation())
-                        .getAngle())
-                .transformBy(
-                    GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
+                .toPose2d(currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
+                .plus(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
                 .getTranslation();
 
         // Scale feedback velocities by input ff

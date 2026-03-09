@@ -66,7 +66,7 @@ public class Turret extends FFSubsystemBase {
             double bestAngle = 0;
 
             for (int i = -2; i < 3; i++) {
-                double potentialSetpoint = targetAngleRad + Math.PI * 2.0 * i;
+                double potentialSetpoint = MathUtil.clamp(targetAngleRad, TurretConstants.minAngle, TurretConstants.maxAngle) + Math.PI * 2.0 * i;
 
                 if (potentialSetpoint < TurretConstants.minAngle || potentialSetpoint > TurretConstants.maxAngle) {
                     continue;
@@ -116,6 +116,7 @@ public class Turret extends FFSubsystemBase {
         }
 
         Logger.recordOutput("Turret/CurrentPositionRad", getRobotRelativeAngleRad());
+        Logger.recordOutput("Turret/Current Field Relative Angle", getFieldRelativeAngle());
 
         // Record cycle time
         LoggedTracer.record("Turret");
@@ -157,15 +158,15 @@ public class Turret extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        this.shouldRunProfile = false;
+        shouldRunProfile = false;
         io.runVolts(volts);
     }
 
     /** Sets the turret's robot-relative angle and robot-relative velocity. */
     public void setRobotRelativeAngle(double angleRad, double velocityRadPerSec) {
-        this.shouldRunProfile = true;
-        this.targetAngleRad = angleRad;
-        this.targetVelocityRadPerSec = velocityRadPerSec;
+        shouldRunProfile = true;
+        targetAngleRad = angleRad;
+        targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     /** Sets the turret's field-relative angle and field-relative velocity. */

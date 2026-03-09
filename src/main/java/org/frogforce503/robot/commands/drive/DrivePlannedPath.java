@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import lombok.Setter;
 
 public class DrivePlannedPath extends Command {
-    // Requirements
     private final Drive drive;
 
     // Control
@@ -41,7 +40,7 @@ public class DrivePlannedPath extends Command {
             trajectory
                 .getDriveTrajectory()
                 .sample(trajectory.getTotalTimeSeconds())
-                .velocityMetersPerSecond == 0.00; // originally 0.1
+                .velocityMetersPerSecond == 0.0;
 
         addRequirements(drive);
     }

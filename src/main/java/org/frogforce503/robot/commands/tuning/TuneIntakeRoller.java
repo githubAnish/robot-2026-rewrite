@@ -45,13 +45,13 @@ public class TuneIntakeRoller extends Command {
     @Override
     public void initialize() {
         // Set tuning mode to true
-        this.kP.setTuningMode(true);
-        this.kI.setTuningMode(true);
-        this.kD.setTuningMode(true);
-        this.kS.setTuningMode(true);
-        this.kV.setTuningMode(true);
-        this.kA.setTuningMode(true);
-        this.setpointVelocityRpm.setTuningMode(true);
+        kP.setTuningMode(true);
+        kI.setTuningMode(true);
+        kD.setTuningMode(true);
+        kS.setTuningMode(true);
+        kV.setTuningMode(true);
+        kA.setTuningMode(true);
+        setpointVelocityRpm.setTuningMode(true);
     }
 
     @Override

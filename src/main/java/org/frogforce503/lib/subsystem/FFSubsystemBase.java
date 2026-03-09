@@ -12,10 +12,10 @@ import lombok.Getter;
 /** A thin wrapper around WPILib's {@link SubsystemBase} class to create command-based subsystems with common FF boilerplate methods. */
 public abstract class FFSubsystemBase extends SubsystemBase {
     @Getter protected LoggedNetworkBoolean coastOverride =
-        new LoggedNetworkBoolean("Coast Mode/" + this.getName(), false);
+        new LoggedNetworkBoolean("Coast Mode/" + getName(), false);
 
     protected final Alert coastModeWhileRunning =
-        new Alert(this.getName() + " cannot coast while running! Request ignored.", AlertType.kError);
+        new Alert(getName() + " cannot coast while running! Request ignored.", AlertType.kError);
 
     private boolean inCoast = false;
 
@@ -32,10 +32,9 @@ public abstract class FFSubsystemBase extends SubsystemBase {
         }
 
         coastModeWhileRunning
-            .set(coastOverride.get() && !RobotState.isDisabled());
+            .set(RobotState.isEnabled() && coastOverride.get());
     };
 
-    // Actions
     protected abstract void setBrakeMode(boolean enabled);
-    public abstract void stop();
+    protected abstract void stop();
 }

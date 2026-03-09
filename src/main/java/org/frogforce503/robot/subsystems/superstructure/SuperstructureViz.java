@@ -7,6 +7,7 @@ import org.frogforce503.robot.subsystems.vision.VisionConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -15,7 +16,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 public class SuperstructureViz {
     // Constants
     private final Transform3d robotToTurret =
-        TurretConstants.robotToTurret
+        Transform3d.kZero
+            .plus(TurretConstants.robotToTurret)
             .plus(new Transform3d(-0.0076, -0.0041, 0.041686, Rotation3d.kZero)); // Offset for viz
 
     private final Transform3d turretToHood = HoodConstants.turretToHood;
@@ -46,17 +48,17 @@ public class SuperstructureViz {
         var hopperExtenderPose =
             Pose3d.kZero
                 .plus(robotToHopperExtender)
-                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(0.0, -Math.PI/2, 0.0)));
+                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(0.0, -MathUtil.clamp(intakePivotAngleRad, 0, Math.PI/2), 0.0)));
 
         var climberDeployFourBarPose =
             Pose3d.kZero
                 .plus(robotToClimberDeployMainPivot)
-                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(climberDeployAngleRad, 0.0, 0.0)));
+                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(-climberDeployAngleRad + Math.PI, 0.0, 0.0)));
 
         var climberHookPose =
             climberDeployFourBarPose
                 .plus(climberDeployMainPivotToSecondaryPivot)
-                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(-climberDeployAngleRad, 0.0, 0.0)));
+                .plus(new Transform3d(Translation3d.kZero, new Rotation3d(climberDeployAngleRad - Math.PI, 0.0, 0.0)));
 
         Logger.recordOutput(
             "SuperstructureViz/Components",

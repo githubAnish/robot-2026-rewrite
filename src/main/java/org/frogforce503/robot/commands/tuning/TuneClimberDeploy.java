@@ -3,8 +3,8 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
+import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -12,8 +12,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class TuneIntakePivot extends Command {
-    private final IntakePivot intakePivot;
+public class TuneClimberDeploy extends Command {
+    private final ClimberDeploy climberDeploy;
 
     private final LoggedTunableNumber kP;
     private final LoggedTunableNumber kI;
@@ -27,29 +27,29 @@ public class TuneIntakePivot extends Command {
 
     private final LoggedTunableNumber setpointAngleDeg;
 
-    public TuneIntakePivot(IntakePivot intakePivot) {
-        this.intakePivot = intakePivot;
+    public TuneClimberDeploy(ClimberDeploy climberDeploy) {
+        this.climberDeploy = climberDeploy;
 
         // Get initial values from config
-        final PIDConfig initialPID = IntakePivotConstants.kPID;
-        final FFConfig initialFF = IntakePivotConstants.kFF;
-        final Constraints initialConstraints = IntakePivotConstants.kConstraints;
+        final PIDConfig initialPID = ClimberDeployConstants.kPID;
+        final FFConfig initialFF = ClimberDeployConstants.kFF;
+        final Constraints initialConstraints = ClimberDeployConstants.kConstraints;
 
         // Create tunable numbers
-        this.kP = new LoggedTunableNumber("IntakePivot/kP", initialPID.kP());
-        this.kI = new LoggedTunableNumber("IntakePivot/kI", initialPID.kI());
-        this.kD = new LoggedTunableNumber("IntakePivot/kD", initialPID.kD());
-        this.kS = new LoggedTunableNumber("IntakePivot/kS", initialFF.kS());
-        this.kG = new LoggedTunableNumber("IntakePivot/kG", initialFF.kG());
-        this.kV = new LoggedTunableNumber("IntakePivot/kV", initialFF.kV());
-        this.kA = new LoggedTunableNumber("IntakePivot/kA", initialFF.kA());
+        this.kP = new LoggedTunableNumber("ClimberDeploy/kP", initialPID.kP());
+        this.kI = new LoggedTunableNumber("ClimberDeploy/kI", initialPID.kI());
+        this.kD = new LoggedTunableNumber("ClimberDeploy/kD", initialPID.kD());
+        this.kS = new LoggedTunableNumber("ClimberDeploy/kS", initialFF.kS());
+        this.kG = new LoggedTunableNumber("ClimberDeploy/kG", initialFF.kG());
+        this.kV = new LoggedTunableNumber("ClimberDeploy/kV", initialFF.kV());
+        this.kA = new LoggedTunableNumber("ClimberDeploy/kA", initialFF.kA());
 
-        this.maxVelocityDegPerSec = new LoggedTunableNumber("IntakePivot/MaxVelocityDegPerSec", Units.radiansToDegrees(initialConstraints.maxVelocity));
-        this.maxAccelerationDegPerSec2 = new LoggedTunableNumber("IntakePivot/MaxAccelerationDegPerSec2", Units.radiansToDegrees(initialConstraints.maxAcceleration));
+        this.maxVelocityDegPerSec = new LoggedTunableNumber("ClimberDeploy/MaxVelocityDegPerSec", Units.radiansToDegrees(initialConstraints.maxVelocity));
+        this.maxAccelerationDegPerSec2 = new LoggedTunableNumber("ClimberDeploy/MaxAccelerationDegPerSec2", Units.radiansToDegrees(initialConstraints.maxAcceleration));
 
-        this.setpointAngleDeg = new LoggedTunableNumber("IntakePivot/SetpointDeg", Units.radiansToDegrees(IntakePivotConstants.START));
+        this.setpointAngleDeg = new LoggedTunableNumber("ClimberDeploy/SetpointDeg", Units.radiansToDegrees(ClimberDeployConstants.START));
 
-        addRequirements(intakePivot);
+        addRequirements(climberDeploy);
     }
 
     @Override
@@ -72,25 +72,25 @@ public class TuneIntakePivot extends Command {
         // Update PID only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> intakePivot.setPID(kP.get(), kI.get(), kD.get()),
+            () -> climberDeploy.setPID(kP.get(), kI.get(), kD.get()),
             kP, kI, kD);
         
         // Update FF only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> intakePivot.setFeedforward(new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get())),
+            () -> climberDeploy.setFeedforward(new ArmFeedforward(kS.get(), kG.get(), kV.get(), kA.get())),
             kS, kG, kV, kA);
 
         // Update trapezoid profile only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> intakePivot.setProfile(new TrapezoidProfile(new Constraints(Units.degreesToRadians(maxVelocityDegPerSec.get()), Units.degreesToRadians(maxAccelerationDegPerSec2.get())))),
+            () -> climberDeploy.setProfile(new TrapezoidProfile(new Constraints(Units.degreesToRadians(maxVelocityDegPerSec.get()), Units.degreesToRadians(maxAccelerationDegPerSec2.get())))),
             maxVelocityDegPerSec, maxAccelerationDegPerSec2);
 
         // Update setpoint only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> intakePivot.setAngle(Units.degreesToRadians(setpointAngleDeg.get())),
+            () -> climberDeploy.setAngle(Units.degreesToRadians(setpointAngleDeg.get())),
             setpointAngleDeg);
     }
 
@@ -101,6 +101,6 @@ public class TuneIntakePivot extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakePivot.stop();
+        climberDeploy.stop();
     }
 }

@@ -21,14 +21,11 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AutoChooser {
-    // Requirements
     private final Drive drive;
     private final Vision vision;
 
-    // Dashboard
     private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
 
-    // State
     private Command autoCommand;
     private AutoMode lastSelectedAuto;
 

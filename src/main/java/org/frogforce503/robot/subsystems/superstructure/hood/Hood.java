@@ -103,7 +103,7 @@ public class Hood extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        this.shouldRunProfile = false;
+        shouldRunProfile = false;
         io.runVolts(volts);
     }
 
@@ -112,9 +112,9 @@ public class Hood extends FFSubsystemBase {
     }
 
     public void setAngle(double angleRad, double velocityRadPerSec) {
-        this.shouldRunProfile = true;
-        this.targetAngleRad = angleRad;
-        this.targetVelocityRadPerSec = velocityRadPerSec;
+        shouldRunProfile = true;
+        targetAngleRad = angleRad;
+        targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     public boolean isAtAngle(double angleRad, double tolerance) {

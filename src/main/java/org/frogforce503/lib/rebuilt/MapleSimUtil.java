@@ -4,87 +4,57 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
-import java.util.function.Supplier;
-
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
-import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rectangle2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Timer;
-
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
+import org.littletonrobotics.junction.Logger;
 
-public final class MapleSimUtil {
-    // Bump Sim Constants
-    private static final double maxLinearSpeedOverBumpMetersPerSec = DriveConstants.maxLinearSpeed / 5;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 
-    private static final Rectangle2d blueLeftBump =
-        new Rectangle2d(FieldConstants.LeftBump.blueBackLeftCorner, FieldConstants.LeftBump.blueFrontRightCorner);
-
-    private static final Rectangle2d blueRightBump =
-        new Rectangle2d(FieldConstants.RightBump.blueBackLeftCorner, FieldConstants.RightBump.blueFrontRightCorner);
-
-    private static final Rectangle2d redLeftBump =
-        new Rectangle2d(FieldConstants.LeftBump.redBackLeftCorner, FieldConstants.LeftBump.redFrontRightCorner);
-
-    private static final Rectangle2d redRightBump =
-        new Rectangle2d(FieldConstants.RightBump.redBackLeftCorner, FieldConstants.RightBump.redFrontRightCorner);
-
-    // Intake Sim Constants
-    private static final int fuelCapacity = 30;
+public class MapleSimUtil {
+    // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
     private static final Distance intakeLengthExtended = Inches.of(9.5);
+    private static final int fuelCapacity = 30;
 
-    // Shoot Sim Constants
-    private static final Timer shotTimer = new Timer();
+    // Hopper Constants
+    private static final int cols = 5;
+    private static final int rows = 3;
+    private static final int perLayer = cols * rows;
+    private static final double fuelToFuelOffset = Units.inchesToMeters(4);
+    private static final Transform3d robotToHopperOffset = new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(9)), Rotation3d.kZero);
+
+    // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.5, 0.5, 0.5);
-    private static final double shotFireRateBallsPerSec = 7; // How many balls can you fire within 1 sec?
+
+    // Bump Constants
+    private static final double maxLinearSpeedOverBumpMetersPerSec = DriveConstants.maxLinearSpeed / 5;
 
     private MapleSimUtil() {}
-
+    
     public static void initializeArena() {
-        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false)); // Allow MapleSim to cross over bump
-    }
+        Arena2026Rebuilt rebuiltArena = new Arena2026Rebuilt(false); // Allow MapleSim to cross over bump
+        rebuiltArena.setEfficiencyMode(false); // Spawn depot fuel
 
-    // Applies max velocity to bumps instead of blocking them out like MapleSim
-    public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
-        double linearSpeed =
-            Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
-
-        boolean inBump =
-            blueLeftBump.contains(robotTranslation) ||
-            blueRightBump.contains(robotTranslation) ||
-            redLeftBump.contains(robotTranslation) ||
-            redRightBump.contains(robotTranslation);
-
-        if ((inBump && linearSpeed <= maxLinearSpeedOverBumpMetersPerSec) || !inBump) {
-            return robotVelocity;
-        }
-
-        double scalar = maxLinearSpeedOverBumpMetersPerSec / linearSpeed;
-
-        return new ChassisSpeeds(
-            robotVelocity.vxMetersPerSecond * scalar,
-            robotVelocity.vyMetersPerSecond * scalar,
-            robotVelocity.omegaRadiansPerSecond);
+        SimulatedArena.overrideInstance(rebuiltArena);
     }
 
     public static IntakeSimulation createIntake(SwerveDriveSimulation driveSimulation) {
@@ -97,49 +67,54 @@ public final class MapleSimUtil {
                 IntakeSimulation.IntakeSide.FRONT,
                 fuelCapacity);
     }
-    
-    public static void shootFuel(
+
+    public static Translation3d[] visualizeFuelInHopper(Pose3d robotPose, int numFuelInRobot) {
+        Translation3d[] balls = new Translation3d[numFuelInRobot];
+
+        for (int i = 0; i < numFuelInRobot; i++) {
+            int layer = i / perLayer;
+            int grid = i % perLayer;
+
+            double x = (grid % cols - (cols - 1) / 2.0) * fuelToFuelOffset;
+            double y = (grid / cols - (rows - 1) / 2.0) * fuelToFuelOffset;
+            double z = layer * fuelToFuelOffset * 1.25; // slightly taller spacing for visibility
+
+            balls[i] =
+                robotPose
+                    .plus(robotToHopperOffset)
+                    .plus(new Transform3d(new Translation3d(x, y, z), Rotation3d.kZero))
+                    .getTranslation();
+        }
+
+        return balls;
+    }
+
+    public static void createFuelProjectile(
         Pose2d pose,
         ChassisSpeeds robotFieldRelativeVelocity,
         Rotation2d turretFieldRelativeAngle,
         double hoodAngleRad,
-        double flywheelsSpeedRadPerSec,
-        Supplier<Translation3d> target,
-        IntakeSimulation intakeSimulation,
-        boolean requiresFuelForShoot
+        double flywheelsSpeedRadPerSec
     ) {
-        if (requiresFuelForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
-            return; // Don't shoot balls if there are none
-        }
-
-        double shotDelaySec = 1.0 / shotFireRateBallsPerSec;
-
-        // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
-        if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {
-            return; // Cooldown not done; skip creating new projectile
-        }
-
-        // Index fuel
-        intakeSimulation.obtainGamePieceFromIntake();
-
-        // Shoot fuel
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
                 pose
-                    .plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret.plus(HoodConstants.turretToHood)))
+                    .plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret))
+                    .plus(GeomUtil.toTransform2d(HoodConstants.turretToHood))
                     .getTranslation(),
                 Translation2d.kZero,
                 robotFieldRelativeVelocity,
                 turretFieldRelativeAngle,
-                TurretConstants.robotToTurret
+                Pose3d.kZero
+                    .plus(TurretConstants.robotToTurret)
                     .plus(HoodConstants.turretToHood)
-                    .getMeasureZ()
-                    .plus(Inches.of(4)), // 4 inches offset
-                MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kRadiusMeters),
-                Radians.of(Units.degreesToRadians(90) - hoodAngleRad));
+                    .plus(new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(4)), Rotation3d.kZero)) // 4 inches offset
+                    .getMeasureZ(),
+                MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kSimRadiusMeters),
+                Radians.of(Units.degreesToRadians(90) - hoodAngleRad)); // 0 deg hood = 90 deg shot angle (since shots have to go up) & vice versa
 
         fuel
-            .withTargetPosition(target)
+            .withTargetPosition(() -> FieldConstants.getShotTarget(pose))
             .withTargetTolerance(shotTolerance)
             .withProjectileTrajectoryDisplayCallBack(
                 pose3ds -> Logger.recordOutput("GameViz/SuccessfulFuelShot", pose3ds.toArray(Pose3d[]::new)),
@@ -147,8 +122,25 @@ public final class MapleSimUtil {
             );
 
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
+    }
+    
+    // Applies max velocity to bumps instead of blocking them out like MapleSim
+    public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
+        double linearSpeed =
+            Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
 
-        // Restart cooldown timer after firing
-        shotTimer.restart();
+        boolean inBump = FieldConstants.Bump.contains(robotTranslation);
+
+        if (inBump && linearSpeed > maxLinearSpeedOverBumpMetersPerSec) {
+            double scalar = maxLinearSpeedOverBumpMetersPerSec / linearSpeed;
+
+            return new ChassisSpeeds(
+                robotVelocity.vxMetersPerSecond * scalar,
+                robotVelocity.vyMetersPerSecond * scalar,
+                robotVelocity.omegaRadiansPerSecond);
+            
+        }
+
+        return robotVelocity;
     }
 }

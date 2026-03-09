@@ -4,7 +4,6 @@ import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
-
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Runs the feeder and flywheels at a low RPM to unjam any stuck fuel. */

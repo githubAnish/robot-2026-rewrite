@@ -7,7 +7,6 @@ import org.frogforce503.lib.auto.planned_path.components.RotationSequence;
 import org.frogforce503.lib.auto.planned_path.components.Waypoint;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -32,25 +31,17 @@ public class PlannedPath {
     }
 
     public Pose2d getInitialHolonomicPose() {
-        Pair<Trajectory.State, RotationSequence.State> sample = _sample(0);
-
-        return
-            new Pose2d(
-                sample.getFirst().poseMeters.getTranslation(),
-                sample.getSecond().position);
+        HolonomicState sample = sample(0);
+        return new Pose2d(sample.poseMeters().getTranslation(), sample.holonomicAngle());
     }
 
     public Pose2d getFinalHolonomicPose() {
-        Pair<Trajectory.State, RotationSequence.State> sample = _sample(getTotalTimeSeconds());
-        
-        return
-            new Pose2d(
-                sample.getFirst().poseMeters.getTranslation(),
-                sample.getSecond().position);    
+        HolonomicState sample = sample(getTotalTimeSeconds());
+        return new Pose2d(sample.poseMeters().getTranslation(), sample.holonomicAngle());   
     }
 
     public Waypoint getFinalWaypoint() {
-        return this.waypoints.get(this.waypoints.size() - 1);
+        return waypoints.get(waypoints.size() - 1);
     }
 
     public List<Waypoint> sampleTimeRange(double ti, double tf, double intervals) {
@@ -73,20 +64,8 @@ public class PlannedPath {
         return sampleTimeRange(ti, tf, 10.0); // 10 intervals is accurate enough to match original path
     }
 
-    private Pair<Trajectory.State, RotationSequence.State> _sample(double timeSeconds) {
-        return
-            Pair.of(
-                this.driveTrajectory.sample(timeSeconds),
-                this.rotationSequence.sample(timeSeconds));
-    }
-
     public HolonomicState sample(double timeSeconds) {
-        Pair<Trajectory.State, RotationSequence.State> sample = this._sample(timeSeconds);
-
-        return
-            new HolonomicState(
-                sample.getFirst(),
-                sample.getSecond());
+        return new HolonomicState(driveTrajectory.sample(timeSeconds), rotationSequence.sample(timeSeconds));
     }
 
     public double getTotalTimeSeconds() {
@@ -124,16 +103,16 @@ public class PlannedPath {
                 rotState.velocityRadiansPerSec);
         }
 
-        public HolonomicState withNewHolonomicAngle(Rotation2d newHolonomicAngle) {
+        public HolonomicState withNewHolonomicAngle(Rotation2d holonomicAngle) {
             return
                 new HolonomicState(
-                    this.timeSeconds,
-                    this.velocityMetersPerSecond,
-                    this.accelerationMetersPerSecondSq,
-                    this.poseMeters,
-                    this.curvatureRadPerMeter,
-                    newHolonomicAngle,
-                    this.angularVelocityRadiansPerSec);
+                    timeSeconds,
+                    velocityMetersPerSecond,
+                    accelerationMetersPerSecondSq,
+                    poseMeters,
+                    curvatureRadPerMeter,
+                    holonomicAngle,
+                    angularVelocityRadiansPerSec);
         }
     }
 }

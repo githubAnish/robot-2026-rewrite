@@ -80,13 +80,13 @@ public class IntakeRoller extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        this.shouldRunVelocity = false;
+        shouldRunVelocity = false;
         io.runVolts(volts);
     }
 
     public void setVelocity(double velocityRadPerSec) {
-        this.shouldRunVelocity = true;
-        this.targetVelocityRadPerSec = velocityRadPerSec;
+        shouldRunVelocity = true;
+        targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     public boolean isAtVelocity(double velocityRadPerSec, double tolerance) {

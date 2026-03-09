@@ -3,6 +3,7 @@ package org.frogforce503.robot.commands;
 import java.util.function.BooleanSupplier;
 
 import org.frogforce503.lib.io.JoystickUtil;
+import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
@@ -10,7 +11,6 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotC
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 import org.frogforce503.robot.subsystems.vision.Vision;
-import org.ironmaple.simulation.IntakeSimulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,34 +28,31 @@ public class IntakeFuelFromGround extends Command {
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
 
+    private final GameViz gameViz;
+
     private final CommandXboxController xboxController;
     private final BooleanSupplier autoAssistEnabled;
 
     // Constants
     private final double kLookaheadTimeSec = 0.15;
 
-    // Sim
-    private final IntakeSimulation intakeSimulation;
-
     public IntakeFuelFromGround(
         Drive drive,
         Vision vision,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
+        GameViz gameViz,
         CommandXboxController xboxController,
-        BooleanSupplier autoAssistEnabled,
-        IntakeSimulation intakeSimulation
+        BooleanSupplier autoAssistEnabled
     ) {
         this.drive = drive;
         this.vision = vision;
-
         this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
-
+        this.gameViz = gameViz;
         this.xboxController = xboxController;
+        
         this.autoAssistEnabled = autoAssistEnabled;
-
-        this.intakeSimulation = intakeSimulation;
 
         addRequirements(drive, intakePivot, intakeRoller);
     }
@@ -66,7 +63,7 @@ public class IntakeFuelFromGround extends Command {
         intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
 
         if (RobotBase.isSimulation()) {
-            intakeSimulation.startIntake();
+            gameViz.startIntake();
         }
     }
 
@@ -111,7 +108,7 @@ public class IntakeFuelFromGround extends Command {
         intakeRoller.stop();
 
         if (RobotBase.isSimulation()) {
-            intakeSimulation.stopIntake();
+            gameViz.stopIntake();
         }
     }
 }

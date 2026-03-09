@@ -1,5 +1,6 @@
 package org.frogforce503.robot;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.TriggerUtil;
@@ -33,14 +34,12 @@ import org.frogforce503.robot.subsystems.leds.Leds;
 import org.frogforce503.robot.subsystems.leds.LedsConstants;
 import org.frogforce503.robot.subsystems.leds.io.LedsIO;
 import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSim;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSpark;
@@ -123,10 +122,10 @@ public class RobotContainer {
 
     // Main Buttons
     final Trigger intakeGround = driverXbox.leftTrigger();
-    final Trigger ejectIntake = driverXbox.leftBumper(); // make this eject all
+    final Trigger ejectIntake = driverXbox.leftBumper();
 
     final Trigger shootHubOrLob = driverXbox.rightTrigger();
-    final Trigger ejectFlywheels = driverXbox.rightBumper(); // make this unjam
+    final Trigger ejectFlywheels = driverXbox.rightBumper();
 
     final Trigger setBatterPreset = driverXbox.y();
     final Trigger setTrenchPreset = driverXbox.x();
@@ -162,8 +161,8 @@ public class RobotContainer {
                     indexer = new Indexer(new IndexerIOSpark());
                     feeder = new Feeder(new FeederIOSpark());
                     turret = new Turret(new TurretIOSpark(), drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-                    flywheels = new Flywheels(new FlywheelsIOSpark());
                     hood = new Hood(new HoodIOSpark());
+                    flywheels = new Flywheels(new FlywheelsIOSpark());
 
                     climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
                     climberHook = new ClimberHook(new ClimberHookIOSpark());
@@ -209,8 +208,8 @@ public class RobotContainer {
                     indexer = new Indexer(new IndexerIOSim());
                     feeder = new Feeder(new FeederIOSim());
                     turret = new Turret(new TurretIOSim(), drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-                    flywheels = new Flywheels(new FlywheelsIOSim());
                     hood = new Hood(new HoodIOSim());
+                    flywheels = new Flywheels(new FlywheelsIOSim());
 
                     climberDeploy = new ClimberDeploy(new ClimberDeployIOSim());
                     climberHook = new ClimberHook(new ClimberHookIOSim());
@@ -250,23 +249,52 @@ public class RobotContainer {
             }
         }
 
-        // No-op implementations for replay
-        if (Constants.getMode() == Mode.REPLAY) {
+        // No-op implementations if replay or not defined above
+        if (drive == null) {
             drive = new Drive(new DriveIO() {});
+        }
 
+        if (intakePivot == null) {
             intakePivot = new IntakePivot(new IntakePivotIO() {});
+        }
+        
+        if (intakeRoller == null) {
             intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+        }
+
+        if (indexer == null) {
             indexer = new Indexer(new IndexerIO() {});
+        }
+
+        if (feeder == null) {
             feeder = new Feeder(new FeederIO() {});
+        }
+
+        if (turret == null) {
             turret = new Turret(new TurretIO() {}, drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-            flywheels = new Flywheels(new FlywheelsIO() {});
-            hood = new Hood(new HoodIO() {});
-
-            climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
-            climberHook = new ClimberHook(new ClimberHookIO() {});
+        }
             
-            leds = new Leds(new LedsIO() {});
+        if (hood == null) {
+            hood = new Hood(new HoodIO() {});
+        }
 
+        if (flywheels == null) {
+            flywheels = new Flywheels(new FlywheelsIO() {});
+        }
+
+        if (climberDeploy == null) {
+            climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
+        }
+
+        if (climberHook == null) {
+            climberHook = new ClimberHook(new ClimberHookIO() {});
+        }
+
+        if (leds == null) {
+            leds = new Leds(new LedsIO() {});
+        }
+
+        if (vision == null) {
             vision =
                 new Vision(
                     visionEstimateConsumer,
@@ -281,39 +309,49 @@ public class RobotContainer {
         warmupExecutor = new WarmupExecutor(drive);
 
         // Create sim requirements
-        gameViz = new GameViz(drive, turret, hood, intakePivot, climberDeploy, visionViz);
+        gameViz = new GameViz(drive, intakePivot, turret, hood, flywheels, climberDeploy, climberHook, visionViz);
 
         configureBindings();
     }
 
     private void configureBindings() {
-        // Create commands (that have or provide dependencies elsewhere)
+        // Create commands (that have / provide dependencies)
         final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob);
+        final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob);  // Requires turret, hood, and flywheels
+        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, trackTargetCommand::isShotFeasible);
+
+        // Create bind functions
+        final BiConsumer<Trigger, ShotPreset> bindShotPreset =
+            (trigger, shotPreset) ->
+                trigger
+                    .whileTrue(Commands.runOnce(() -> trackTargetCommand.setShotPreset(shotPreset)))
+                    .onFalse(Commands.runOnce(() -> trackTargetCommand.setShotPreset(ShotPreset.NONE)));
 
         // Apply default commands
         drive.setDefaultCommand(teleopDriveCommand);
-
         indexer.setDefaultCommand(indexerRunCommand);
-        turret.setDefaultCommand(new TrackTargetCommand(drive, vision, turret, hood)); // Requires turret and hood
-        flywheels.setDefaultCommand(Commands.run(() -> flywheels.setVelocity(FlywheelsConstants.IDLE), flywheels).withName("Flywheels Idle"));
+        flywheels.setDefaultCommand(trackTargetCommand);
 
         // Bind main controls
         intakeGround.whileTrue(
-            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, driverXbox, autoAssistOverride, gameViz.getIntakeSimulation()));
+            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, gameViz, driverXbox, autoAssistOverride));
 
         shootHubOrLob.whileTrue(
-            new ShootFuelIntoHubOrLob(
-                drive, vision, feeder, turret, hood, flywheels, gameViz.getIntakeSimulation()));
+            new ShootFuelIntoHubOrLob(feeder, gameViz, trackTargetCommand::isShotFeasible));
 
-        ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
-        ejectFlywheels.whileTrue(new EjectFuelFromShooter(feeder, flywheels));
+        ejectIntake.whileTrue(
+            new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
+            
+        ejectFlywheels.whileTrue(
+            new EjectFuelFromShooter(feeder, flywheels));
 
-        bindShotPreset(setBatterPreset, ShotPreset.BATTER);
-        bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
-        bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
+        bindShotPreset.accept(setBatterPreset, ShotPreset.BATTER);
+        bindShotPreset.accept(setTrenchPreset, ShotPreset.TRENCH);
+        bindShotPreset.accept(setDepotPreset, ShotPreset.DEPOT);
 
-        bindClimbing(climb);
+        climb.onTrue(
+            new ClimbSequence(drive, intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook, gameViz, climb)
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other commands from interrupting (including itself re-scheduling)
 
         // Bind override controls
         toggleSlowMode.onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
@@ -325,7 +363,7 @@ public class RobotContainer {
         toggleAutoAssist.onTrue(Commands.runOnce(() -> autoAssistOverride.set(!autoAssistOverride.get())));
     
         // Triggers
-        Trigger shotFeasible = new Trigger(ShotCalculator.getInstance()::isFeasibleShot);
+        Trigger shotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
 
         // Rumbles controller for 0.25 sec & blinks LEDs for 1 sec once shot feasible
         shotFeasible
@@ -334,23 +372,6 @@ public class RobotContainer {
                     rumbleController(0.75, 0.25),
                     blinkLeds(LedsConstants.READY_TO_SHOOT, 1)
             ).withName("Driver Rumble Feasible Shot"));
-    }
-
-    private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
-        trigger
-            .whileTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
-            .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
-    }
-
-    // Starts climb sequence and prevents other commands from interrupting it (including itself re-scheduling)
-    private void bindClimbing(Trigger advanceTrigger) {
-        Command climbSequence =
-            new ClimbSequence(
-                intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook, advanceTrigger, gameViz::setRobotHeightMeters);
-
-        advanceTrigger.onTrue(
-            climbSequence
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     }
 
     private Command rumbleController(double value, double durationSec) {
@@ -369,16 +390,14 @@ public class RobotContainer {
     }
 
     public void robotPeriodic() {
-        loggedJVM.update();
+        Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
 
+        // Update sim
         if (RobotBase.isSimulation()) {
             gameViz.update();
         }
 
-        // Clear shot params
-        ShotCalculator.getInstance().clearShotInfo();
-
-        Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
+        loggedJVM.update();
     }
 
     public void autonomousInit() {
@@ -405,6 +424,6 @@ public class RobotContainer {
     public void test() {
         // Schedule the TuneShot command (helps tune shotmaps) by uncommenting the following 2 lines
         // RobotModeTriggers.teleop().onTrue(
-        //     new TuneShot(drive, turret, hood, flywheels, gameViz.getIntakeSimulation(), true).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        //     new TuneShot(drive, turret, hood, flywheels, gameViz, true).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     }
 }

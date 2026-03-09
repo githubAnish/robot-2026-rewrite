@@ -1,8 +1,7 @@
 package org.frogforce503.robot.commands.tuning;
 
 import org.frogforce503.lib.logging.LoggedTunableNumber;
-import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
@@ -11,23 +10,22 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConst
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
-import org.ironmaple.simulation.IntakeSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Command to tune hood angle and flywheel speed for a specific distance or preset. */
+/** Command to tune hood angle and flywheels speed for a specific distance or preset. */
 public class TuneShot extends Command {
     private final Drive drive;
-
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
+
+    private final GameViz gameViz;
 
     private final boolean tuningHubShot;
 
@@ -40,24 +38,19 @@ public class TuneShot extends Command {
     private final LoggedNetworkBoolean recordShot =
         new LoggedNetworkBoolean("Tuning/TuneShot/Record Shot?", false);
 
-    // Sim
-    private final IntakeSimulation intakeSimulation;
-
     public TuneShot(
         Drive drive,
         Turret turret,
         Hood hood,
         Flywheels flywheels,
-        IntakeSimulation intakeSimulation,
+        GameViz gameViz,
         boolean tuningHubShot
     ) {
         this.drive = drive;
-
         this.turret = turret;
         this.hood = hood;
         this.flywheels = flywheels;
-
-        this.intakeSimulation = intakeSimulation;
+        this.gameViz = gameViz;
 
         this.tuningHubShot = tuningHubShot;
 
@@ -66,8 +59,8 @@ public class TuneShot extends Command {
 
     @Override
     public void initialize() {
-        this.flywheelsVelocityRpm.setTuningMode(true);
-        this.hoodAngleDeg.setTuningMode(true);
+        flywheelsVelocityRpm.setTuningMode(true);
+        hoodAngleDeg.setTuningMode(true);
     }
 
     @Override
@@ -80,16 +73,10 @@ public class TuneShot extends Command {
 
         // Calculate shot params
         ShotInfo shotInfo =
-            tuningHubShot
-                ? ShotCalculator.getInstance().calculateHubShotInfo(
-                    drive.getPose(),
-                    drive.getRobotVelocity(),
-                    drive.getFieldVelocity())
-
-                : ShotCalculator.getInstance().calculateLobShotInfo(
-                    drive.getPose(),
-                    drive.getRobotVelocity(),
-                    drive.getFieldVelocity());
+            ShotCalculator.calculateShotInfo(
+                drive.getPose(),
+                drive.getRobotVelocity(),
+                drive.getFieldVelocity());
 
         turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
         turretVelocityRadPerSec = shotInfo.turretVelocityRadPerSec();
@@ -103,18 +90,7 @@ public class TuneShot extends Command {
 
         // Simulate shooting
         if (RobotBase.isSimulation()) {
-            MapleSimUtil.shootFuel(
-                drive.getPose(),
-                drive.getFieldVelocity(),
-                turretFieldRelativeAngle,
-                hoodAngleRad,
-                flywheelsVelocityRadPerSec,
-                () ->
-                    tuningHubShot
-                        ? FieldConstants.Hub.getHubShotPose()
-                        : new Translation3d(FieldConstants.Depot.getLobShotPose()),
-                intakeSimulation,
-                false);
+            gameViz.shootFuel(false);
         }
 
         if (recordShot.get()) {

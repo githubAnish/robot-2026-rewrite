@@ -94,13 +94,13 @@ public class Flywheels extends FFSubsystemBase {
     }
 
     public void runVolts(double volts) {
-        this.shouldRunProfile = false;
+        shouldRunProfile = false;
         io.runVolts(volts);
     }
 
     public void setVelocity(double velocityRadPerSec) {
-        this.shouldRunProfile = true;
-        this.targetVelocityRadPerSec = velocityRadPerSec;
+        shouldRunProfile = true;
+        targetVelocityRadPerSec = velocityRadPerSec;
     }
 
     public boolean isAtVelocity(double velocityRadPerSec, double tolerance) {

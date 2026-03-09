@@ -1,12 +1,12 @@
 package org.frogforce503.robot.constants.field;
 
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -41,20 +41,25 @@ public class FieldConstants {
                 .toPose2d();
     }
 
-    public static boolean inAllianceZone(Pose2d pose) {
+    public static boolean inAllianceZone(Pose2d robotPose) {
         return
             isRed()
-                ? pose.getX() > Lines.redInitLineX
-                : pose.getX() < Lines.blueInitLineX;
+                ? robotPose.getX() > Lines.redInitLineX
+                : robotPose.getX() < Lines.blueInitLineX;
     }
 
-    public static boolean underTrench(Pose2d pose) {
-        final double offset = Units.inchesToMeters(6.0); // So hood can duck earlier
+    public static Translation3d getShotTarget(Pose2d robotPose) {
+        boolean inAllianceZone = inAllianceZone(robotPose);
+        boolean closerToDepot =
+            robotPose.getTranslation().getDistance(Depot.getLobShotPose()) < robotPose.getTranslation().getDistance(Outpost.getLobShotPose());
 
-        return
-            isRed()
-                ? MathUtils.inRange(pose.getX(), LeftBump.redFrontLeftCorner.getX() - offset, Lines.redInitLineX + offset)
-                : MathUtils.inRange(pose.getX(), Lines.blueInitLineX - offset, LeftBump.blueFrontLeftCorner.getX() + offset);
+        if (inAllianceZone) {
+            return Hub.getHubShotPose();
+        } else if (closerToDepot) {
+            return new Translation3d(Depot.getLobShotPose());
+        } else {
+            return new Translation3d(Outpost.getLobShotPose());
+        }
     }
 
     public static class Lines {
@@ -88,7 +93,7 @@ public class FieldConstants {
             redShotPose = redCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
         }
 
-        public static Translation3d getHubShotPose() {
+        private static Translation3d getHubShotPose() {
             return isRed() ? redShotPose : blueShotPose;
         }
     }
@@ -96,40 +101,41 @@ public class FieldConstants {
     public static class Outpost {
         public static final Pose2d blue = getTagPose2d(29);
         public static final Pose2d red = getTagPose2d(13);
+
+        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(18), Units.inchesToMeters(18));
+
+        private static Translation2d getLobShotPose() {
+            return
+                isRed()
+                    ? red.getTranslation().minus(lobShotPoseOffset)
+                    : blue.getTranslation().plus(lobShotPoseOffset);
+        }
     }
 
     public static class Depot {
-        public static final Translation2d blueFrontLeftCorner;
-        public static final Translation2d blueFrontRightCorner;
-        public static final Translation2d blueBackLeftCorner;
-        public static final Translation2d blueBackRightCorner;
-
-        public static final Translation2d redFrontLeftCorner;
-        public static final Translation2d redFrontRightCorner;
-        public static final Translation2d redBackLeftCorner;
-        public static final Translation2d redBackRightCorner;
+        public static final Rectangle2d blue;
+        public static final Rectangle2d red;
 
         static {
-            final double backLeftToFrontLeft = Units.inchesToMeters(26.7);
-            final double frontLeftToFrontRight = Units.inchesToMeters(42.0);
+            final double depotLength = Units.inchesToMeters(26.7);
+            final double depotWidth = Units.inchesToMeters(42.0);
+            final double wallToDepotY = Units.inchesToMeters(61.5);
 
-            final double leftWallToBlueBackLeft = Units.inchesToMeters(61.5);
+            // Blue Depot
+            Translation2d blueBackLeftCorner = new Translation2d(0, fieldWidth - wallToDepotY);
+            Translation2d blueFrontRightCorner = blueBackLeftCorner.plus(new Translation2d(depotLength, -depotWidth));
 
-            blueBackLeftCorner = new Translation2d(0, fieldWidth - leftWallToBlueBackLeft);
-            blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-            blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
-            blueBackRightCorner = blueFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
 
-            final double rightWallToRedBackLeft = Units.inchesToMeters(61.5);
-            
-            redBackLeftCorner = new Translation2d(fieldLength, rightWallToRedBackLeft);
-            redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-            redFrontRightCorner = redFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
-            redBackRightCorner = redFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            // Red Depot
+            Translation2d redBackLeftCorner = new Translation2d(fieldLength, wallToDepotY);
+            Translation2d redFrontRightCorner = redBackLeftCorner.plus(new Translation2d(-depotLength, depotWidth));
+
+            red = new Rectangle2d(redBackLeftCorner, redFrontRightCorner);
         }
 
-        public static Translation2d getLobShotPose() {
-            return isRed() ? redBackLeftCorner : blueBackLeftCorner;
+        private static Translation2d getLobShotPose() {
+            return isRed() ? red.getCenter().getTranslation() : blue.getCenter().getTranslation();
         }
     }
 
@@ -138,21 +144,17 @@ public class FieldConstants {
      * <b> All corners must be viewed from the blue alliance. </b>
      */
     public static class NeutralZone {
-        public static final Translation2d frontLeftCorner;
-        public static final Translation2d frontRightCorner;
-        public static final Translation2d backLeftCorner;
-        public static final Translation2d backRightCorner;
+        public static Rectangle2d zone;
 
         static {
-            final double boundingBoxWidth = Units.inchesToMeters(206.0); // From game manual, see https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
-            final double boundingBoxDepth = Units.inchesToMeters(72.0); // From game manual, see https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
-
+            final double boundingBoxWidth = Units.inchesToMeters(206.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
+            final double boundingBoxDepth = Units.inchesToMeters(72.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
             final Translation2d fieldCenter = new Translation2d(fieldLength / 2, fieldWidth / 2);
             
-            frontLeftCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, boundingBoxWidth / 2));
-            frontRightCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, -boundingBoxWidth / 2));
-            backLeftCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, boundingBoxWidth / 2));
-            backRightCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, -boundingBoxWidth / 2));
+            Translation2d frontLeftCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, boundingBoxWidth / 2));
+            Translation2d backRightCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, -boundingBoxWidth / 2));
+
+            zone = new Rectangle2d(backRightCorner, frontLeftCorner);
         }
     }
 
@@ -166,102 +168,114 @@ public class FieldConstants {
         public static final Pose2d redRight;
 
         static {
-            final double rungLength = Units.inchesToMeters(41.1); // from measuring on field CAD onshape
-            final double centerTagToTowerX = Units.inchesToMeters(41.86); // from measuring on field CAD onshape
+            final double rungLength = Units.inchesToMeters(41.1); // from field CAD
+            final double centerTagToTowerX = Units.inchesToMeters(41.86); // from field CAD
 
+            // Blue Tower
             blueCenter = getTagPose2d(31).plus(GeomUtil.toTransform2d(centerTagToTowerX, 0));
             blueLeft = blueCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
             blueRight = blueCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
 
+            // Red Tower
             redCenter = getTagPose2d(15).plus(GeomUtil.toTransform2d(centerTagToTowerX, 0));
             redLeft = redCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
             redRight = redCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
         }
 
-        /** Interpolated climb pose between blueLeft (t = 0) and blueRight (t = 1). */
-        public static Pose2d getBlueClimbPose(double t) {
-            return blueLeft.interpolate(blueRight, t);
-        }
-
-        /** Interpolated climb pose between redLeft (t = 0) and redRight (t = 1). */
-        public static Pose2d getRedClimbPose(double t) {
-            return redLeft.interpolate(redRight, t);
+        /** Interpolated climb pose between left (t = 0) and right (t = 1) poses on tower. */
+        public static Pose2d getClimbPose(double t) {
+            return isRed() ? redLeft.interpolate(redRight, t) : blueLeft.interpolate(blueRight, t);
         }
     }
 
-    public static class LeftTrench {
-        public static final Translation2d blueLeftTrenchCenter = getTagPose2d(23).getTranslation();
-        public static final Translation2d redLeftTrenchCenter = getTagPose2d(7).getTranslation();
-    }
+    public static class Trench {
+        public static final Rectangle2d blueLeft;
+        public static final Rectangle2d blueRight;
 
-    public static class RightTrench {
-        public static final Translation2d blueRightTrenchCenter = getTagPose2d(28).getTranslation();
-        public static final Translation2d redRightTrenchCenter = getTagPose2d(12).getTranslation();
-    }
-
-    public static class LeftBump {
-        public static final Translation2d blueFrontLeftCorner;
-        public static final Translation2d blueFrontRightCorner;
-        public static final Translation2d blueBackLeftCorner;
-        public static final Translation2d blueBackRightCorner;
-
-        public static final Translation2d redFrontLeftCorner;
-        public static final Translation2d redFrontRightCorner;
-        public static final Translation2d redBackLeftCorner;
-        public static final Translation2d redBackRightCorner;
+        public static final Rectangle2d redLeft;
+        public static final Rectangle2d redRight;
 
         static {
-            final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
-            final double frontLeftToFrontRight = Units.inchesToMeters(73.0);
+            final double trenchLength = Units.inchesToMeters(49.0);
+            final double trenchWidth = Units.inchesToMeters(63.0);
+
+            // Blue Left Trench
+            Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth);
+            Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(trenchLength, -trenchWidth));
+
+            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
+
+            // Blue Right Trench
+            Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, 0.0);
+            Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(trenchLength, trenchWidth));
+
+            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
+
+            // Red Left Trench
+            Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, 0.0);
+            Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-trenchLength, trenchWidth));
+
+            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
+
+            // Red Right Trench
+            Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth);
+            Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-trenchLength, -trenchWidth));
+
+            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
+        }
+
+        public static boolean contains(Translation2d translation) {
+            return
+                blueLeft.contains(translation) ||
+                blueRight.contains(translation) ||
+                redLeft.contains(translation) ||
+                redRight.contains(translation);
+        }
+    }
+
+    public static class Bump {
+        public static final Rectangle2d blueLeft;
+        public static final Rectangle2d blueRight;
+
+        public static final Rectangle2d redLeft;
+        public static final Rectangle2d redRight;
+
+        static {
+            final double bumpLength = Units.inchesToMeters(49.0);
+            final double bumpWidth = Units.inchesToMeters(73.0);
+            final double trenchWidth = Units.inchesToMeters(63.0);
 
             // Blue Left Bump
-            final double leftWallToBlueLeftBumpBackLeft = Units.inchesToMeters(63.0);
+            Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - trenchWidth);
+            Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(bumpLength, -bumpWidth));
 
-            blueBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - leftWallToBlueLeftBumpBackLeft);
-            blueFrontLeftCorner = blueBackLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-            blueFrontRightCorner = blueFrontLeftCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
-            blueBackRightCorner = blueFrontRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-
-            // Red Left Bump
-            final double rightWallToRedLeftBumpBackLeft = Units.inchesToMeters(63.0);
-
-            redBackLeftCorner = new Translation2d(Lines.redInitLineX, rightWallToRedLeftBumpBackLeft);
-            redFrontLeftCorner = redBackLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-            redFrontRightCorner = redFrontLeftCorner.plus(new Translation2d(0, frontLeftToFrontRight));
-            redBackRightCorner = redFrontRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-        }
-    }
-
-    public static class RightBump {
-        public static final Translation2d blueFrontLeftCorner;
-        public static final Translation2d blueFrontRightCorner;
-        public static final Translation2d blueBackLeftCorner;
-        public static final Translation2d blueBackRightCorner;
-
-        public static final Translation2d redFrontLeftCorner;
-        public static final Translation2d redFrontRightCorner;
-        public static final Translation2d redBackLeftCorner;
-        public static final Translation2d redBackRightCorner;
-
-        static {
-            final double backLeftToFrontLeft = Units.inchesToMeters(49.0);
-            final double frontLeftToFrontRight = Units.inchesToMeters(73.0);
+            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
 
             // Blue Right Bump
-            final double rightWallToBlueRightBumpBackRight = Units.inchesToMeters(63.0);
+            Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, trenchWidth);
+            Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(bumpLength, bumpWidth));
 
-            blueBackRightCorner = new Translation2d(Lines.blueInitLineX, rightWallToBlueRightBumpBackRight);
-            blueFrontRightCorner = blueBackRightCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
-            blueFrontLeftCorner = blueFrontRightCorner.plus(new Translation2d(0, frontLeftToFrontRight));
-            blueBackLeftCorner = blueFrontLeftCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
+            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
+
+            // Red Left Bump
+            Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, trenchWidth);
+            Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-bumpLength, bumpWidth));
+
+            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
 
             // Red Right Bump
-            final double leftWallToRedRightBumpBackRight = Units.inchesToMeters(63.0);
+            Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - trenchWidth);
+            Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-bumpLength, -bumpWidth));
 
-            redBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - leftWallToRedRightBumpBackRight);
-            redFrontRightCorner = redBackRightCorner.plus(new Translation2d(-backLeftToFrontLeft, 0));
-            redFrontLeftCorner = redFrontRightCorner.plus(new Translation2d(0, -frontLeftToFrontRight));
-            redBackLeftCorner = redFrontLeftCorner.plus(new Translation2d(backLeftToFrontLeft, 0));
+            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
+        }
+
+        public static boolean contains(Translation2d translation) {
+            return
+                blueLeft.contains(translation) ||
+                blueRight.contains(translation) ||
+                redLeft.contains(translation) ||
+                redRight.contains(translation);
         }
     }
 }

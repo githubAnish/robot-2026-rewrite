@@ -75,7 +75,7 @@ public class RotationSequence {
   }
 
   public TreeMap<Double, Rotation2d> getTreeMap() {
-    return this.sequence;
+    return sequence;
   }
 
   /** Represents a state in a rotation sequence with a position and velocity. */

@@ -21,9 +21,9 @@ public class ClimberDeployConstants {
 
     public static final double absoluteEncoderZeroOffset = 0.0;
 
-    public static final PIDConfig kPID = new PIDConfig();
+    public static final PIDConfig kPID = new PIDConfig(1, 0, 0);
     public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(0, 0);
+    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final double minAngle = Units.degreesToRadians(0);
     public static final double maxAngle = Units.degreesToRadians(180);
@@ -32,4 +32,5 @@ public class ClimberDeployConstants {
     public static final double kTolerance = Units.degreesToRadians(3.0);
 
     public static final double START = maxAngle;
+    public static final double CLIMB = minAngle;
 }

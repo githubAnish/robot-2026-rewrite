@@ -1,6 +1,7 @@
 package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.logging.LoggerUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
@@ -35,6 +36,8 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
+        LoggerUtil.recordCurrentCommand(this);
+
         io.updateInputs(inputs);
         Logger.processInputs("Drive", inputs);
 

@@ -49,7 +49,7 @@ public class ClimberHook extends FFSubsystemBase {
         if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
             double heightAtLimitSwitch = ClimberHookConstants.minHeight; // assume limit switch at bottom
 
-            io.setRelativePosition(heightAtLimitSwitch);
+            setRelativePosition(heightAtLimitSwitch);
             setpoint = new State(heightAtLimitSwitch, 0.0);
         }
 
@@ -95,7 +95,15 @@ public class ClimberHook extends FFSubsystemBase {
         return inputs.positionMeters;
     }
 
+    public double getVelocityMetersPerSec() {
+        return inputs.velocityMetersPerSec;
+    }
+
     // Actions
+    public void setRelativePosition(double positionMeters) {
+        io.setRelativePosition(positionMeters);
+    }
+
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -122,8 +130,8 @@ public class ClimberHook extends FFSubsystemBase {
     }
 
     public void setHeight(double heightMeters) {
-        this.shouldRunProfile = true;
-        this.targetHeightMeters = heightMeters;
+        shouldRunProfile = true;
+        targetHeightMeters = heightMeters;
     }
 
     public boolean isAtHeight(double heightMeters, double tolerance) {

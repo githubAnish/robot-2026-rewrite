@@ -55,16 +55,16 @@ public class TuneHood extends Command {
     @Override
     public void initialize() {
         // Set tuning mode to true
-        this.kP.setTuningMode(true);
-        this.kI.setTuningMode(true);
-        this.kD.setTuningMode(true);
-        this.kS.setTuningMode(true);
-        this.kG.setTuningMode(true);
-        this.kV.setTuningMode(true);
-        this.kA.setTuningMode(true);
-        this.maxVelocityDegPerSec.setTuningMode(true);
-        this.maxAccelerationDegPerSec2.setTuningMode(true);
-        this.setpointAngleDeg.setTuningMode(true);
+        kP.setTuningMode(true);
+        kI.setTuningMode(true);
+        kD.setTuningMode(true);
+        kS.setTuningMode(true);
+        kG.setTuningMode(true);
+        kV.setTuningMode(true);
+        kA.setTuningMode(true);
+        maxVelocityDegPerSec.setTuningMode(true);
+        maxAccelerationDegPerSec2.setTuningMode(true);
+        setpointAngleDeg.setTuningMode(true);
     }
 
     @Override
