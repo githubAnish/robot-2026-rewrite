@@ -56,8 +56,8 @@ public class TurretIOSpark implements TurretIO {
         config
             .absoluteEncoder
                 .zeroOffset(TurretConstants.absoluteEncoderZeroOffset)
-                .positionConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians, TODO assume absolute encoder on main rotating shaft of turret
-                .velocityConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec, TODO assume absolute encoder on main rotating shaft of turret
+                .positionConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / TurretConstants.absoluteEncoderMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .zeroCentered(true)
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();
@@ -78,7 +78,7 @@ public class TurretIOSpark implements TurretIO {
     @Override
     public void updateInputs(TurretIOInputs inputs) {
         inputs.motorConnected = connectedDebouncer.calculate(motor.getLastError() == REVLibError.kOk);
-        inputs.positionRad = encoder.getPosition();
+        inputs.positionRad = encoder.getPosition() + TurretConstants.relativeEncoderZeroOffsetRad;
         inputs.absolutePositionRad = absoluteEncoder.getPosition();
         inputs.velocityRadPerSec = encoder.getVelocity();
         inputs.appliedVolts = motor.getAppliedOutput() * motor.getBusVoltage();
@@ -98,7 +98,7 @@ public class TurretIOSpark implements TurretIO {
 
     @Override
     public void runPosition(double positionRad, double feedforward) {
-        controller.setSetpoint(positionRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
+        controller.setSetpoint(positionRad - TurretConstants.relativeEncoderZeroOffsetRad, ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
     }
 
     @Override
@@ -120,6 +120,6 @@ public class TurretIOSpark implements TurretIO {
 
     @Override
     public void setRelativePosition(double positionRad) {
-        encoder.setPosition(positionRad);
+        encoder.setPosition(positionRad - TurretConstants.relativeEncoderZeroOffsetRad);
     }
 }

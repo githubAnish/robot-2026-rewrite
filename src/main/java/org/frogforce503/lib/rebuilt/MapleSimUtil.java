@@ -15,6 +15,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,6 +31,23 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 
 public class MapleSimUtil {
+    // Arena Constants
+    private static final Translation2d blueDepotBottomLeftCorner =
+        FieldConstants.Depot.blue.getCenter().getTranslation()
+            .plus(
+                new Translation2d(
+                    -FieldConstants.Depot.blue.getXWidth() / 2,
+                    FieldConstants.Depot.blue.getYWidth() / 2));
+
+    private static final Translation2d redDepotBottomLeftCorner =
+        FieldConstants.Depot.red.getCenter().getTranslation()
+            .plus(
+                new Translation2d(
+                    FieldConstants.Depot.red.getXWidth() / 2,
+                    -FieldConstants.Depot.red.getYWidth() / 2));
+
+    private static final double fuelDiameter = Units.inchesToMeters(5.91);
+    
     // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
     private static final Distance intakeLengthExtended = Inches.of(9.5);
@@ -51,10 +69,32 @@ public class MapleSimUtil {
     private MapleSimUtil() {}
     
     public static void initializeArena() {
-        Arena2026Rebuilt rebuiltArena = new Arena2026Rebuilt(false); // Allow MapleSim to cross over bump
-        rebuiltArena.setEfficiencyMode(false); // Spawn depot fuel
+        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false)); // Allow MapleSim to cross over bump
+    }
 
-        SimulatedArena.overrideInstance(rebuiltArena);
+    public static void resetArena() {
+        SimulatedArena.getInstance().resetFieldForAuto();
+
+        // Add depot fuel
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 6; y++) {
+                Translation2d fuelPosition = Translation2d.kZero;
+
+                if (FieldConstants.isRed()) {
+                    fuelPosition =
+                        redDepotBottomLeftCorner
+                            .plus(new Translation2d(-fuelDiameter / 2, fuelDiameter + Units.inchesToMeters(0.5))) // bottom left corner to bottom left fuel offset
+                            .plus(new Translation2d(-fuelDiameter * x, fuelDiameter * y));
+                } else {
+                    fuelPosition =
+                        blueDepotBottomLeftCorner
+                            .plus(new Translation2d(fuelDiameter / 2, -(fuelDiameter + Units.inchesToMeters(0.5)))) // bottom left corner to bottom left fuel offset
+                            .plus(new Translation2d(fuelDiameter * x, -fuelDiameter * y));
+                }
+
+                SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(fuelPosition));
+            }
+        }
     }
 
     public static IntakeSimulation createIntake(SwerveDriveSimulation driveSimulation) {

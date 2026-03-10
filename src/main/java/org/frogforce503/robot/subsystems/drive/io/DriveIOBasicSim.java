@@ -86,9 +86,8 @@ public class DriveIOBasicSim implements DriveIO {
     private SwerveDriveState getCurrentState() {
         SwerveDriveState currentState = new SwerveDriveState();
         
-        currentState.SuccessfulDaqs = 0;
-        currentState.FailedDaqs = 0;
         currentState.Pose = currentPose;
+        currentState.Speeds = currentVelocity;
         currentState.ModuleStates = moduleStates;
         currentState.OdometryPeriod = 0.02;
 

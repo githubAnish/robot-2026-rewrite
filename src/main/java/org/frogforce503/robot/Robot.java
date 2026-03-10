@@ -94,7 +94,9 @@ public class Robot extends LoggedRobot {
     }
 
     // Set field up for MapleSim
-    MapleSimUtil.initializeArena();
+    if (RobotBase.isSimulation()) {
+      MapleSimUtil.initializeArena();
+    }
 
     // Initialize RobotContainer
     robotContainer = new RobotContainer();
@@ -131,6 +133,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     robotContainer.teleopInit();
+
+    // Select Teleop Tab on Elastic
     Elastic.selectTab("Teleop");
   }
 
@@ -139,7 +143,14 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledInit() {
+    // Reset MapleSim field
+    if (RobotBase.isSimulation()) {
+      MapleSimUtil.resetArena();
+    }
+
     robotContainer.disabledInit();
+
+    // Select Autonomous Tab on Elastic
     Elastic.selectTab("Autonomous");
   }
 

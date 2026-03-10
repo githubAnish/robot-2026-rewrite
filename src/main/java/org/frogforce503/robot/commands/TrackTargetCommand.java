@@ -18,7 +18,9 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.AprilTagGoal;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +33,9 @@ public class TrackTargetCommand extends Command {
     private final Flywheels flywheels;
 
     private final BooleanSupplier isShootingSupplier;
+
+    // Constants
+    private final double trenchDuckLookaheadSec = 1.0;
 
     // State
     @Setter private ShotPreset shotPreset = ShotPreset.NONE;
@@ -65,8 +70,13 @@ public class TrackTargetCommand extends Command {
 
     @Override
     public void execute() {
-        final boolean trackingHub = FieldConstants.inAllianceZone(drive.getPose());
-        final boolean underTrench = FieldConstants.Trench.contains(drive.getPose().getTranslation());
+        // Get inputs
+        final Pose2d robotPose = drive.getPose();
+        final ChassisSpeeds robotRelativeVelocity = drive.getRobotVelocity();
+        final ChassisSpeeds fieldRelativeVelocity = drive.getFieldVelocity();
+
+        final boolean trackingHub = FieldConstants.inAllianceZone(robotPose);
+        final boolean underTrench = FieldConstants.Trench.contains(robotPose, fieldRelativeVelocity, trenchDuckLookaheadSec);
 
         // Define shot params
         Rotation2d turretFieldRelativeAngle = Rotation2d.kZero;
@@ -80,9 +90,9 @@ public class TrackTargetCommand extends Command {
             case NONE:
                 ShotInfo shotInfo =
                     ShotCalculator.calculateShotInfo(
-                        drive.getPose(),
-                        drive.getRobotVelocity(),
-                        drive.getFieldVelocity());
+                        robotPose,
+                        robotRelativeVelocity,
+                        fieldRelativeVelocity);
 
                 turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
                 turretVelocityRadPerSec = shotInfo.turretVelocityRadPerSec();

@@ -24,7 +24,6 @@ public class TuneShot extends Command {
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
-
     private final GameViz gameViz;
 
     private final boolean tuningHubShot;

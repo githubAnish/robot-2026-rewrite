@@ -41,10 +41,6 @@ public class GameViz {
 
     @Setter private double robotHeightMeters = 0.0;
 
-    // Intake Sim Constants
-    private final double intakeEjectRateBallsPerSec = 5; // How many balls can intake eject within 1 sec?
-    private final Timer intakeEjectTimer = new Timer();
-
     // Shoot Sim Constants
     private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
     private final Timer shotTimer = new Timer();
@@ -76,9 +72,6 @@ public class GameViz {
         if (RobotBase.isSimulation()) {
             this.intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
         }
-
-        // Reset MapleSim field
-        SimulatedArena.getInstance().resetFieldForAuto();
     }
 
     public void update() {
@@ -115,25 +108,6 @@ public class GameViz {
 
     public void stopIntake() {
         intakeSimulation.stopIntake();
-    }
-
-    public void ejectFuelFromIntake() {
-        if (intakeSimulation.getGamePiecesAmount() <= 0) {
-            return; // Don't eject balls if there are none
-        }
-
-        double intakeDelaySec = 1.0 / intakeEjectRateBallsPerSec;
-
-        // Allow very first eject (timer not used yet, get() == 0.0), or when cooldown has elapsed
-        if (intakeEjectTimer.isRunning() && !intakeEjectTimer.hasElapsed(intakeDelaySec)) {
-            return; // Cooldown not done; skip ejecting
-        }
-
-        // Eject fuel
-        intakeSimulation.obtainGamePieceFromIntake();
-
-        // Restart cooldown timer after firing
-        intakeEjectTimer.restart();
     }
 
     public void shootFuel(boolean needFuelFromIntakeForShoot) {

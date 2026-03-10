@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 
 public final class TurretConstants {
     // Hardware / Configuration
@@ -21,15 +22,15 @@ public final class TurretConstants {
 
     public static final int statorCurrentLimit = 35;
 
-    // public static final double relativeEncoderZeroOffsetRad = Units.degreesToRadians(90);
+    public static final double relativeEncoderZeroOffsetRad = RobotBase.isSimulation() ? 0.0 : Units.degreesToRadians(90);
     public static final double absoluteEncoderZeroOffset = 0.1788;
 
     public static final PIDConfig kPID = new PIDConfig(8, 0, 0.2);
     public static final FFConfig kFF = new FFConfig(0, 0, 8, 0);
     public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(720));
     
-    public static final double minAngle = Units.degreesToRadians(-132.0);
-    public static final double maxAngle = Units.degreesToRadians(200.0);
+    public static final double minAngle = Units.degreesToRadians(-132.0); // measured from 0 deg (which is when turret faces opposite the intake)
+    public static final double maxAngle = Units.degreesToRadians(200.0); // measured from 0 deg (which is when turret faces opposite the intake)
 
     public static final Transform3d robotToTurret =
         new Transform3d(
@@ -39,8 +40,8 @@ public final class TurretConstants {
             Rotation3d.kZero);
 
     // Setpoints
-    public static final double kFixedTolerance = Units.degreesToRadians(0.5); // TODO Turret position has to be extremely accurate for consistent shot
-    public static final double kShootOnMoveTolerance = Units.degreesToRadians(5); // TODO Turret position has to be extremely accurate for consistent shot
+    public static final double kFixedTolerance = Units.degreesToRadians(0.5);
+    public static final double kShootOnMoveTolerance = Units.degreesToRadians(5);
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards

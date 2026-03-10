@@ -60,8 +60,8 @@ public class ClimberDeployIOSpark implements ClimberDeployIO {
                 .inverted(ClimberDeployConstants.absoluteEncoderInverted)
                 .zeroCentered(true)
                 .zeroOffset(ClimberDeployConstants.absoluteEncoderZeroOffset)
-                .positionConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI) // convert rotations to radians
-                .velocityConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * 2 * Math.PI / 60) // convert RPM to rad/sec
+                .positionConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
+                .velocityConversionFactor((1 / ClimberDeployConstants.absoluteEncoderMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
                 .averageDepth(2)
                 .setSparkMaxDataPortConfig();
 

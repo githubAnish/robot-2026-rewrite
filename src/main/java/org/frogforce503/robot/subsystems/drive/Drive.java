@@ -76,10 +76,6 @@ public class Drive extends SubsystemBase {
         return inputs.Pose;
     }
 
-    public Pose2d getLookaheadPose(double lookaheadTimeSec) {
-        return getPose().exp(getRobotVelocity().toTwist2d(lookaheadTimeSec));
-    }
-
     public Rotation2d getAngle() {
         return getPose().getRotation();
     }

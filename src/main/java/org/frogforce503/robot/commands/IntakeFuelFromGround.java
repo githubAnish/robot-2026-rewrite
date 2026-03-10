@@ -70,7 +70,7 @@ public class IntakeFuelFromGround extends Command {
     @Override
     public void execute() {
         // Get inputs
-        Pose2d robotPose = drive.getLookaheadPose(kLookaheadTimeSec);
+        Pose2d robotPose = drive.getPose();
         Translation2d target = new Translation2d(); // Use object detection for vision.getFieldToBestCluster();
 
         // Calculate default teleop velocities

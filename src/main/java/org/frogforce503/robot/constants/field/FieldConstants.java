@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -149,7 +150,7 @@ public class FieldConstants {
      * <b> All corners must be viewed from the blue alliance. </b>
      */
     public static class NeutralZone {
-        public static Rectangle2d zone;
+        public static final Rectangle2d zone;
 
         static {
             final double boundingBoxWidth = Units.inchesToMeters(206.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
@@ -200,6 +201,8 @@ public class FieldConstants {
         public static final Rectangle2d redLeft;
         public static final Rectangle2d redRight;
 
+        private static final Translation2d duckOffset = new Translation2d(Units.inchesToMeters(12), 0);
+
         static {
             final double trenchLength = Units.inchesToMeters(49.0);
             final double trenchWidth = Units.inchesToMeters(63.0);
@@ -208,33 +211,51 @@ public class FieldConstants {
             Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth);
             Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(trenchLength, -trenchWidth));
 
-            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
+            blueLeft =
+                new Rectangle2d(
+                    blueLeftBackLeftCorner.minus(duckOffset),
+                    blueLeftFrontRightCorner.plus(duckOffset));
 
             // Blue Right Trench
             Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, 0.0);
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(trenchLength, trenchWidth));
 
-            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
+            blueRight =
+                new Rectangle2d(
+                    blueRightBackRightCorner.minus(duckOffset),
+                    blueRightFrontLeftCorner.plus(duckOffset));
 
             // Red Left Trench
             Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, 0.0);
             Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-trenchLength, trenchWidth));
 
-            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
+            redLeft =
+                new Rectangle2d(
+                    redLeftBackLeftCorner.plus(duckOffset),
+                    redLeftFrontRightCorner.minus(duckOffset));
 
             // Red Right Trench
             Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth);
             Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-trenchLength, -trenchWidth));
 
-            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
+            redRight =
+                new Rectangle2d(
+                    redRightBackRightCorner.plus(duckOffset),
+                    redRightFrontLeftCorner.minus(duckOffset));
         }
 
-        public static boolean contains(Translation2d translation) {
+        private static boolean contains(Rectangle2d trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
             return
-                blueLeft.contains(translation) ||
-                blueRight.contains(translation) ||
-                redLeft.contains(translation) ||
-                redRight.contains(translation);
+                trench.contains(robotPose.getTranslation()) ||
+                trench.contains(robotPose.exp(fieldRelativeVelocity.toTwist2d(lookaheadSec)).getTranslation());
+        }
+
+        public static boolean contains(Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
+            return
+                contains(blueLeft, robotPose, fieldRelativeVelocity, lookaheadSec) ||
+                contains(blueRight, robotPose, fieldRelativeVelocity, lookaheadSec) ||
+                contains(redLeft, robotPose, fieldRelativeVelocity, lookaheadSec) ||
+                contains(redRight, robotPose, fieldRelativeVelocity, lookaheadSec);
         }
     }
 
