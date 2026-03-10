@@ -1,14 +1,19 @@
 package org.frogforce503.robot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
+import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.auto.WarmupExecutor;
+import org.frogforce503.robot.auto.autos.ShootPreloadGoToNZOnce;
 import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
@@ -77,6 +82,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import com.ctre.phoenix6.controls.ControlRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -304,12 +311,12 @@ public class RobotContainer {
                     new ObjectDetectionIO[] {});
         }
 
-        // Create auto requirements
-        autoChooser = new AutoChooser(drive, vision);
-        warmupExecutor = new WarmupExecutor(drive);
-
         // Create sim requirements
         gameViz = new GameViz(drive, intakePivot, turret, hood, flywheels, climberDeploy, climberHook, visionViz);
+
+        // Create auto requirements
+        autoChooser = new AutoChooser(drive);
+        warmupExecutor = new WarmupExecutor(drive);
 
         configureBindings();
     }
@@ -334,7 +341,7 @@ public class RobotContainer {
 
         // Bind main controls
         intakeGround.whileTrue(
-            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, gameViz, driverXbox, autoAssistOverride));
+            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, gameViz, autoAssistOverride));
 
         shootHubOrLob.whileTrue(
             new ShootFuelIntoHubOrLob(feeder, gameViz, trackTargetCommand::isShotFeasible));
@@ -361,7 +368,7 @@ public class RobotContainer {
 
         seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
         toggleAutoAssist.onTrue(Commands.runOnce(() -> autoAssistOverride.set(!autoAssistOverride.get())));
-    
+
         // Triggers
         Trigger shotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
 
@@ -372,6 +379,25 @@ public class RobotContainer {
                     rumbleController(0.75, 0.25),
                     blinkLeds(LedsConstants.READY_TO_SHOOT, 1)
             ).withName("Driver Rumble Feasible Shot"));
+
+        // Add autos
+        autoChooser.addAuto( // Random test auto
+            "Test",
+            new AutoMode() {
+                @Override
+                public Command getCommand() {
+                    return Commands.runOnce(() -> drive.setPose(GeomUtil.toPose2d(new Translation2d(1.889,4.002))));
+                }
+
+                @Override
+                public List<Pose2d> getPoses() {
+                    return new ArrayList<>(List.of(Pose2d.kZero));
+                }
+        });
+
+        autoChooser.addAuto(
+            "Shoot Preload Then Go To NZ Once",
+            new ShootPreloadGoToNZOnce(drive, vision, intakePivot, intakeRoller, feeder, gameViz, trackTargetCommand::isShotFeasible));
     }
 
     private Command rumbleController(double value, double durationSec) {

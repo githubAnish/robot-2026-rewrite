@@ -27,7 +27,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj WarmupPath = new ChoreoTraj(
 	    "WarmupPath",
 	    OptionalInt.empty(),
-	    2.44672,
+	    2.48086,
 	    new Pose2d(3.028, 5.399, Rotation2d.fromRadians(0)),
 	    new Pose2d(6.322, 2.924, Rotation2d.fromRadians(-0.639))
 	);
