@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 
 public class SuperstructureViz {
-    // Constants
     private final Transform3d robotToTurret =
         Transform3d.kZero
             .plus(TurretConstants.robotToTurret)
@@ -25,8 +24,6 @@ public class SuperstructureViz {
     private final Transform3d robotToHopperExtender = new Transform3d(0.306, 0.01, 0.31, Rotation3d.kZero);
     private final Transform3d robotToClimberDeployMainPivot = new Transform3d(0.0625, -0.345, 0.185, Rotation3d.kZero);
     private final Transform3d climberDeployMainPivotToSecondaryPivot = new Transform3d(0.0, 0.075, -0.1, Rotation3d.kZero); // due to 4 bar for climber
-
-    public SuperstructureViz() {}
 
     public void update(Pose3d drivePose3d, double turretAngleRad, double hoodAngleRad, double intakePivotAngleRad, double climberDeployAngleRad) {
         // Calculate subsystem poses

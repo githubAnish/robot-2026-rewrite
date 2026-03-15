@@ -9,8 +9,9 @@ public final class LoggerUtil {
 
     public static void recordCurrentCommand(SubsystemBase subsystem) {
         final var currentCommand = subsystem.getCurrentCommand();
+        
         Logger.recordOutput(
             subsystem.getName() + "/Current Command",
             currentCommand == null ? "None" : currentCommand.getName());
-    }   
+    }
 }

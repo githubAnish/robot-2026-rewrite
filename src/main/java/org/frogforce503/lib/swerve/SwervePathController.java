@@ -1,7 +1,5 @@
 package org.frogforce503.lib.swerve;
 
-import org.frogforce503.lib.auto.planned_path.PlannedPath.HolonomicState;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -97,40 +95,6 @@ public class SwervePathController {
         final double yFF,
         final double thetaFF
     ) {
-        return
-            calculate(
-                currentPose,
-                targetPose,
-                targetPose.getRotation(),
-                xFF,
-                yFF,
-                thetaFF);
-    }
-
-    public ChassisSpeeds calculate(
-        Pose2d currentPose,
-        Pose2d targetPose,
-        Rotation2d targetAngle,
-        double linearFF,
-        double thetaFF
-    ) {
-        return
-            calculate(
-                currentPose,
-                targetPose,
-                targetAngle,
-                linearFF * targetPose.getRotation().getCos(),
-                linearFF * targetPose.getRotation().getSin(),
-                thetaFF);
-    }
-
-    public ChassisSpeeds calculate(Pose2d currentPose, HolonomicState state) {
-        return
-            calculate(
-                currentPose,
-                state.poseMeters(),
-                state.holonomicAngle(),
-                state.velocityMetersPerSecond(),
-                state.angularVelocityRadiansPerSec());
+        return calculate(currentPose, targetPose, targetPose.getRotation(), xFF, yFF, thetaFF);
     }
 }

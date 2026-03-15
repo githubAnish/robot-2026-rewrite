@@ -85,8 +85,7 @@ public class DriveToPose extends Command {
     public void initialize() {
         Pose2d currentPose = drive.getPose();
         ChassisSpeeds currentVel = drive.getFieldVelocity();
-        Translation2d linearFieldVelocity =
-            new Translation2d(currentVel.vxMetersPerSecond, currentVel.vyMetersPerSecond);
+        Translation2d linearFieldVelocity = new Translation2d(currentVel.vxMetersPerSecond, currentVel.vyMetersPerSecond);
 
         driveController.reset(
             currentPose.getTranslation().getDistance(target.get().getTranslation()),
@@ -118,8 +117,7 @@ public class DriveToPose extends Command {
         double currentDistance =
             currentPose
                 .getTranslation()
-                .getDistance(
-                    targetPose.getTranslation());
+                .getDistance(targetPose.getTranslation());
 
         double ffScaler =
             MathUtil.clamp(
@@ -147,8 +145,7 @@ public class DriveToPose extends Command {
                     .getTranslation()
                     .minus(targetPose.getTranslation())
                     .getAngle())
-            .plus(
-                GeomUtil.toTransform2d(driveController.getSetpoint().position, 0.0))
+            .plus(GeomUtil.toTransform2d(driveController.getSetpoint().position, 0.0))
             .getTranslation();
 
         // Calculate theta speed
@@ -183,9 +180,7 @@ public class DriveToPose extends Command {
         driveVelocity =
             driveVelocity
                 .interpolate(
-                    linearFF
-                        .get()
-                        .times(DriveConstants.maxLinearSpeed),
+                    linearFF.get().times(DriveConstants.maxLinearSpeed),
                     linearS);
 
         thetaVelocity =
@@ -229,6 +224,7 @@ public class DriveToPose extends Command {
     @Override
     public void end(boolean interrupted) {
         drive.stop();
+        
         // Clear logs
         Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
         Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});

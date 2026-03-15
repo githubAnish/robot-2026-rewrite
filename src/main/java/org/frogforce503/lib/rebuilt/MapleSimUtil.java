@@ -148,7 +148,7 @@ public class MapleSimUtil {
                 Pose3d.kZero
                     .plus(TurretConstants.robotToTurret)
                     .plus(HoodConstants.turretToHood)
-                    .plus(new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(4)), Rotation3d.kZero)) // 4 inches offset
+                    .plus(new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(4)), Rotation3d.kZero)) // offset = 4 inches
                     .getMeasureZ(),
                 MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kSimRadiusMeters),
                 Radians.of(Units.degreesToRadians(90) - hoodAngleRad)); // 0 deg hood = 90 deg shot angle (since shots have to go up) & vice versa
@@ -164,7 +164,7 @@ public class MapleSimUtil {
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
     }
     
-    // Applies max velocity to bumps instead of blocking them out like MapleSim
+    /** Applies max velocity to bumps instead of blocking them out like MapleSim */
     public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
         double linearSpeed =
             Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);

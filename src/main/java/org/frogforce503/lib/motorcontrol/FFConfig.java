@@ -32,11 +32,11 @@ public record FFConfig(
         return new SimpleMotorFeedforward(kS(), kV(), kA());
     }
 
-    public ArmFeedforward getArmFF() {
-        return new ArmFeedforward(kS(), kG(), kV(), kA());
-    }
-
     public ElevatorFeedforward getElevatorFF() {
         return new ElevatorFeedforward(kS(), kG(), kV(), kA());
+    }
+
+    public ArmFeedforward getArmFF() {
+        return new ArmFeedforward(kS(), kG(), kV(), kA());
     }
 }

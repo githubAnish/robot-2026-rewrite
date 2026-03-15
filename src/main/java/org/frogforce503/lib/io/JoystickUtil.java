@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public final class JoystickUtil {
-    private static final double kDeadband = 0.2;
+    private static final double deadband = 0.2;
 
     private JoystickUtil() {}
 
@@ -18,7 +18,7 @@ public final class JoystickUtil {
         double driverY = -xboxController.getLeftX();
 
         // Apply deadband
-        double linearMagnitude = MathUtil.applyDeadband(Math.hypot(driverX, driverY), kDeadband);
+        double linearMagnitude = MathUtil.applyDeadband(Math.hypot(driverX, driverY), deadband);
         Rotation2d linearDirection = new Rotation2d(Math.atan2(driverY, driverX));
 
         // Square magnitude for more precise control
@@ -37,7 +37,7 @@ public final class JoystickUtil {
         double driverOmega = -xboxController.getRightX();
 
         // Apply deadband
-        double omega = MathUtil.applyDeadband(driverOmega, kDeadband);
+        double omega = MathUtil.applyDeadband(driverOmega, deadband);
 
         // Square magnitude for more precise control & return new angular velocity
         return Math.copySign(omega * omega, omega);

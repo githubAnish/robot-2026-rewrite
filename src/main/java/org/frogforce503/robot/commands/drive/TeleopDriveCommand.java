@@ -27,11 +27,11 @@ public class TeleopDriveCommand extends Command {
     // Constants
     private final PIDController headingHoldController = new PIDController(5, 0, 0);
     private final double headingHoldTolerance = Units.degreesToRadians(1.0);
-    private final double kHeadingHoldDelay = 0.25;
+    private final double headingHoldDelay = 0.25;
     private final Timer headingHoldTimer = new Timer();
 
-    private static final double kOmegaDeadband = 0.05;
-    private static final double kTranslationDeadband = 0.02;
+    private static final double translationDeadband = 0.02;
+    private static final double omegaDeadband = 0.05;
 
     // State
     private TeleopDriveState currentState = TeleopDriveState.IDLE;
@@ -78,9 +78,9 @@ public class TeleopDriveCommand extends Command {
 
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
 
-        // Apply speeds to drivetrain
-        boolean isTranslating = Math.hypot(xVelocity, yVelocity) > kTranslationDeadband;
-        boolean isRotating = Math.abs(omega) > kOmegaDeadband;
+        // Determine teleop drive state
+        boolean isTranslating = Math.hypot(xVelocity, yVelocity) > translationDeadband;
+        boolean isRotating = Math.abs(omega) > omegaDeadband;
 
         if (robotRelative) {
             currentState = TeleopDriveState.ROBOT_RELATIVE;
@@ -92,6 +92,7 @@ public class TeleopDriveCommand extends Command {
             currentState = TeleopDriveState.IDLE;
         }
 
+        // Apply state
         switch (currentState) {
             case FIELD_RELATIVE:
                 lockHeadingIfRotationStopped(isRotating);
@@ -153,7 +154,7 @@ public class TeleopDriveCommand extends Command {
             headingSetpoint = Optional.empty();
         } else {
             headingHoldTimer.start();
-            if (headingHoldTimer.hasElapsed(kHeadingHoldDelay)) {
+            if (headingHoldTimer.hasElapsed(headingHoldDelay)) {
                 headingSetpoint = Optional.of(drive.getAngle());
             }
         }

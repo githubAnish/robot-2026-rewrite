@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package org.frogforce503.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
@@ -32,145 +28,145 @@ import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 public class Robot extends LoggedRobot {
-  private final RobotContainer robotContainer;
-  
-  public Robot() {
-    Logger.recordMetadata("ProjectName", "FF2026_" + Constants.getRobot().name().toUpperCase()); // Set a metadata value
-
-    // Set up data receivers & replay source
-    switch (Constants.getMode()) {
-      case REAL:
-        // Running on real robot, log to USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case SIM:
-        // Running a physics simulator, log to NT
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case REPLAY:
-        // Replaying a log, set up replay source
-        setUseTiming(false); // Run as fast as possible
-
-        String inPath = LogFileUtil.findReplayLog();
-        String outPath = LogFileUtil.addPathSuffix(inPath, "_sim");
-
-        Logger.setReplaySource(new WPILOGReader(inPath));
-        Logger.addDataReceiver(new WPILOGWriter(outPath));
-        break;
-    }
-
-    // Disable unnecessary logging
-    SignalLogger.enableAutoLogging(false);
-    StatusLogger.disableAutoLogging();
-
-    // Start AdvantageKit logger
-    Logger.start();
-
-    // Adjust loop overrun warning timeout
-    try {
-      Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
-      watchdogField.setAccessible(true);
-      Watchdog watchdog = (Watchdog) watchdogField.get(this);
-      watchdog.setTimeout(Constants.loopPeriodWatchdogSecs);
-    } catch (Exception e) {
-      DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
-    }
-    CommandScheduler.getInstance().setPeriod(Constants.loopPeriodWatchdogSecs);
-
-    // Disable alerts for disconnected controllers
-    DriverStation.silenceJoystickConnectionWarning(true);
-
-    // Configure brownout voltage
-    RobotController.setBrownoutVoltage(6.0);
-
-    // Configure DriverStation for sim
-    RoboRioSim.setTeamNumber(503);
-
-    if (RobotBase.isSimulation()) {
-      DriverStationSim.setDsAttached(true);
-      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
-      DriverStationSim.notifyNewData();
-    }
-
-    // Set field up for MapleSim
-    if (RobotBase.isSimulation()) {
-      MapleSimUtil.initializeArena();
-    }
-
-    // Initialize RobotContainer
-    robotContainer = new RobotContainer();
-    robotContainer.test();
-  }
-
-  @Override
-  public void robotPeriodic() {
-    LoggedTracer.reset();
-
-    // Run command scheduler
-    CommandScheduler.getInstance().run();
-    SmartDashboard.putData(CommandScheduler.getInstance());
-    LoggedTracer.record("CommandScheduler");
-
-    // Log NT client list
-    NTClientLogger.log();
+    private final RobotContainer robotContainer;
     
-    robotContainer.robotPeriodic();
+    public Robot() {
+        Logger.recordMetadata("ProjectName", "FF2026_" + Constants.getRobot().name().toUpperCase()); // Set a metadata value
 
-    // Record cycle time
-    LoggedTracer.record("RobotPeriodic");
-  }
+        // Set up data receivers & replay source
+        switch (Constants.getMode()) {
+            case REAL:
+                // Running on real robot, log to USB stick ("/U/logs")
+                Logger.addDataReceiver(new WPILOGWriter());
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
 
-  @Override
-  public void autonomousInit() {
-    robotContainer.autonomousInit();
-  }
+            case SIM:
+                // Running a physics simulator, log to NT
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
 
-  @Override
-  public void autonomousPeriodic() {}
+            case REPLAY:
+                // Replaying a log, set up replay source
+                setUseTiming(false); // Run as fast as possible
 
-  @Override
-  public void teleopInit() {
-    robotContainer.teleopInit();
+                String inPath = LogFileUtil.findReplayLog();
+                String outPath = LogFileUtil.addPathSuffix(inPath, "_sim");
 
-    // Select Teleop Tab on Elastic
-    Elastic.selectTab("Teleop");
-  }
+                Logger.setReplaySource(new WPILOGReader(inPath));
+                Logger.addDataReceiver(new WPILOGWriter(outPath));
+                break;
+        }
 
-  @Override
-  public void teleopPeriodic() {}
+        // Disable unnecessary logging
+        SignalLogger.enableAutoLogging(false);
+        StatusLogger.disableAutoLogging();
 
-  @Override
-  public void disabledInit() {
-    // Reset MapleSim field
-    if (RobotBase.isSimulation()) {
-      MapleSimUtil.resetArena();
+        // Start AdvantageKit logger
+        Logger.start();
+
+        // Adjust loop overrun warning timeout
+        try {
+            Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
+            watchdogField.setAccessible(true);
+            Watchdog watchdog = (Watchdog) watchdogField.get(this);
+            watchdog.setTimeout(Constants.loopPeriodWatchdogSecs);
+        } catch (Exception e) {
+            DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
+        }
+        CommandScheduler.getInstance().setPeriod(Constants.loopPeriodWatchdogSecs);
+
+        // Disable alerts for disconnected controllers
+        DriverStation.silenceJoystickConnectionWarning(true);
+
+        // Configure brownout voltage
+        RobotController.setBrownoutVoltage(6.0);
+
+        // Configure DriverStation for sim
+        RoboRioSim.setTeamNumber(503);
+
+        if (RobotBase.isSimulation()) {
+            DriverStationSim.setDsAttached(true);
+            DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+            DriverStationSim.notifyNewData();
+        }
+
+        // Set field up for MapleSim
+        if (RobotBase.isSimulation()) {
+            MapleSimUtil.initializeArena();
+        }
+
+        // Initialize RobotContainer
+        robotContainer = new RobotContainer();
+        robotContainer.test();
     }
 
-    robotContainer.disabledInit();
+    @Override
+    public void robotPeriodic() {
+        LoggedTracer.reset();
 
-    // Select Autonomous Tab on Elastic
-    Elastic.selectTab("Autonomous");
-  }
+        // Run command scheduler
+        CommandScheduler.getInstance().run();
+        SmartDashboard.putData(CommandScheduler.getInstance());
+        LoggedTracer.record("CommandScheduler");
 
-  @Override
-  public void disabledPeriodic() {
-    robotContainer.disabledPeriodic();
-  }
+        // Log NT client list
+        NTClientLogger.log();
+        
+        robotContainer.robotPeriodic();
 
-  @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-  }
+        // Record cycle time
+        LoggedTracer.record("RobotPeriodic");
+    }
 
-  @Override
-  public void testPeriodic() {}
+    @Override
+    public void autonomousInit() {
+        robotContainer.autonomousInit();
+    }
 
-  @Override
-  public void simulationInit() {}
+    @Override
+    public void autonomousPeriodic() {}
 
-  @Override
-  public void simulationPeriodic() {}
+    @Override
+    public void teleopInit() {
+        robotContainer.teleopInit();
+
+        // Select Teleop Tab on Elastic
+        Elastic.selectTab("Teleop");
+    }
+
+    @Override
+    public void teleopPeriodic() {}
+
+    @Override
+    public void disabledInit() {
+        // Reset MapleSim field
+        if (RobotBase.isSimulation()) {
+            MapleSimUtil.resetArena();
+        }
+
+        robotContainer.disabledInit();
+
+        // Select Autonomous Tab on Elastic
+        Elastic.selectTab("Autonomous");
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        robotContainer.disabledPeriodic();
+    }
+
+    @Override
+    public void testInit() {
+        CommandScheduler.getInstance().cancelAll();
+    }
+
+    @Override
+    public void testPeriodic() {}
+
+    @Override
+    public void simulationInit() {}
+
+    @Override
+    public void simulationPeriodic() {}
 }

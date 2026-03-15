@@ -24,9 +24,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimbSequence extends Command {
-    // Requirements
     private final Drive drive;
-
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
     private final Indexer indexer;
@@ -34,10 +32,8 @@ public class ClimbSequence extends Command {
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
-    
     private final ClimberDeploy climberDeploy;
     private final ClimberHook climberHook;
-
     private final GameViz gameViz;
 
     private final BooleanSupplier advanceButton;

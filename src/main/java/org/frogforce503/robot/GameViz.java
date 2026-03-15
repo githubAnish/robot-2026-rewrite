@@ -93,7 +93,8 @@ public class GameViz {
             intakePivot.getAngleRad(),
             climberDeploy.getAngleRad());
 
-        Translation3d[] fuelInHopper = MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
+        Translation3d[] fuelInHopper =
+            MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
         Translation3d[] fuelTranslations = // Convert fuel poses to translations to lower data processed by NT
             Arrays

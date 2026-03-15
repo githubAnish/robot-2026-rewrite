@@ -9,12 +9,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 /** Applies coast requests for the drive and steer motors. */
 public class SwerveDriveCoast implements SwerveRequest {
-    private final CoastOut m_driveRequest = new CoastOut();
-    private final CoastOut m_steerRequest = new CoastOut();
+    private final CoastOut driveRequest = new CoastOut();
+    private final CoastOut steerRequest = new CoastOut();
 
     public StatusCode apply(SwerveControlParameters parameters, SwerveModule<?, ?, ?>... modulesToApply) {
         for (SwerveModule<?, ?, ?> module : modulesToApply) {
-            module.apply(m_driveRequest, m_steerRequest);
+            module.apply(driveRequest, steerRequest);
         }
         return StatusCode.OK;
     }

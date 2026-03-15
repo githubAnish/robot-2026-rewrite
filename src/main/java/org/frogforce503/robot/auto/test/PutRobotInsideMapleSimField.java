@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
  * <p> Sim-only auto mode placing the robot at a valid pose inside the MapleSim field. </p>
- * <p> This is because Most MapleSim interactions require the robot to start within field boundaries. </p>
+ * <p> This is because most MapleSim interactions require the robot to start within field boundaries. </p>
  */
 public class PutRobotInsideMapleSimField implements AutoMode {
     private final Drive drive;

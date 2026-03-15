@@ -6,6 +6,4 @@ import edu.wpi.first.wpilibj2.command.Command;
 public interface AutoMode {
     public Command getCommand();
     public Pose2d[] getPoses();
-
-    
 }

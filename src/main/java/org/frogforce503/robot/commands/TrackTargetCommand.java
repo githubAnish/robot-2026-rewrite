@@ -173,7 +173,6 @@ public class TrackTargetCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         vision.setDesiredAprilTagGoal(AprilTagGoal.GLOBAL_LOCALIZATION);
-
         turret.stop();
         hood.stop();
         flywheels.stop();

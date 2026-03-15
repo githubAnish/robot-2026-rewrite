@@ -124,22 +124,16 @@ public class DriveToPose1323 extends Command {
                 0.0,
                 1.0);
 
-        double xOutput =
-            xController.calculate(currentPose.getX(), targetPose.getX());
-
-        double yOutput =
-            yController.calculate(currentPose.getY(), targetPose.getY());
+        double xOutput = xController.calculate(currentPose.getX(), targetPose.getX());
+        double yOutput = yController.calculate(currentPose.getY(), targetPose.getY());
 
         Translation2d driveOutput = new Translation2d(xOutput, yOutput);
 
-        double driveVelocityScalar =
-            minSpeed + ffScaler * (maxSpeed - minSpeed);
+        double driveVelocityScalar = minSpeed + ffScaler * (maxSpeed - minSpeed);
 
-        if (currentDistance < xController.getErrorTolerance() &&
-            currentDistance < yController.getErrorTolerance()
-        ) {
+        if (currentDistance < xController.getErrorTolerance() && currentDistance < yController.getErrorTolerance()) {
             driveVelocityScalar = 0.0;
-        }        
+        }
 
         // Calculate theta speed
         double thetaVelocity =
@@ -173,9 +167,7 @@ public class DriveToPose1323 extends Command {
         driveVelocity =
             driveVelocity
                 .interpolate(
-                    linearFF
-                        .get()
-                        .times(DriveConstants.maxLinearSpeed),
+                    linearFF.get().times(DriveConstants.maxLinearSpeed),
                     linearS);
 
         thetaVelocity =
@@ -210,6 +202,7 @@ public class DriveToPose1323 extends Command {
     @Override
     public void end(boolean interrupted) {
         drive.stop();
+        
         // Clear logs
         Logger.recordOutput("DriveFromPathToPose/Goal", new Pose2d[] {});
     }

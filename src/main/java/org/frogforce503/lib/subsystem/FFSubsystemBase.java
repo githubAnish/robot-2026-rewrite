@@ -14,10 +14,10 @@ public abstract class FFSubsystemBase extends SubsystemBase {
     @Getter protected LoggedNetworkBoolean coastOverride =
         new LoggedNetworkBoolean("Coast Mode/" + getName(), false);
 
+    private boolean inCoast = false;
+
     protected final Alert coastModeWhileRunning =
         new Alert(getName() + " cannot coast while running! Request ignored.", AlertType.kError);
-
-    private boolean inCoast = false;
 
     @Override
     public void periodic() {
@@ -27,12 +27,11 @@ public abstract class FFSubsystemBase extends SubsystemBase {
         boolean shouldCoast = coastOverride.get();
 
         if (RobotState.isDisabled() && shouldCoast != inCoast) {
-            inCoast = shouldCoast;
             setBrakeMode(!shouldCoast);
+            inCoast = shouldCoast;
         }
 
-        coastModeWhileRunning
-            .set(RobotState.isEnabled() && coastOverride.get());
+        coastModeWhileRunning.set(RobotState.isEnabled() && coastOverride.get());
     };
 
     protected abstract void setBrakeMode(boolean enabled);

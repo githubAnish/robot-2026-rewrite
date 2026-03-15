@@ -114,9 +114,10 @@ public class MapleSimSwerveDrivetrain {
         SimulatedArena.getInstance().simulationPeriodic();
 
         pigeonSim.setRawYaw(
-                mapleSimDrive.getSimulatedDriveTrainPose().getRotation().getMeasure());
-        pigeonSim.setAngularVelocityZ(RadiansPerSecond.of(
-                mapleSimDrive.getDriveTrainSimulatedChassisSpeedsRobotRelative().omegaRadiansPerSecond));
+            mapleSimDrive.getSimulatedDriveTrainPose().getRotation().getMeasure());
+
+        pigeonSim.setAngularVelocityZ(
+            RadiansPerSecond.of(mapleSimDrive.getDriveTrainSimulatedChassisSpeedsRobotRelative().omegaRadiansPerSecond));
     }
 
     /**
@@ -135,8 +136,7 @@ public class MapleSimSwerveDrivetrain {
             this.moduleSimulation = moduleSimulation;
 
             moduleSimulation.useDriveMotorController(new TalonFXMotorControllerSim(module.getDriveMotor()));
-            moduleSimulation.useSteerMotorController(
-                    new TalonFXMotorControllerWithRemoteCanCoderSim(module.getSteerMotor(), module.getEncoder()));
+            moduleSimulation.useSteerMotorController(new TalonFXMotorControllerWithRemoteCanCoderSim(module.getSteerMotor(), module.getEncoder()));
         }
     }
 

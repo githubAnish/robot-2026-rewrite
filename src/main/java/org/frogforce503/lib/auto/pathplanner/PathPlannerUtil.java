@@ -73,10 +73,10 @@ public final class PathPlannerUtil {
         }
     }
 
-    public static Pose2d[] getPoses(PathPlannerPath... pathPlannerPaths) {
+    public static Pose2d[] getPoses(PathPlannerPath... paths) {
         return
             Arrays
-                .stream(pathPlannerPaths)
+                .stream(paths)
                 .flatMap(traj -> traj.getPathPoses().stream())
                 .toArray(Pose2d[]::new);
     }

@@ -88,7 +88,6 @@ public class RobotContainer {
     // Subsystems
     private Drive drive;
     private Vision vision;
-
     private IntakePivot intakePivot;
     private IntakeRoller intakeRoller;
     private Indexer indexer;
@@ -96,10 +95,8 @@ public class RobotContainer {
     private Turret turret;
     private Hood hood;
     private Flywheels flywheels;
-
     private ClimberDeploy climberDeploy;
     private ClimberHook climberHook;
-
     private Leds leds;
 
     // Sim
