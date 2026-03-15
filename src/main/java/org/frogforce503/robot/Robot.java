@@ -32,7 +32,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 public class Robot extends LoggedRobot {
-  private RobotContainer robotContainer;
+  private final RobotContainer robotContainer;
   
   public Robot() {
     Logger.recordMetadata("ProjectName", "FF2026_" + Constants.getRobot().name().toUpperCase()); // Set a metadata value
@@ -40,7 +40,7 @@ public class Robot extends LoggedRobot {
     // Set up data receivers & replay source
     switch (Constants.getMode()) {
       case REAL:
-        // Running on a real robot, log to a USB stick ("/U/logs")
+        // Running on real robot, log to USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
         break;
@@ -53,8 +53,10 @@ public class Robot extends LoggedRobot {
       case REPLAY:
         // Replaying a log, set up replay source
         setUseTiming(false); // Run as fast as possible
+
         String inPath = LogFileUtil.findReplayLog();
         String outPath = LogFileUtil.addPathSuffix(inPath, "_sim");
+
         Logger.setReplaySource(new WPILOGReader(inPath));
         Logger.addDataReceiver(new WPILOGWriter(outPath));
         break;
@@ -110,12 +112,11 @@ public class Robot extends LoggedRobot {
     // Run command scheduler
     CommandScheduler.getInstance().run();
     SmartDashboard.putData(CommandScheduler.getInstance());
-
     LoggedTracer.record("CommandScheduler");
 
     // Log NT client list
     NTClientLogger.log();
-
+    
     robotContainer.robotPeriodic();
 
     // Record cycle time

@@ -6,8 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
@@ -18,6 +16,13 @@ import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculator {
+    private static Rotation2d lastTurretAngle;
+    private static double lastHoodAngle;
+    private static Rotation2d turretAngle;
+    private static double hoodAngle = Double.NaN;
+    private static double turretVelocity;
+    private static double hoodVelocity;
+
     // Constants
     private static final LinearFilter turretAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
@@ -34,43 +39,25 @@ public class ShotCalculator {
     public static final double maxDistanceLobShoot = 20.0; // Update based on shotmap distance range
 
     // Maps
-    private static final InterpolatingTreeMap<Double, Rotation2d> hubHoodAngleMap =
-        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
-        
-    private static final InterpolatingDoubleTreeMap hubFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap hubFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
-    private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
-
-    private static final InterpolatingTreeMap<Double, Rotation2d> lobHoodAngleMap =
-        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
-        
-    private static final InterpolatingDoubleTreeMap lobFlywheelSpeedMap =
-        new InterpolatingDoubleTreeMap();
-
-    private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap =
-        new InterpolatingDoubleTreeMap();
-
-    // State
-    private static Rotation2d lastTurretAngle;
-    private static double lastHoodAngle;
-    private static Rotation2d turretAngle;
-    private static double hoodAngle = Double.NaN;
-    private static double turretVelocity;
-    private static double hoodVelocity;
+    private static final InterpolatingDoubleTreeMap lobHoodAngleMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap lobFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     static {
         // Configure hub shotmaps (tuned in sim)
-        hubHoodAngleMap.put(1.205, Rotation2d.fromDegrees(10));
-        hubHoodAngleMap.put(2.056, Rotation2d.fromDegrees(20));
-        hubHoodAngleMap.put(2.585, Rotation2d.fromDegrees(26));
-        hubHoodAngleMap.put(2.905, Rotation2d.fromDegrees(30));
-        hubHoodAngleMap.put(3.110, Rotation2d.fromDegrees(33));
-        hubHoodAngleMap.put(3.716, Rotation2d.fromDegrees(35));
-        hubHoodAngleMap.put(4.360, Rotation2d.fromDegrees(36));
-        hubHoodAngleMap.put(4.950, Rotation2d.fromDegrees(40));
-        hubHoodAngleMap.put(5.427, Rotation2d.fromDegrees(41));
+        hubHoodAngleMap.put(1.205, Units.degreesToRadians(10));
+        hubHoodAngleMap.put(2.056, Units.degreesToRadians(20));
+        hubHoodAngleMap.put(2.585, Units.degreesToRadians(26));
+        hubHoodAngleMap.put(2.905, Units.degreesToRadians(30));
+        hubHoodAngleMap.put(3.110, Units.degreesToRadians(33));
+        hubHoodAngleMap.put(3.716, Units.degreesToRadians(35));
+        hubHoodAngleMap.put(4.360, Units.degreesToRadians(36));
+        hubHoodAngleMap.put(4.950, Units.degreesToRadians(40));
+        hubHoodAngleMap.put(5.427, Units.degreesToRadians(41));
 
         hubFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
         hubFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
@@ -89,8 +76,8 @@ public class ShotCalculator {
         hubTimeOfFlightMap.put(5.427, 1.1);
 
         // Configure lob shotmaps (tuned in sim)
-        lobHoodAngleMap.put(8.095, Rotation2d.fromDegrees(45));
-        lobHoodAngleMap.put(9.861, Rotation2d.fromDegrees(45));
+        lobHoodAngleMap.put(8.095, Units.degreesToRadians(45));
+        lobHoodAngleMap.put(9.861, Units.degreesToRadians(45));
 
         lobFlywheelSpeedMap.put(8.095, Units.rotationsPerMinuteToRadiansPerSecond(2000));
         lobFlywheelSpeedMap.put(9.861, Units.rotationsPerMinuteToRadiansPerSecond(2500));
@@ -99,17 +86,13 @@ public class ShotCalculator {
         lobTimeOfFlightMap.put(9.861, 1.4);
     }
 
-    public static ShotInfo calculateShotInfo(
-        Pose2d robotPose,
-        ChassisSpeeds robotRelativeVelocity,
-        ChassisSpeeds fieldRelativeVelocity
-    ) {
+    public static ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
         // Get inputs
-        boolean isHubShot = FieldConstants.inAllianceZone(robotPose);
-        Translation2d target = FieldConstants.getShotTarget(robotPose).toTranslation2d();
-        InterpolatingTreeMap<Double, Rotation2d> hoodAngleMap = isHubShot ? hubHoodAngleMap : lobHoodAngleMap;
-        InterpolatingDoubleTreeMap flywheelSpeedMap = isHubShot ? hubFlywheelSpeedMap : lobFlywheelSpeedMap;
-        InterpolatingDoubleTreeMap timeOfFlightMap = isHubShot ? hubTimeOfFlightMap : lobTimeOfFlightMap;
+        final boolean isHubShot = FieldConstants.inAllianceZone(robotPose);
+        final Translation2d target = FieldConstants.getShotTarget(robotPose).toTranslation2d();
+        final InterpolatingDoubleTreeMap hoodAngleMap = isHubShot ? hubHoodAngleMap : lobHoodAngleMap;
+        final InterpolatingDoubleTreeMap flywheelSpeedMap = isHubShot ? hubFlywheelSpeedMap : lobFlywheelSpeedMap;
+        final InterpolatingDoubleTreeMap timeOfFlightMap = isHubShot ? hubTimeOfFlightMap : lobTimeOfFlightMap;
 
         // Calculate estimated pose while accounting for phase delay
         robotPose =
@@ -160,7 +143,7 @@ public class ShotCalculator {
 
         // Calculate parameters accounted for imparted velocity
         turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-        hoodAngle = hoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+        hoodAngle = hoodAngleMap.get(lookaheadTurretToTargetDistance);
 
         if (lastTurretAngle == null) {
             lastTurretAngle = turretAngle;

@@ -24,10 +24,8 @@ public class Drive extends SubsystemBase {
     private final DriveIO io;
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
 
-    // Viz
     @Getter private final DriveViz viz = new DriveViz();
 
-    // State
     @Setter @Getter private boolean coastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {

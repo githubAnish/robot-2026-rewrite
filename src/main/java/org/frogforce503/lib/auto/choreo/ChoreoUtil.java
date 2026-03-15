@@ -1,11 +1,15 @@
 package org.frogforce503.lib.auto.choreo;
 
+import java.util.Arrays;
+
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public final class ChoreoUtil {
@@ -36,5 +40,13 @@ public final class ChoreoUtil {
             speeds,
             sample.moduleForcesX(),
             sample.moduleForcesY());
+    }
+
+    public static Pose2d[] getPoses(AutoTrajectory... choreoTrajectories) {
+        return
+            Arrays
+                .stream(choreoTrajectories)
+                .flatMap(traj -> Arrays.stream(traj.getRawTrajectory().getPoses()))
+                .toArray(Pose2d[]::new);
     }
 }

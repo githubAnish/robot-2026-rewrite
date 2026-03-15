@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.leds;
 
 import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.signals.RGBWColor;
 
 import edu.wpi.first.wpilibj.util.Color;
@@ -16,6 +15,6 @@ public class LedsConstants {
     public static final SolidColor ALL_LEDS_OFF = new SolidColor(0, 399).withColor(new RGBWColor());
 
     // Season-specific setpoints
-    public static final StrobeAnimation READY_TO_SHOOT = new StrobeAnimation(0, 399).withColor(new RGBWColor(Color.kGreen));
-    public static final SolidColor CAMERA_DISCONNECTED = new SolidColor(0, 399).withColor(new RGBWColor(Color.kRed));
+    public static final SolidColor SHOT_NOT_FEASIBLE = new SolidColor(0, 399).withColor(new RGBWColor(Color.kRed));
+    public static final SolidColor SHOT_FEASIBLE = new SolidColor(0, 399).withColor(new RGBWColor(Color.kGreen));
 }

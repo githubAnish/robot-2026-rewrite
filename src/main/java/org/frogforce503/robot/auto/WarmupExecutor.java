@@ -21,10 +21,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+@SuppressWarnings("unused")
 public class WarmupExecutor {
     private final Drive drive;
     
-    // Constants
     private final String choreoPathSuffix = ".traj";
     private final String pathPlannerPathSuffix = ".path";
 
@@ -44,13 +44,7 @@ public class WarmupExecutor {
                 .ignoringDisable(true));
     }
 
-    // Public methods
-    public void disabledInit() {
-        // NetworkTableInstance.getDefault().flush();
-        // System.gc();
-    }
-
-    public void disabledPeriodic() {
+    public void periodic() {
         warmupPlannedPathGenerator();
         warmupPathPlannerPaths();
         warmupChoreoPaths();

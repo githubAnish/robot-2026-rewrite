@@ -1,22 +1,17 @@
 package org.frogforce503.robot;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
-import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
-import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.auto.WarmupExecutor;
 import org.frogforce503.robot.auto.autos.ShootPreloadGoToNZOnce;
 import org.frogforce503.robot.commands.ClimbSequence;
-import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
+import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
@@ -78,26 +73,17 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonVision;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
-import com.ctre.phoenix6.controls.ControlRequest;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * Main container for robot subsystems, commands, and controller bindings.
  * Use https://www.padcrafter.com to visualize the controller bindings.
  */
-@ExtensionMethod({TriggerUtil.class})
 public class RobotContainer {
     // Subsystems
     private Drive drive;
@@ -116,13 +102,13 @@ public class RobotContainer {
 
     private Leds leds;
 
-    // Auto
-    private final AutoChooser autoChooser;
-    private final WarmupExecutor warmupExecutor;
-
     // Sim
     private final GameViz gameViz;
     private final VisionSimulator visionViz = new VisionSimulator();
+
+    // Auto
+    private final AutoChooser autoChooser;
+    private final WarmupExecutor warmupExecutor;
 
     // Controllers
     private final CommandXboxController driverXbox = new CommandXboxController(0);
@@ -130,7 +116,7 @@ public class RobotContainer {
     // Main Buttons
     final Trigger intakeGround = driverXbox.leftTrigger();
     final Trigger ejectIntake = driverXbox.leftBumper();
-
+    
     final Trigger shootHubOrLob = driverXbox.rightTrigger();
     final Trigger ejectFlywheels = driverXbox.rightBumper();
 
@@ -145,12 +131,14 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-
     final Trigger seedTurretRelativePosition = driverXbox.povLeft();
-    final Trigger toggleAutoAssist = driverXbox.povRight();
 
-    private final LoggedNetworkBoolean autoAssistOverride =
-        new LoggedNetworkBoolean("Auto Assist Override", true); // Auto-aligning
+    // Commands
+    private final TeleopDriveCommand teleopDriveCommand;
+    private final TrackTargetCommand trackTargetCommand;
+
+    // Triggers
+    private final Trigger isShotFeasible;
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -182,23 +170,13 @@ public class RobotContainer {
                             drive::getPose,
                             turret::getRobotRelativeAngleRad,
                             new AprilTagIO[] {
-                                new AprilTagIOPhotonVision(
-                                    CameraName.TURRET_CAMERA
-                                ),
-                                new AprilTagIOPhotonVision(
-                                    CameraName.LEFT_CAMERA
-                                ),
-                                new AprilTagIOPhotonVision(
-                                    CameraName.RIGHT_CAMERA
-                                ),
-                                new AprilTagIOPhotonVision(
-                                    CameraName.BACK_CAMERA
-                                ),
+                                new AprilTagIOPhotonVision(CameraName.TURRET_CAMERA),
+                                new AprilTagIOPhotonVision(CameraName.LEFT_CAMERA),
+                                new AprilTagIOPhotonVision(CameraName.RIGHT_CAMERA),
+                                new AprilTagIOPhotonVision(CameraName.BACK_CAMERA),
                             },
                             new ObjectDetectionIO[] {
-                                new ObjectDetectionIOPhotonVision(
-                                    CameraName.FUEL_CAMERA
-                                )
+                                new ObjectDetectionIOPhotonVision(CameraName.FUEL_CAMERA)
                             });
                 }
                 case PracticeBot -> {
@@ -229,28 +207,13 @@ public class RobotContainer {
                             drive::getPose,
                             turret::getRobotRelativeAngleRad,
                             new AprilTagIO[] {
-                                new AprilTagIOPhotonSim(
-                                    CameraName.TURRET_CAMERA,
-                                    visionViz
-                                ),
-                                new AprilTagIOPhotonSim(
-                                    CameraName.LEFT_CAMERA,
-                                    visionViz
-                                ),
-                                new AprilTagIOPhotonSim(
-                                    CameraName.RIGHT_CAMERA,
-                                    visionViz
-                                ),
-                                new AprilTagIOPhotonSim(
-                                    CameraName.BACK_CAMERA,
-                                    visionViz
-                                ),
+                                new AprilTagIOPhotonSim(CameraName.TURRET_CAMERA, visionViz),
+                                new AprilTagIOPhotonSim(CameraName.LEFT_CAMERA, visionViz),
+                                new AprilTagIOPhotonSim(CameraName.RIGHT_CAMERA, visionViz),
+                                new AprilTagIOPhotonSim(CameraName.BACK_CAMERA, visionViz),
                             },
                             new ObjectDetectionIO[] {
-                                new ObjectDetectionIOPhotonSim(
-                                    CameraName.FUEL_CAMERA,
-                                    visionViz
-                                )
+                                new ObjectDetectionIOPhotonSim(CameraName.FUEL_CAMERA, visionViz)
                             });
                 }
             }
@@ -318,15 +281,37 @@ public class RobotContainer {
         autoChooser = new AutoChooser(drive);
         warmupExecutor = new WarmupExecutor(drive);
 
-        configureBindings();
+        // Initialize commands
+        teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
+        trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob); // Requires turret, hood, and flywheels
+
+        // Initialize triggers
+        isShotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
+
+        // Configure default commands
+        drive.setDefaultCommand(teleopDriveCommand);
+        indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
+        flywheels.setDefaultCommand(trackTargetCommand);
+
+        leds.setDefaultCommand(
+            Commands.either(
+                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
+                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
+                isShotFeasible)
+            .withName("Leds Default Command"));
+
+        // Configure autos & button bindings
+        configureAutos();
+        configureButtonBindings();
     }
 
-    private void configureBindings() {
-        // Create commands (that have / provide dependencies)
-        final TeleopDriveCommand teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        final TrackTargetCommand trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob);  // Requires turret, hood, and flywheels
-        final RunIndexerWhenReady indexerRunCommand = new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, trackTargetCommand::isShotFeasible);
+    private void configureAutos() {
+        autoChooser.addAuto(
+            "Shoot Preload Then Go To NZ Once",
+            new ShootPreloadGoToNZOnce(intakePivot, intakeRoller, feeder, gameViz, isShotFeasible));
+    }
 
+    private void configureButtonBindings() {
         // Create bind functions
         final BiConsumer<Trigger, ShotPreset> bindShotPreset =
             (trigger, shotPreset) ->
@@ -334,17 +319,12 @@ public class RobotContainer {
                     .whileTrue(Commands.runOnce(() -> trackTargetCommand.setShotPreset(shotPreset)))
                     .onFalse(Commands.runOnce(() -> trackTargetCommand.setShotPreset(ShotPreset.NONE)));
 
-        // Apply default commands
-        drive.setDefaultCommand(teleopDriveCommand);
-        indexer.setDefaultCommand(indexerRunCommand);
-        flywheels.setDefaultCommand(trackTargetCommand);
-
         // Bind main controls
         intakeGround.whileTrue(
-            new IntakeFuelFromGround(drive, vision, intakePivot, intakeRoller, gameViz, autoAssistOverride));
+            new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob.whileTrue(
-            new ShootFuelIntoHubOrLob(feeder, gameViz, trackTargetCommand::isShotFeasible));
+            new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasible));
 
         ejectIntake.whileTrue(
             new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
@@ -367,52 +347,6 @@ public class RobotContainer {
         xWheels.onTrue(Commands.runOnce(drive::brake));
 
         seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
-        toggleAutoAssist.onTrue(Commands.runOnce(() -> autoAssistOverride.set(!autoAssistOverride.get())));
-
-        // Triggers
-        Trigger shotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
-
-        // Rumbles controller for 0.25 sec & blinks LEDs for 1 sec once shot feasible
-        shotFeasible
-            .onTrue(
-                Commands.parallel(
-                    rumbleController(0.75, 0.25),
-                    blinkLeds(LedsConstants.READY_TO_SHOOT, 1)
-            ).withName("Driver Rumble Feasible Shot"));
-
-        // Add autos
-        autoChooser.addAuto( // Random test auto
-            "Test",
-            new AutoMode() {
-                @Override
-                public Command getCommand() {
-                    return Commands.runOnce(() -> drive.setPose(GeomUtil.toPose2d(new Translation2d(1.889,4.002))));
-                }
-
-                @Override
-                public List<Pose2d> getPoses() {
-                    return new ArrayList<>(List.of(Pose2d.kZero));
-                }
-        });
-
-        autoChooser.addAuto(
-            "Shoot Preload Then Go To NZ Once",
-            new ShootPreloadGoToNZOnce(drive, vision, intakePivot, intakeRoller, feeder, gameViz, trackTargetCommand::isShotFeasible));
-    }
-
-    private Command rumbleController(double value, double durationSec) {
-        return
-            Commands.run(() -> driverXbox.setRumble(RumbleType.kBothRumble, value))
-                .withTimeout(durationSec)
-                .finallyDo(() -> driverXbox.setRumble(RumbleType.kBothRumble, 0));
-    }
-
-    private Command blinkLeds(ControlRequest pattern, double durationSec) {
-        return
-            Commands.sequence(
-                Commands.runOnce(() -> leds.runPattern(LedsConstants.READY_TO_SHOOT)),
-                Commands.waitSeconds(durationSec),
-                Commands.runOnce(() -> leds.stop()));
     }
 
     public void robotPeriodic() {
@@ -438,18 +372,15 @@ public class RobotContainer {
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
         }
-        warmupExecutor.disabledInit();
     }
 
     public void disabledPeriodic() {
         autoChooser.periodic();
-        warmupExecutor.disabledPeriodic();
+        warmupExecutor.periodic();
         turret.seedRelativePosition();
     }
 
     public void test() {
-        // Schedule the TuneShot command (helps tune shotmaps) by uncommenting the following 2 lines
-        // RobotModeTriggers.teleop().onTrue(
-        //     new TuneShot(drive, turret, hood, flywheels, gameViz, true).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        
     }
 }

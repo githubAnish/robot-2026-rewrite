@@ -1,6 +1,7 @@
 package org.frogforce503.robot.constants.field;
 
-import org.frogforce503.lib.math.GeomUtil;
+import java.util.List;
+
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.Constants;
 
@@ -49,18 +50,15 @@ public class FieldConstants {
                 : robotPose.getX() < Lines.blueInitLineX;
     }
 
+    /**
+     * Returns the hub shot pose when the robot is in the alliance zone;
+     * otherwise returns the nearest lob shot pose (Depot or Outpost).
+     */
     public static Translation3d getShotTarget(Pose2d robotPose) {
-        boolean inAllianceZone = inAllianceZone(robotPose);
-        boolean closerToDepot =
-            robotPose.getTranslation().getDistance(Depot.getLobShotPose()) < robotPose.getTranslation().getDistance(Outpost.getLobShotPose());
-
-        if (inAllianceZone) {
-            return Hub.getHubShotPose();
-        } else if (closerToDepot) {
-            return new Translation3d(Depot.getLobShotPose());
-        } else {
-            return new Translation3d(Outpost.getLobShotPose());
-        }
+        return
+            inAllianceZone(robotPose)
+                ? Hub.getHubShotPose()
+                : new Translation3d(robotPose.getTranslation().nearest(List.of(Depot.getLobShotPose(), Outpost.getLobShotPose())));
     }
 
     public static class Lines {
@@ -165,32 +163,26 @@ public class FieldConstants {
     }
 
     public static class Tower {
-        public static final Pose2d blueCenter;
-        public static final Pose2d blueLeft;
-        public static final Pose2d blueRight;
-
-        public static final Pose2d redCenter;
-        public static final Pose2d redLeft;
-        public static final Pose2d redRight;
+        public static final Rectangle2d blue;
+        public static final Rectangle2d red;
 
         static {
             final double rungLength = Units.inchesToMeters(41.1); // from field CAD
             final double centerTagToTowerX = Units.inchesToMeters(41.86); // from field CAD
 
             // Blue Tower
-            blueCenter = getTagPose2d(31).plus(GeomUtil.toTransform2d(centerTagToTowerX, 0));
-            blueLeft = blueCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
-            blueRight = blueCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
+            Pose2d blueTowerTag = getTagPose2d(31);
+            Translation2d blueBackLeftCorner = blueTowerTag.getTranslation().plus(new Translation2d(0, rungLength / 2));
+            Translation2d blueFrontRightCorner = blueTowerTag.getTranslation().plus(new Translation2d(centerTagToTowerX, -rungLength / 2));
+
+            blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
 
             // Red Tower
-            redCenter = getTagPose2d(15).plus(GeomUtil.toTransform2d(centerTagToTowerX, 0));
-            redLeft = redCenter.plus(GeomUtil.toTransform2d(0, rungLength / 2));
-            redRight = redCenter.plus(GeomUtil.toTransform2d(0, -rungLength / 2));
-        }
+            Pose2d redTowerTag = getTagPose2d(15);
+            Translation2d redBackLeftCorner = redTowerTag.getTranslation().plus(new Translation2d(0, -rungLength / 2));
+            Translation2d redFrontRightCorner = redTowerTag.getTranslation().plus(new Translation2d(-centerTagToTowerX, rungLength / 2));
 
-        /** Interpolated climb pose between left (t = 0) and right (t = 1) poses on tower. */
-        public static Pose2d getClimbPose(double t) {
-            return isRed() ? redLeft.interpolate(redRight, t) : blueLeft.interpolate(blueRight, t);
+            red = new Rectangle2d(redBackLeftCorner, redFrontRightCorner);
         }
     }
 
@@ -201,8 +193,6 @@ public class FieldConstants {
         public static final Rectangle2d redLeft;
         public static final Rectangle2d redRight;
 
-        private static final Translation2d duckOffset = new Translation2d(Units.inchesToMeters(12), 0);
-
         static {
             final double trenchLength = Units.inchesToMeters(49.0);
             final double trenchWidth = Units.inchesToMeters(63.0);
@@ -211,37 +201,25 @@ public class FieldConstants {
             Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth);
             Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(trenchLength, -trenchWidth));
 
-            blueLeft =
-                new Rectangle2d(
-                    blueLeftBackLeftCorner.minus(duckOffset),
-                    blueLeftFrontRightCorner.plus(duckOffset));
+            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
 
             // Blue Right Trench
             Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, 0.0);
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(trenchLength, trenchWidth));
 
-            blueRight =
-                new Rectangle2d(
-                    blueRightBackRightCorner.minus(duckOffset),
-                    blueRightFrontLeftCorner.plus(duckOffset));
+            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
 
             // Red Left Trench
             Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, 0.0);
             Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-trenchLength, trenchWidth));
 
-            redLeft =
-                new Rectangle2d(
-                    redLeftBackLeftCorner.plus(duckOffset),
-                    redLeftFrontRightCorner.minus(duckOffset));
+            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
 
             // Red Right Trench
             Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth);
             Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-trenchLength, -trenchWidth));
 
-            redRight =
-                new Rectangle2d(
-                    redRightBackRightCorner.plus(duckOffset),
-                    redRightFrontLeftCorner.minus(duckOffset));
+            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
         }
 
         private static boolean contains(Rectangle2d trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {

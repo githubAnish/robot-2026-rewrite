@@ -50,18 +50,6 @@ public class DrivePlannedPath extends Command {
         timer.reset();
         controller.reset();
         timer.start();
-
-        var poses =
-            trajectory
-                .getDriveTrajectory()
-                .getStates()
-                .stream()
-                .map(state -> state.poseMeters)
-                .toArray(Pose2d[]::new);
-
-        drive.getViz()
-            .getObject("CurrentTrajectory")
-            .setPoses(poses);
     }
 
     @Override
@@ -112,10 +100,6 @@ public class DrivePlannedPath extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        drive.getViz()
-            .getObject("CurrentTrajectory")
-            .setPoses();
-
         if (willStopAtEnd) {
             drive.stop();
         }

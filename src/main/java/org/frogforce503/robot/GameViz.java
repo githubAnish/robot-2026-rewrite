@@ -66,11 +66,16 @@ public class GameViz {
         this.flywheels = flywheels;
         this.climberDeploy = climberDeploy;
         this.climberHook = climberHook;
-
+        
         this.visionViz = visionViz;
 
         if (RobotBase.isSimulation()) {
-            this.intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
+            intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
+            
+            // Fill preload fuel
+            for (int i = 0; i < 8; i++) {
+                intakeSimulation.addGamePieceToIntake();
+            }
         }
     }
 

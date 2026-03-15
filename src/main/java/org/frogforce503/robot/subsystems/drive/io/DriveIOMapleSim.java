@@ -19,11 +19,9 @@ import lombok.Getter;
 
 @SuppressWarnings("unchecked")
 public class DriveIOMapleSim extends DriveIOPhoenix {
-    // Requirements
     @Getter private final MapleSimSwerveDrivetrain drivetrain;
     private Notifier simNotifier;
 
-    // Constants
     private static final double kSimLoopPeriod = 0.002; // 2 ms
 
     public DriveIOMapleSim(SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>... modules) {

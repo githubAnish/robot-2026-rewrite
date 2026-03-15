@@ -14,23 +14,23 @@ public final class TurretConstants {
     // Hardware / Configuration
     public static final int motorId = 6;
 
-    public static final double motorMechanismRatio = 250.0;
+    public static final double motorMechanismRatio = 50.0;
     public static final double absoluteEncoderMechanismRatio = 1.0;
     
     public static final boolean motorInverted = true;
-    public static final boolean absoluteEncoderInverted = true;
+    public static final boolean absoluteEncoderInverted = false;
 
     public static final int statorCurrentLimit = 35;
 
     public static final double relativeEncoderZeroOffsetRad = RobotBase.isSimulation() ? 0.0 : Units.degreesToRadians(90);
-    public static final double absoluteEncoderZeroOffset = 0.1788;
+    public static final double absoluteEncoderZeroOffset = 0.1789;
 
-    public static final PIDConfig kPID = new PIDConfig(8, 0, 0.2);
-    public static final FFConfig kFF = new FFConfig(0, 0, 8, 0);
-    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(720));
+    public static final PIDConfig kPID = new PIDConfig(4, 0, 0);
+    public static final FFConfig kFF = new FFConfig();
+    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(720), Units.degreesToRadians(1440));
     
-    public static final double minAngle = Units.degreesToRadians(-132.0); // measured from 0 deg (which is when turret faces opposite the intake)
-    public static final double maxAngle = Units.degreesToRadians(200.0); // measured from 0 deg (which is when turret faces opposite the intake)
+    public static final double minAngle = Units.degreesToRadians(-223.0); // measured from 0 deg (when turret faces opposite intake)
+    public static final double maxAngle = Units.degreesToRadians(280.0); // measured from 0 deg (when turret faces opposite intake)
 
     public static final Transform3d robotToTurret =
         new Transform3d(

@@ -35,7 +35,7 @@ public class TrackTargetCommand extends Command {
     private final BooleanSupplier isShootingSupplier;
 
     // Constants
-    private final double trenchDuckLookaheadSec = 1.0;
+    private final double trenchDuckLookaheadSec = 0.5;
 
     // State
     @Setter private ShotPreset shotPreset = ShotPreset.NONE;
@@ -133,9 +133,10 @@ public class TrackTargetCommand extends Command {
                 break;
         }
 
-        if (underTrench) { // Hood ducks under trench
+        if (underTrench) {
             hoodAngleRad = HoodConstants.DUCK_UNDER_TRENCH;
             hoodVelocityRadPerSec = 0.0;
+            isShotFeasible = false; // Don't shoot under trench
         }
 
         if (!isShootingSupplier.getAsBoolean()) { // Flywheels idle if not shooting

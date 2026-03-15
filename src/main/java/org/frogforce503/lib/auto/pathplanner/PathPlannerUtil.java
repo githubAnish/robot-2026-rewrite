@@ -1,6 +1,7 @@
 package org.frogforce503.lib.auto.pathplanner;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.lib.util.ErrorUtil;
@@ -15,6 +16,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
+
+import edu.wpi.first.math.geometry.Pose2d;
 
 public final class PathPlannerUtil {
     private PathPlannerUtil() {}
@@ -68,5 +71,13 @@ public final class PathPlannerUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static Pose2d[] getPoses(PathPlannerPath... pathPlannerPaths) {
+        return
+            Arrays
+                .stream(pathPlannerPaths)
+                .flatMap(traj -> traj.getPathPoses().stream())
+                .toArray(Pose2d[]::new);
     }
 }

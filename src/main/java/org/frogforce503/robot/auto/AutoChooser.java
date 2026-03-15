@@ -1,9 +1,8 @@
 package org.frogforce503.robot.auto;
 
-import java.util.List;
-
 import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
+import org.frogforce503.robot.auto.test.PutRobotInsideMapleSimField;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -11,29 +10,32 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class AutoChooser {
     private final Drive drive;
-
     private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
 
     private Command autoCommand;
     private AutoMode lastSelectedAuto;
 
-    public AutoChooser(
-        Drive drive
-    ) {
+    public AutoChooser(Drive drive) {
         this.drive = drive;
 
         // Configure PathPlanner
         PathPlannerUtil.configureAutoBuilder(drive);
         Pathfinding.setPathfinder(new LocalADStarAK());
+
+        // Configure autos
+        if (RobotBase.isSimulation()) {
+            routineChooser.addDefaultOption("Put Robot Inside MapleSim Field", new PutRobotInsideMapleSimField(drive));
+        }
     }
 
-    public void addAuto(String autoName, AutoMode auto) {
-        routineChooser.addOption(autoName, auto);
+    public void addAuto(String name, AutoMode autoMode) {
+        routineChooser.addOption(name, autoMode);
     }
 
     public void startAuto() {
@@ -43,9 +45,10 @@ public class AutoChooser {
             return;
         }
 
-        final String autoName = selectedAuto.getClass().getSimpleName();
-
-        autoCommand = selectedAuto.getCommand().withName(autoName);
+        autoCommand =
+            selectedAuto
+                .getCommand()
+                .withName(selectedAuto.getClass().getSimpleName());
 
         if (autoCommand != null) {
             CommandScheduler.getInstance().schedule(autoCommand);
@@ -59,12 +62,10 @@ public class AutoChooser {
             logTrajectory(); // Clear poses
 
         } else if (selectedAuto != lastSelectedAuto) {
-            List<Pose2d> trajectoryPoses = selectedAuto.getPoses();
-            Pose2d start = trajectoryPoses.get(0);
+            Pose2d[] trajectoryPoses = selectedAuto.getPoses();
 
-            logTrajectory(trajectoryPoses.toArray(Pose2d[]::new));
-        
-            drive.setPose(start);
+            drive.setPose(trajectoryPoses[0]); // Set drive pose to trajectory start
+            logTrajectory(trajectoryPoses);
         }
 
         lastSelectedAuto = selectedAuto;

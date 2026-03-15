@@ -15,14 +15,9 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
 public class DriveViz {
-    // Requirements
     private final Field2d fieldViz = new Field2d();
 
-    // Constants
-    private final boolean logModules = true;
-    private final double maxSpeed = DriveConstants.maxLinearSpeed;
-
-    // Module viz
+    private final boolean logModules = false;
     private final LoggedMechanism2d[] moduleMechanisms;
     private final LoggedMechanismLigament2d[] moduleSpeeds;
     private final LoggedMechanismLigament2d[] moduleDirections;
@@ -35,27 +30,24 @@ public class DriveViz {
                 new LoggedMechanism2d(1, 1),
                 new LoggedMechanism2d(1, 1),
                 new LoggedMechanism2d(1, 1),
-                new LoggedMechanism2d(1, 1)
-            };
+                new LoggedMechanism2d(1, 1)};
 
         moduleSpeeds =
             new LoggedMechanismLigament2d[] {
                 createModuleSpeedLigament(0),
                 createModuleSpeedLigament(1),
                 createModuleSpeedLigament(2),
-                createModuleSpeedLigament(3),
-            };
+                createModuleSpeedLigament(3)};
 
         moduleDirections =
             new LoggedMechanismLigament2d[] {
                 createModuleDirectionLigament(0),
                 createModuleDirectionLigament(1),
                 createModuleDirectionLigament(2),
-                createModuleDirectionLigament(3),
-            };
+                createModuleDirectionLigament(3)};
     }
 
-    /** Gets the field object on Field2d, creating it if needed. */
+    /** Gets the field object on Field2d, creating it before if needed. */
     public FieldObject2d getObject(String name) {
         return fieldViz.getObject(name);
     }
@@ -90,7 +82,7 @@ public class DriveViz {
             for (int i = 0; i < 4; ++i) {
                 moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
                 moduleDirections[i].setAngle(state.ModuleStates[i].angle);
-                moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * maxSpeed));
+                moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * DriveConstants.maxLinearSpeed));
             }
 
             Logger.recordOutput("Drive/Modules/Viz/FrontLeft", moduleMechanisms[0]);

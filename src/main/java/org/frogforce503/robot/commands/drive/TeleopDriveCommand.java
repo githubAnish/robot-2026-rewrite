@@ -21,7 +21,6 @@ import org.littletonrobotics.junction.Logger;
 
 @ExtensionMethod(JoystickUtil.class)
 public class TeleopDriveCommand extends Command {
-    // Requirements
     private final Drive drive;
     private final CommandXboxController xboxController;
 
@@ -55,14 +54,6 @@ public class TeleopDriveCommand extends Command {
         headingHoldController.setTolerance(headingHoldTolerance);
 
         addRequirements(drive);
-    }
-
-    public void toggleSlowMode() {
-        slowMode = !slowMode;
-    }
-
-    public void toggleRobotRelative() {
-        robotRelative = !robotRelative;
     }
 
     @Override
@@ -137,6 +128,14 @@ public class TeleopDriveCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         drive.stop();
+    }
+
+    public void toggleSlowMode() {
+        slowMode = !slowMode;
+    }
+
+    public void toggleRobotRelative() {
+        robotRelative = !robotRelative;
     }
 
     private void runFieldRelativeVelocity(ChassisSpeeds speeds) {

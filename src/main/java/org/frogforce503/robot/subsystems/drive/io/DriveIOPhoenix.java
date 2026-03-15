@@ -32,14 +32,14 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     private final StatusSignal<Angle> gyroYaw;
 
     // Requests
-    public static final ApplyRobotSpeeds APPLY_ROBOT_SPEEDS =
+    private final ApplyRobotSpeeds APPLY_ROBOT_SPEEDS =
         new ApplyRobotSpeeds()
             .withCenterOfRotation(DriveConstants.centerOfRotation)
             .withDriveRequestType(DriveRequestType.Velocity)
             .withSteerRequestType(SteerRequestType.MotionMagicExpo)
             .withDesaturateWheelSpeeds(true);
 
-    public static final SysIdSwerveTranslation RUN_CHARACTERIZATION = new SysIdSwerveTranslation();
+    private final SysIdSwerveTranslation RUN_CHARACTERIZATION = new SysIdSwerveTranslation();
 
     public DriveIOPhoenix(SwerveModuleConstants<?, ?, ?>... modules) {
         super(
@@ -78,8 +78,8 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
         inputs.gyroAngle = Rotation2d.fromDegrees(gyroYaw.getValueAsDouble());
 
         for (int i = 0; i < 4; i++) {
-            inputs.drivePositionsRad[i] = Units.rotationsToRadians(drivePositionSignals[0].getValueAsDouble());
-            inputs.driveVelocitiesRadPerSec[i] = Units.rotationsToRadians(driveVelocitySignals[0].getValueAsDouble());
+            inputs.drivePositionsRad[i] = Units.rotationsToRadians(drivePositionSignals[i].getValueAsDouble());
+            inputs.driveVelocitiesRadPerSec[i] = Units.rotationsToRadians(driveVelocitySignals[i].getValueAsDouble());
         }
     }
 

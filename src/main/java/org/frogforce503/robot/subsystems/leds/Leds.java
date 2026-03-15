@@ -38,8 +38,4 @@ public class Leds extends SubsystemBase {
     public void runPattern(ControlRequest pattern) {
         io.runPattern(pattern);
     }
-
-    public void cameraDisconnected() {
-        io.runPattern(LedsConstants.CAMERA_DISCONNECTED);
-    }
 }

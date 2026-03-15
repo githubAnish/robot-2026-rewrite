@@ -14,7 +14,12 @@ public class RunIndexerWhenReady extends Command {
     private final BooleanSupplier isShootingSupplier;
     private final BooleanSupplier isShotFeasibleSupplier;
 
-    public RunIndexerWhenReady(Indexer indexer, BooleanSupplier isIntakingSupplier, BooleanSupplier isShootingSupplier, BooleanSupplier isShotFeasibleSupplier) {
+    public RunIndexerWhenReady(
+        Indexer indexer,
+        BooleanSupplier isIntakingSupplier,
+        BooleanSupplier isShootingSupplier,
+        BooleanSupplier isShotFeasibleSupplier
+    ) {
         this.indexer = indexer;
         
         this.isIntakingSupplier = isIntakingSupplier;
