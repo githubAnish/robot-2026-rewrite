@@ -9,6 +9,7 @@
       "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
       "/AdvantageKit/RealOutputs/PhotonAlerts": "Alerts",
       "/AdvantageKit/RealOutputs/SuperstructureViz/2D": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/SuperstructureViz/asdas": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Alliance Color": "String Chooser",
@@ -33,6 +34,11 @@
         }
       },
       "/SmartDashboard/Field": {
+        "Trajectory": {
+          "length": 0.25,
+          "weight": 3.0,
+          "width": 0.25
+        },
         "bottom": 1914,
         "height": 8.069275856018066,
         "left": 245,

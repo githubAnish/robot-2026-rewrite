@@ -128,7 +128,7 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-    final Trigger seedTurretRelativePosition = driverXbox.povLeft();
+    final Trigger seedTurretRelativePosition = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
