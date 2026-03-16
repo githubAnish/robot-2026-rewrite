@@ -101,7 +101,7 @@ public class FieldConstants {
         public static final Pose2d blue = getTagPose2d(29);
         public static final Pose2d red = getTagPose2d(13);
 
-        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(26), Units.inchesToMeters(18));
+        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(36), Units.inchesToMeters(18));
 
         private static Translation2d getLobShotPose() {
             return
@@ -115,7 +115,7 @@ public class FieldConstants {
         public static final Rectangle2d blue;
         public static final Rectangle2d red;
 
-        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(26), 0);
+        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(36), 0);
 
         static {
             final double depotLength = Units.inchesToMeters(26.7);
