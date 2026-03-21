@@ -14,6 +14,7 @@ import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
+import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
@@ -304,7 +305,7 @@ public class RobotContainer {
 
     private void configureAutos() {
         autoChooser.addAuto(
-            "Shoot Preload Then Go To NZ Once",
+            "Shoot Preload, Go To NZ Once, Shoot",
             new ShootPreloadGoToNZOnce(intakePivot, intakeRoller, feeder, gameViz, isShotFeasible));
     }
 
@@ -317,24 +318,27 @@ public class RobotContainer {
                     .onFalse(Commands.runOnce(() -> trackTargetCommand.setShotPreset(ShotPreset.NONE)));
 
         // Bind main controls
-        intakeGround.whileTrue(
-            new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
+        intakeGround
+            .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
-        shootHubOrLob.whileTrue(
-            new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasible));
+        shootHubOrLob
+            .whileTrue(new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasible))
+            .and(intakeGround.negate())
+            .whileTrue(
+                Commands.repeatingSequence(
+                    new ShakeIntake(intakePivot, intakeRoller).withTimeout(0.5),
+                    Commands.waitSeconds(0.5)
+                ));
 
-        ejectIntake.whileTrue(
-            new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
-            
-        ejectFlywheels.whileTrue(
-            new EjectFuelFromShooter(feeder, flywheels));
+        ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
+        ejectFlywheels.whileTrue(new EjectFuelFromShooter(feeder, flywheels));
 
         bindShotPreset.accept(setBatterPreset, ShotPreset.BATTER);
         bindShotPreset.accept(setTrenchPreset, ShotPreset.TRENCH);
         bindShotPreset.accept(setDepotPreset, ShotPreset.DEPOT);
 
         climb.onTrue(
-            new ClimbSequence(drive, intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook, gameViz, climb)
+            new ClimbSequence(turret, hood, flywheels, climberDeploy, climberHook, gameViz, climb)
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other commands from interrupting (including itself re-scheduling)
 
         // Bind override controls

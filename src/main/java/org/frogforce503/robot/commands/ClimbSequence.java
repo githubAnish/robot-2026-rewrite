@@ -7,15 +7,9 @@ import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeployConstants;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
 import org.frogforce503.robot.subsystems.climberhook.ClimberHookConstants;
-import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
@@ -24,11 +18,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimbSequence extends Command {
-    private final Drive drive;
-    private final IntakePivot intakePivot;
-    private final IntakeRoller intakeRoller;
-    private final Indexer indexer;
-    private final Feeder feeder;
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
@@ -55,11 +44,6 @@ public class ClimbSequence extends Command {
     }
     
     public ClimbSequence(
-        Drive drive,
-        IntakePivot intakePivot,
-        IntakeRoller intakeRoller,
-        Indexer indexer,
-        Feeder feeder,
         Turret turret,
         Hood hood,
         Flywheels flywheels,
@@ -68,11 +52,6 @@ public class ClimbSequence extends Command {
         GameViz gameViz,
         BooleanSupplier advanceButton
     ) {
-        this.drive = drive;
-        this.intakePivot = intakePivot;
-        this.intakeRoller = intakeRoller;
-        this.indexer = indexer;
-        this.feeder = feeder;
         this.turret = turret;
         this.flywheels = flywheels;
         this.hood = hood;
@@ -82,7 +61,7 @@ public class ClimbSequence extends Command {
 
         this.advanceButton = advanceButton;
 
-        addRequirements(drive, intakePivot, intakeRoller, indexer, feeder, turret, hood, flywheels, climberDeploy, climberHook);
+        addRequirements(turret, hood, flywheels, climberDeploy, climberHook);
     }
 
     @Override
@@ -95,9 +74,6 @@ public class ClimbSequence extends Command {
     public void execute() {
         switch (currentState) {
             case DISABLE_SUPERSTRUCTURE:
-                intakePivot.setAngle(IntakePivotConstants.STOW);
-                intakeRoller.stop();
-                indexer.stop();
                 turret.setRobotRelativeAngle(TurretConstants.CLIMB, 0.0);
                 flywheels.stop();
                 hood.setAngle(HoodConstants.CLIMB);
@@ -219,11 +195,6 @@ public class ClimbSequence extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        drive.stop();
-        intakePivot.stop();
-        intakeRoller.stop();
-        indexer.stop();
-        feeder.stop();
         turret.stop();
         hood.stop();
         flywheels.stop();

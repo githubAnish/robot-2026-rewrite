@@ -16,6 +16,23 @@ public final class SparkUtil {
             burnFlash ? PersistMode.kPersistParameters : PersistMode.kNoPersistParameters);
     }
 
+    /** <p> Changes the filtering for an internal encoder for a Spark Max or Spark Flex (depends on {@code isSparkFlex}). </p>
+     *  <p> See https://www.chiefdelphi.com/t/psa-rev-spark-default-velocity-filtering-is-still-really-bad-for-flywheels/514567. </p>
+     */
+    public static <C extends SparkBaseConfig> void optimizeRelativeEncoderFilter(C config, boolean isSparkFlex) {
+        if (isSparkFlex) { // Spark Flex uses quadrature internal encoder
+            config
+                .encoder
+                    .quadratureMeasurementPeriod(5)
+                    .quadratureAverageDepth(2);
+        } else { // Spark Max uses hall-effect internal encoders, with UVW signal output
+            config
+                .encoder
+                    .uvwMeasurementPeriod(10)
+                    .uvwAverageDepth(2);
+        }
+    }
+
     /** Optimizes motor signals to limit unnecessary data over CAN. */
     public static <C extends SparkBaseConfig> void optimizeSignals(C config, boolean hasAbsoluteEncoder, boolean hasExternalOrAlternateEncoder) {
         config

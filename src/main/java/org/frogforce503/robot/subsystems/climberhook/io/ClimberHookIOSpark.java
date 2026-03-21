@@ -58,9 +58,9 @@ public class ClimberHookIOSpark implements ClimberHookIO {
         config
             .encoder
                 .positionConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (ClimberHookConstants.sprocketPitchDiameter * Math.PI)) // convert rotations to meters
-                .velocityConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (ClimberHookConstants.sprocketPitchDiameter * Math.PI) / 60) // convert RPM to meters/sec
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+                .velocityConversionFactor((1 / ClimberHookConstants.mechanismRatio) * (ClimberHookConstants.sprocketPitchDiameter * Math.PI) / 60); // convert RPM to meters/sec
+                
+        SparkUtil.optimizeRelativeEncoderFilter(config, false);
 
         config
             .closedLoop

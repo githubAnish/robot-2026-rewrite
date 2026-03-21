@@ -49,9 +49,9 @@ public class TurretIOSpark implements TurretIO {
         config
             .encoder
                 .positionConversionFactor((1 / TurretConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
-                .velocityConversionFactor((1 / TurretConstants.motorMechanismRatio) * (2 * Math.PI) / 60) // convert RPM to rad/sec
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+                .velocityConversionFactor((1 / TurretConstants.motorMechanismRatio) * (2 * Math.PI) / 60); // convert RPM to rad/sec
+                
+        SparkUtil.optimizeRelativeEncoderFilter(config, false);
 
         config
             .absoluteEncoder
