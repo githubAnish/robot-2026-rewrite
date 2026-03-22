@@ -10,7 +10,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
-public final class TurretConstants {
+public class TurretConstants {
     // Hardware / Configuration
     public static final int motorId = 6;
 
@@ -20,7 +20,7 @@ public final class TurretConstants {
     public static final boolean motorInverted = true;
     public static final boolean absoluteEncoderInverted = false;
 
-    public static final int statorCurrentLimit = 35;
+    public static final int statorCurrentLimit = 80;
 
     public static final double relativeEncoderZeroOffsetRad = RobotBase.isSimulation() ? 0.0 : Units.degreesToRadians(90);
     public static final double absoluteEncoderZeroOffset = 0.1789;

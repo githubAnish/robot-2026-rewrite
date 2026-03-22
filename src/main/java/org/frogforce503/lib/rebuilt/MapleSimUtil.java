@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
@@ -39,13 +40,6 @@ public class MapleSimUtil {
                     -FieldConstants.Depot.blue.getXWidth() / 2,
                     FieldConstants.Depot.blue.getYWidth() / 2));
 
-    private static final Translation2d redDepotBottomLeftCorner =
-        FieldConstants.Depot.red.getCenter().getTranslation()
-            .plus(
-                new Translation2d(
-                    FieldConstants.Depot.red.getXWidth() / 2,
-                    -FieldConstants.Depot.red.getYWidth() / 2));
-
     private static final double fuelDiameter = Units.inchesToMeters(5.91);
     
     // Intake Constants
@@ -78,19 +72,11 @@ public class MapleSimUtil {
         // Add depot fuel
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 6; y++) {
-                Translation2d fuelPosition = Translation2d.kZero;
-
-                if (FieldConstants.isRed()) {
-                    fuelPosition =
-                        redDepotBottomLeftCorner
-                            .plus(new Translation2d(-fuelDiameter / 2, fuelDiameter + Units.inchesToMeters(0.5))) // bottom left corner to bottom left fuel offset
-                            .plus(new Translation2d(-fuelDiameter * x, fuelDiameter * y));
-                } else {
-                    fuelPosition =
+                Translation2d fuelPosition =
+                    AllianceFlipUtil.apply(
                         blueDepotBottomLeftCorner
                             .plus(new Translation2d(fuelDiameter / 2, -(fuelDiameter + Units.inchesToMeters(0.5)))) // bottom left corner to bottom left fuel offset
-                            .plus(new Translation2d(fuelDiameter * x, -fuelDiameter * y));
-                }
+                            .plus(new Translation2d(fuelDiameter * x, -fuelDiameter * y)));
 
                 SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(fuelPosition));
             }

@@ -76,7 +76,7 @@ public class ClimbSequence extends Command {
             case DISABLE_SUPERSTRUCTURE:
                 turret.setRobotRelativeAngle(TurretConstants.CLIMB, 0.0);
                 flywheels.stop();
-                hood.setAngle(HoodConstants.CLIMB);
+                hood.setAngle(HoodConstants.CLIMB, 0.0);
 
                 if (RobotBase.isSimulation()) {
                     gameViz.setRobotHeightMeters(0.0);

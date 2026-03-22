@@ -2,6 +2,8 @@ package org.frogforce503.robot.constants.field;
 
 import java.util.List;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.Constants;
 
@@ -44,10 +46,7 @@ public class FieldConstants {
     }
 
     public static boolean inAllianceZone(Pose2d robotPose) {
-        return
-            isRed()
-                ? robotPose.getX() > Lines.redInitLineX
-                : robotPose.getX() < Lines.blueInitLineX;
+        return AllianceFlipUtil.applyX(robotPose.getX()) < Lines.blueInitLineX;
     }
 
     /**
@@ -62,60 +61,40 @@ public class FieldConstants {
     }
 
     public static class Lines {
-        public static final double blueInitLineX;
-        public static final double redInitLineX;
-
-        static {
-            final double allianceWallToBlueInitLine = Units.inchesToMeters(156.8);
-            blueInitLineX = allianceWallToBlueInitLine;
-
-            final double allianceWallToRedInitLine = Units.inchesToMeters(156.8);
-            redInitLineX = fieldLength - allianceWallToRedInitLine;
-        }
+        public static final double blueInitLineX = Units.inchesToMeters(156.8); // Alliance Wall To Init Line
     }
 
     public static class Hub {
         public static final Translation3d blueCenter;
-        public static final Translation3d redCenter;
-
         public static final Translation3d blueShotPose;
-        public static final Translation3d redShotPose;
 
         static {
             final double hubHeight = Units.inchesToMeters(72.0);
             final double hubHeightToShotHeight = Units.inchesToMeters(10.0);
 
             blueCenter = new Translation3d(getTagPose2d(18).getX(), getTagPose2d(26).getY(), hubHeight);
-            redCenter = new Translation3d(getTagPose2d(2).getX(), getTagPose2d(10).getY(), hubHeight);
-
             blueShotPose = blueCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
-            redShotPose = redCenter.plus(new Translation3d(0.0, 0.0, -hubHeightToShotHeight));
         }
 
         private static Translation3d getHubShotPose() {
-            return isRed() ? redShotPose : blueShotPose;
+            return AllianceFlipUtil.apply(blueShotPose);
         }
     }
 
     public static class Outpost {
         public static final Pose2d blue = getTagPose2d(29);
-        public static final Pose2d red = getTagPose2d(13);
-
-        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(36), Units.inchesToMeters(18));
 
         private static Translation2d getLobShotPose() {
             return
-                isRed()
-                    ? red.getTranslation().minus(lobShotPoseOffset)
-                    : blue.getTranslation().plus(lobShotPoseOffset);
+                AllianceFlipUtil.apply(
+                    blue
+                        .plus(GeomUtil.toTransform2d(Units.inchesToMeters(36), Units.inchesToMeters(18))) // Lob Shot Pose Offset
+                        .getTranslation());
         }
     }
 
     public static class Depot {
         public static final Rectangle2d blue;
-        public static final Rectangle2d red;
-
-        private static final Translation2d lobShotPoseOffset = new Translation2d(Units.inchesToMeters(36), 0);
 
         static {
             final double depotLength = Units.inchesToMeters(26.7);
@@ -127,19 +106,15 @@ public class FieldConstants {
             Translation2d blueFrontRightCorner = blueBackLeftCorner.plus(new Translation2d(depotLength, -depotWidth));
 
             blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
-
-            // Red Depot
-            Translation2d redBackLeftCorner = new Translation2d(fieldLength, wallToDepotY);
-            Translation2d redFrontRightCorner = redBackLeftCorner.plus(new Translation2d(-depotLength, depotWidth));
-
-            red = new Rectangle2d(redBackLeftCorner, redFrontRightCorner);
         }
 
         private static Translation2d getLobShotPose() {
             return
-                isRed()
-                    ? red.getCenter().getTranslation().minus(lobShotPoseOffset)
-                    : blue.getCenter().getTranslation().plus(lobShotPoseOffset);
+                AllianceFlipUtil.apply(
+                    blue
+                        .getCenter()
+                        .plus(GeomUtil.toTransform2d(Units.inchesToMeters(36), 0)) // Lob Shot Pose Offset
+                        .getTranslation());
         }
     }
 
@@ -164,25 +139,16 @@ public class FieldConstants {
 
     public static class Tower {
         public static final Rectangle2d blue;
-        public static final Rectangle2d red;
 
         static {
             final double rungLength = Units.inchesToMeters(41.1); // from field CAD
             final double centerTagToTowerX = Units.inchesToMeters(41.86); // from field CAD
 
-            // Blue Tower
             Pose2d blueTowerTag = getTagPose2d(31);
             Translation2d blueBackLeftCorner = blueTowerTag.getTranslation().plus(new Translation2d(0, rungLength / 2));
             Translation2d blueFrontRightCorner = blueTowerTag.getTranslation().plus(new Translation2d(centerTagToTowerX, -rungLength / 2));
 
             blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
-
-            // Red Tower
-            Pose2d redTowerTag = getTagPose2d(15);
-            Translation2d redBackLeftCorner = redTowerTag.getTranslation().plus(new Translation2d(0, -rungLength / 2));
-            Translation2d redFrontRightCorner = redTowerTag.getTranslation().plus(new Translation2d(-centerTagToTowerX, rungLength / 2));
-
-            red = new Rectangle2d(redBackLeftCorner, redFrontRightCorner);
         }
     }
 
@@ -210,16 +176,10 @@ public class FieldConstants {
             blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
 
             // Red Left Trench
-            Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, 0.0);
-            Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-trenchLength, trenchWidth));
-
-            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
+            redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);
 
             // Red Right Trench
-            Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth);
-            Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-trenchLength, -trenchWidth));
-
-            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
+            redRight = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueRight);
         }
 
         private static boolean contains(Rectangle2d trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
@@ -262,16 +222,10 @@ public class FieldConstants {
             blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
 
             // Red Left Bump
-            Translation2d redLeftBackLeftCorner = new Translation2d(Lines.redInitLineX, trenchWidth);
-            Translation2d redLeftFrontRightCorner = redLeftBackLeftCorner.plus(new Translation2d(-bumpLength, bumpWidth));
-
-            redLeft = new Rectangle2d(redLeftBackLeftCorner, redLeftFrontRightCorner);
+            redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);
 
             // Red Right Bump
-            Translation2d redRightBackRightCorner = new Translation2d(Lines.redInitLineX, fieldWidth - trenchWidth);
-            Translation2d redRightFrontLeftCorner = redRightBackRightCorner.plus(new Translation2d(-bumpLength, -bumpWidth));
-
-            redRight = new Rectangle2d(redRightBackRightCorner, redRightFrontLeftCorner);
+            redRight = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueRight);
         }
 
         public static boolean contains(Translation2d translation) {

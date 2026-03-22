@@ -9,7 +9,7 @@ import edu.wpi.first.math.MathUtil;
  * 
  * @see {@link MathUtil} for more common math utility functions.
  */
-public final class MathUtils {
+public class MathUtils {
     private MathUtils() {}
 
     /** Finds min of {@code values}. */

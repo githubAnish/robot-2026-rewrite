@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
-public final class DriveConstants {
+public class DriveConstants {
     // Hardware / Configuration
     public static final SwerveDrivetrainConstants drivetrainConstants = TunerConstants.DrivetrainConstants;
     public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft = TunerConstants.FrontLeft;

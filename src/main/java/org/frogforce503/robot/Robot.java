@@ -37,7 +37,7 @@ public class Robot extends LoggedRobot {
         switch (Constants.getMode()) {
             case REAL:
                 // Running on real robot, log to USB stick ("/U/logs")
-                Logger.addDataReceiver(new WPILOGWriter());
+                Logger.addDataReceiver(new WPILOGWriter("/media/sda1/logs"));
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
 
@@ -60,6 +60,7 @@ public class Robot extends LoggedRobot {
 
         // Disable unnecessary logging
         SignalLogger.enableAutoLogging(false);
+        SignalLogger.stop();
         StatusLogger.disableAutoLogging();
 
         // Start AdvantageKit logger
@@ -76,9 +77,6 @@ public class Robot extends LoggedRobot {
         }
         CommandScheduler.getInstance().setPeriod(Constants.loopPeriodWatchdogSecs);
 
-        // Disable alerts for disconnected controllers
-        DriverStation.silenceJoystickConnectionWarning(true);
-
         // Configure brownout voltage
         RobotController.setBrownoutVoltage(6.0);
 
@@ -86,6 +84,8 @@ public class Robot extends LoggedRobot {
         RoboRioSim.setTeamNumber(503);
 
         if (RobotBase.isSimulation()) {
+            DriverStation.silenceJoystickConnectionWarning(true);
+
             DriverStationSim.setDsAttached(true);
             DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
             DriverStationSim.notifyNewData();

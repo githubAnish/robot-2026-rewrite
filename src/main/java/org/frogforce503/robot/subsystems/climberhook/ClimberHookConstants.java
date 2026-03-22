@@ -5,7 +5,7 @@ import org.frogforce503.lib.motorcontrol.PIDConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
-public final class ClimberHookConstants {
+public class ClimberHookConstants {
     // Hardware / Configuration
     public static final int motorId = 11;
     public static final int limitSwitchId = 1;

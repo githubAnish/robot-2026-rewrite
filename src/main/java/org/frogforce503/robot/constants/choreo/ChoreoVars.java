@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.*;
  * DO NOT MODIFY THIS FILE YOURSELF; instead, change these values
  * in the Choreo GUI.
  */
-public final class ChoreoVars {
+public class ChoreoVars {
 
     private ChoreoVars() {}
 }

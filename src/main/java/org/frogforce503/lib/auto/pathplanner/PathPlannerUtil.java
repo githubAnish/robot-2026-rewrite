@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.robot.Constants;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.json.simple.parser.ParseException;
@@ -19,7 +19,7 @@ import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
-public final class PathPlannerUtil {
+public class PathPlannerUtil {
     private PathPlannerUtil() {}
 
     public static void configureAutoBuilder(Drive drive) {
@@ -44,7 +44,7 @@ public final class PathPlannerUtil {
                     new PIDConstants(thetaPID.kP(), thetaPID.kI(), thetaPID.kD())
                 ),
                 config,
-                () -> Constants.useAllianceFlipping,
+                FieldConstants::isRed,
                 drive);
 
         } catch (IOException | ParseException e) {

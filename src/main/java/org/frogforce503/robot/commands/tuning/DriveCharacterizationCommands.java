@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 /** <p> Commands to run wheel radius characterization & FF characterization (measures kS and kV). </p>
  *  <p> Use the {@link SysIdExecutor} if you want to run SysId on the drivetrain. </p>
  */
-public final class DriveCharacterizationCommands {
+public class DriveCharacterizationCommands {
     private static final double ffStartDelay = 2.0; // Secs
     private static final double ffRampRate = 0.1; // Volts/Sec
     private static final double wheelRadiusMaxVelocity = 0.25; // Rad/Sec

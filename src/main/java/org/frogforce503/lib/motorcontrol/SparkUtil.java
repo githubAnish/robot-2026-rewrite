@@ -6,7 +6,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig;
 
 /** Helper class for Spark IO implementations. */
-public final class SparkUtil {
+public class SparkUtil {
     private SparkUtil() {}
 
     public static <S extends SparkBase, C extends SparkBaseConfig> void configure(S motor, C config, boolean burnFlash) {

@@ -18,7 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Command to tune hood angle and flywheels speed for a specific distance or preset. */
+/** Tunes hood angle and flywheels speed for a specific distance or preset. */
 public class TuneShot extends Command {
     private final Drive drive;
     private final Turret turret;
@@ -85,7 +85,7 @@ public class TuneShot extends Command {
         // Run subsystems
         turret.setFieldRelativeAngle(turretFieldRelativeAngle, turretVelocityRadPerSec);
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
-        hood.setAngle(hoodAngleRad);
+        hood.setAngle(hoodAngleRad, 0.0);
 
         // Simulate shooting
         if (RobotBase.isSimulation()) {

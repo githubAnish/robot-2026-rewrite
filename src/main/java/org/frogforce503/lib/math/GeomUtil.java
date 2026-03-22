@@ -11,6 +11,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Geometry utilities for working with translations, rotations, transforms, and poses. */
 public class GeomUtil {
+    private GeomUtil() {}
+
     /**
      * Creates a pure translating transform
      *

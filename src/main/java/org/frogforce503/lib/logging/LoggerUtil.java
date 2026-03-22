@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public final class LoggerUtil {
+public class LoggerUtil {
     private LoggerUtil() {}
 
     public static void recordCurrentCommand(SubsystemBase subsystem) {

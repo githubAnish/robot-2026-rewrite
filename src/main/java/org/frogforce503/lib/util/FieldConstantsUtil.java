@@ -11,7 +11,7 @@ import org.json.simple.parser.ParseException;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 
-public final class FieldConstantsUtil {
+public class FieldConstantsUtil {
     private static JSONObject fieldJson;
 
     private FieldConstantsUtil() {}

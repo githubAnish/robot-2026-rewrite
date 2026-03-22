@@ -90,7 +90,7 @@ public class TuneHood extends Command {
         // Update setpoint only if changed
         LoggedTunableNumber.ifChanged(
             hashCode(),
-            () -> hood.setAngle(Units.degreesToRadians(setpointAngleDeg.get())),
+            () -> hood.setAngle(Units.degreesToRadians(setpointAngleDeg.get()), 0.0),
             setpointAngleDeg);
     }
 

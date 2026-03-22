@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import lombok.Getter;
 import lombok.Setter;
 
 /**
@@ -23,7 +22,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
     private LoggedNetworkNumber dashboardNumber;
     private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
 
-    @Setter @Getter private boolean tuningMode = false;
+    @Setter private boolean tuningMode = false;
 
     /**
      * Create a new LoggedTunableNumber

@@ -3,6 +3,7 @@ package org.frogforce503.robot;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
@@ -18,6 +19,7 @@ import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.commands.tuning.TuneHood;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
@@ -79,12 +81,16 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.lib.BLine.FollowPath;
+import lombok.experimental.ExtensionMethod;
 
 /**
  * Main container for robot subsystems, commands, and controller bindings.
  * Use https://www.padcrafter.com to visualize the controller bindings.
  */
+@ExtensionMethod(TriggerUtil.class)
 public class RobotContainer {
     // Subsystems
     private Drive drive;
@@ -281,22 +287,22 @@ public class RobotContainer {
 
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob); // Requires turret, hood, and flywheels
+        trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob);
 
         // Initialize triggers
         isShotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
 
         // Configure default commands
-        drive.setDefaultCommand(teleopDriveCommand);
-        indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
-        flywheels.setDefaultCommand(trackTargetCommand);
+        // drive.setDefaultCommand(teleopDriveCommand);
+        // indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
+        // flywheels.setDefaultCommand(trackTargetCommand);
 
-        leds.setDefaultCommand(
-            Commands.either(
-                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
-                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
-                isShotFeasible)
-            .withName("Leds Default Command"));
+        // leds.setDefaultCommand(
+        //     Commands.either(
+        //         Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
+        //         Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
+        //         isShotFeasible)
+        //     .withName("Leds Default Command"));
 
         // Configure autos & button bindings
         configureAutos();
@@ -304,9 +310,11 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
+        final FollowPath.Builder bLineAutoBuilder = autoChooser.getBlineAutoBuilder();
+
         autoChooser.addAuto(
             "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadGoToNZOnce(intakePivot, intakeRoller, feeder, gameViz, isShotFeasible));
+            new ShootPreloadGoToNZOnce(intakePivot, intakeRoller, feeder, gameViz, bLineAutoBuilder, isShotFeasible));
     }
 
     private void configureButtonBindings() {
@@ -382,6 +390,6 @@ public class RobotContainer {
     }
 
     public void test() {
-        
+        RobotModeTriggers.teleop().onTrue(new TuneHood(hood));   
     }
 }
