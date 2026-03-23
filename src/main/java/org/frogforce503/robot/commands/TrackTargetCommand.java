@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import lombok.Getter;
 import lombok.Setter;
@@ -103,8 +104,8 @@ public class TrackTargetCommand extends Command {
             isShotFeasible = false; // Don't shoot under trench
         }
 
-        if (!isShootingSupplier.getAsBoolean()) { // Flywheels idle if not shooting
-            flywheels.setVelocity(FlywheelsConstants.IDLE);
+        if (!isShootingSupplier.getAsBoolean() && RobotState.isTeleop()) {
+            flywheelsVelocityRadPerSec = FlywheelsConstants.IDLE; // Flywheels idle if not shooting
         }
 
         // Run subsystems

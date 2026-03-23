@@ -61,10 +61,10 @@ public class TuneShot extends TrackTargetCommand {
 
     @Override
     public void execute() {
-        super.execute();
-
         super.setHoodAngleOverride(OptionalDouble.of(Units.degreesToRadians(hoodAngleDeg.get())));
         super.setFlywheelsVelocityOverride(OptionalDouble.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheelsVelocityRpm.get())));
+
+        super.execute(); // Calculate shot params after override applied
 
         // Simulate shooting
         if (RobotBase.isSimulation() && isShootingSupplier.getAsBoolean()) {
