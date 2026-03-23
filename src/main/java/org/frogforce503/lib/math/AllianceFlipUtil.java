@@ -21,6 +21,7 @@ public class AllianceFlipUtil {
         return FieldConstants.isRed() || override;
     }
 
+    /** Applies a flip without depending on the current alliance. */
     public static <T> T mirror(UnaryOperator<T> flipFunction, T blueValue) {
         try {
             override = true;

@@ -82,7 +82,7 @@ public class GameViz {
     public void update() {
         Pose3d drivePose3d =
             new Pose3d(drive.getPose())
-                .plus(new Transform3d(new Translation3d(0.0, 0.0, robotHeightMeters), Rotation3d.kZero));
+                .plus(new Transform3d(0.0, 0.0, robotHeightMeters, Rotation3d.kZero));
 
         visionViz.update(drive.getPose());
         

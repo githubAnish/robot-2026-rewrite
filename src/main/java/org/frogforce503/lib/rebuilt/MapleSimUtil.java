@@ -52,13 +52,14 @@ public class MapleSimUtil {
     private static final int rows = 3;
     private static final int perLayer = cols * rows;
     private static final double fuelToFuelOffset = Units.inchesToMeters(4);
-    private static final Transform3d robotToHopperOffset = new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(9)), Rotation3d.kZero);
+    private static final Transform3d robotToHopperOffset = new Transform3d(0, 0, Units.inchesToMeters(9), Rotation3d.kZero);
 
     // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
+    private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
 
     // Bump Constants
-    private static final double maxLinearSpeedOverBumpMetersPerSec = DriveConstants.maxLinearSpeed / 5;
+    private static final double maxLinearSpeedOverBump = DriveConstants.maxLinearSpeed / 5;
 
     private MapleSimUtil() {}
     
@@ -134,7 +135,7 @@ public class MapleSimUtil {
                 Pose3d.kZero
                     .plus(TurretConstants.robotToTurret)
                     .plus(HoodConstants.turretToHood)
-                    .plus(new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(4)), Rotation3d.kZero)) // offset = 4 inches
+                    .plus(initialShotHeightOffset)
                     .getMeasureZ(),
                 MetersPerSecond.of(flywheelsSpeedRadPerSec * FlywheelsConstants.kSimRadiusMeters),
                 Radians.of(Units.degreesToRadians(90) - hoodAngleRad)); // 0 deg hood = 90 deg shot angle (since shots have to go up) & vice versa
@@ -157,8 +158,8 @@ public class MapleSimUtil {
 
         boolean inBump = FieldConstants.Bump.contains(robotTranslation);
 
-        if (inBump && linearSpeed > maxLinearSpeedOverBumpMetersPerSec) {
-            double scalar = maxLinearSpeedOverBumpMetersPerSec / linearSpeed;
+        if (inBump && linearSpeed > maxLinearSpeedOverBump) {
+            double scalar = maxLinearSpeedOverBump / linearSpeed;
 
             return new ChassisSpeeds(
                 robotVelocity.vxMetersPerSecond * scalar,
