@@ -8,46 +8,56 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculator {
-    private static Rotation2d lastTurretAngle;
-    private static double lastHoodAngle;
-    private static Rotation2d turretAngle;
-    private static double hoodAngle = Double.NaN;
-    private static double turretVelocity;
-    private static double hoodVelocity;
+    private static ShotCalculator instance;
+
+    private Rotation2d lastTurretAngle;
+    private double lastHoodAngle;
+    private Rotation2d turretAngle;
+    private double hoodAngle = Double.NaN;
+    private double turretVelocity;
+    private double hoodVelocity;
+
+    // Cached info
+    private ShotInfo latestShotInfo = null;
+    @Setter @Getter private boolean isShotFeasible = false;
+    @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
 
     // Constants
-    private static final LinearFilter turretAngleFilter =
+    private final LinearFilter turretAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
-    private static final LinearFilter hoodAngleFilter =
+    private final LinearFilter hoodAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
-    private static final double phaseDelay = 0.03;
+    private final double phaseDelay = 0.03;
 
-    public static final double minDistanceHubShoot = 0.8789512555744705;
-    public static final double maxDistanceHubShoot = 6.011086792618746;
+    public final double minDistanceHubShoot = 0.8789512555744705;
+    public final double maxDistanceHubShoot = 6.011086792618746;
 
-    public static final double minDistanceLobShoot = 4.548765387286399;
-    public static final double maxDistanceLobShoot = 15.0;
+    public final double minDistanceLobShoot = 4.548765387286399;
+    public final double maxDistanceLobShoot = 15.0;
 
     // Maps
-    private static final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap hubFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap hubFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap hubTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
-    private static final InterpolatingDoubleTreeMap lobHoodAngleMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap lobFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap lobHoodAngleMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap lobFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap lobTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
-    static {
+    public ShotCalculator() {
         // Configure hub shotmaps (tuned in sim)
         hubHoodAngleMap.put(0.8789512555744705, Units.degreesToRadians(4.0));
         hubHoodAngleMap.put(1.5750158519083022, Units.degreesToRadians(15.0));
@@ -102,7 +112,25 @@ public class ShotCalculator {
         lobTimeOfFlightMap.put(12.054478922470933, 2.6);
     }
 
-    public static ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
+    public static ShotCalculator getInstance() {
+        if (instance == null) {
+            instance = new ShotCalculator();
+        }
+        return instance;
+    }
+
+    public boolean isShotDistanceValid(Pose2d robotPose) {
+        return
+            FieldConstants.inAllianceZone(robotPose)
+                ? MathUtils.inRange(latestShotInfo.turretToTargetDistance(), minDistanceHubShoot, maxDistanceHubShoot)
+                : MathUtils.inRange(latestShotInfo.turretToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
+    }
+
+    public ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
+        if (latestShotInfo != null) {
+            return latestShotInfo;
+        }
+
         // Get inputs
         final boolean isHubShot = FieldConstants.inAllianceZone(robotPose);
         final Translation2d target = FieldConstants.getShotTarget(robotPose).toTranslation2d();
@@ -179,7 +207,8 @@ public class ShotCalculator {
         lastTurretAngle = turretAngle;
         lastHoodAngle = hoodAngle;
 
-        ShotInfo shotInfo =
+        // Update latest shot info
+        latestShotInfo =
             new ShotInfo(
                 turretAngle,
                 turretVelocity,
@@ -188,12 +217,21 @@ public class ShotCalculator {
                 flywheelsSpeedMap.get(lookaheadTurretToTargetDistance),
                 lookaheadTurretToTargetDistance);
 
-        // Log calculated values
+        // Log data
+        Logger.recordOutput("ShotCalculator/Is Hub Shot?", isHubShot);
         Logger.recordOutput("ShotCalculator/TargetTranslation", target);
-        Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
-        Logger.recordOutput("ShotCalculator/TurretToTargetDistance", lookaheadTurretToTargetDistance);
 
-        return shotInfo;
+        Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
+        Logger.recordOutput("ShotCalculator/LatestShotInfo", latestShotInfo);
+        Logger.recordOutput("ShotCalculator/Is Shot Feasible?", isShotFeasible);
+
+        Logger.recordOutput("ShotCalculator/Shot Preset", shotPreset);
+
+        return latestShotInfo;
+    }
+
+    public void clearLatestShotInfo() {
+        latestShotInfo = null;
     }
 
     public record ShotInfo(

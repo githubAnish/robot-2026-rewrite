@@ -60,7 +60,7 @@ public class WarmupExecutor {
     }
 
     private void warmupShotCalculator() {
-        ShotCalculator.calculateShotInfo(
+        ShotCalculator.getInstance().calculateShotInfo(
             drive.getPose(),
             drive.getRobotVelocity(),
             drive.getFieldVelocity()

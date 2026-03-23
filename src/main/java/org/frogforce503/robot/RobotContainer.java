@@ -1,6 +1,5 @@
 package org.frogforce503.robot;
 
-import java.util.OptionalDouble;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -37,16 +36,20 @@ import org.frogforce503.robot.subsystems.leds.Leds;
 import org.frogforce503.robot.subsystems.leds.LedsConstants;
 import org.frogforce503.robot.subsystems.leds.io.LedsIO;
 import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSim;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSim;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSpark;
@@ -63,6 +66,7 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRo
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
+import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIO;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSim;
 import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSpark;
@@ -138,7 +142,6 @@ public class RobotContainer {
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
-    private final TrackTargetCommand trackTargetCommand;
 
     // Triggers
     private final Trigger isShotFeasible;
@@ -286,15 +289,26 @@ public class RobotContainer {
 
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        trackTargetCommand = new TrackTargetCommand(drive, vision, turret, hood, flywheels, shootHubOrLob);
 
         // Initialize triggers
-        isShotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
+        isShotFeasible = new Trigger(ShotCalculator.getInstance()::isShotFeasible);
 
         // Configure default commands
         drive.setDefaultCommand(teleopDriveCommand);
-        indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
-        flywheels.setDefaultCommand(trackTargetCommand);
+        
+        indexer.setDefaultCommand(
+            new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
+
+        turret.setDefaultCommand(
+            new TrackTargetCommand(drive, vision, turret));
+
+        hood.setDefaultCommand(
+            Commands.runOnce(() -> hood.setAngle(HoodConstants.DUCK_UNDER_TRENCH, 0.0), hood)
+                .withName("Hood Default Command"));
+
+        flywheels.setDefaultCommand(
+            Commands.runOnce((() -> flywheels.setVelocity(FlywheelsConstants.IDLE)), flywheels)
+                .withName("Flywheels Default Command"));
 
         leds.setDefaultCommand(
             Commands.either(
@@ -313,7 +327,7 @@ public class RobotContainer {
 
         autoChooser.addAuto(
             "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadGoToNZOnce(intakePivot, intakeRoller, feeder, gameViz, bLineAutoBuilder, isShotFeasible));
+            new ShootPreloadGoToNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
     }
 
     private void configureButtonBindings() {
@@ -321,23 +335,19 @@ public class RobotContainer {
         final BiConsumer<Trigger, ShotPreset> bindShotPreset =
             (trigger, shotPreset) ->
                 trigger
-                    .whileTrue(
-                        Commands.runOnce(() -> {
-                            trackTargetCommand.setHoodAngleOverride(OptionalDouble.of(shotPreset.getHoodAngleRad()));
-                            trackTargetCommand.setFlywheelsVelocityOverride(OptionalDouble.of(shotPreset.getFlywheelsVelocityRadPerSec()));
-                        }))
+                    .onTrue(
+                        Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset))
+                            .withName("Enabling Preset " + shotPreset.toString()))
                     .onFalse(
-                        Commands.runOnce(() -> {
-                            trackTargetCommand.setHoodAngleOverride(OptionalDouble.empty());
-                            trackTargetCommand.setFlywheelsVelocityOverride(OptionalDouble.empty());
-                        }));
+                        Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE))
+                            .withName("Disabling Preset " + shotPreset.toString()));
 
         // Bind main controls
         intakeGround
             .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
-            .whileTrue(new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasible))
+            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz))
             .and(intakeGround.negate())
             .whileTrue(
                 Commands.repeatingSequence(
@@ -365,14 +375,40 @@ public class RobotContainer {
     }
 
     public void robotPeriodic() {
+        loggedJVM.update();
         Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
+
+        // Calculate latest shot info
+        ShotInfo shotInfo =
+            ShotCalculator.getInstance().calculateShotInfo(
+                drive.getPose(),
+                drive.getRobotVelocity(),
+                drive.getFieldVelocity());
+
+        // Check if shot feasible
+        boolean isShotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
+        boolean turretAtGoal = turret.isAtAngle(shotInfo.turretFieldRelativeAngle(), TurretConstants.kShootOnMoveTolerance);
+        boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.kShootOnMoveTolerance);
+        boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.kTolerance);
+
+        boolean isCalculatedShotFeasible =
+            isShotDistanceValid && turretAtGoal && hoodAtGoal && flywheelsAtGoal;
+
+        ShotCalculator.getInstance().setShotFeasible(
+            isCalculatedShotFeasible ||
+            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // true if calculated shot feasible or using preset
+
+        Logger.recordOutput("ShotCalculator/Turret At Goal?", turretAtGoal);
+        Logger.recordOutput("ShotCalculator/Hood At Goal?", hoodAtGoal);
+        Logger.recordOutput("ShotCalculator/Flywheels At Goal?", flywheelsAtGoal);
+
+        // Clear latest shot info
+        ShotCalculator.getInstance().clearLatestShotInfo();
 
         // Update sim
         if (RobotBase.isSimulation()) {
             gameViz.update();
         }
-
-        loggedJVM.update();
     }
 
     public void autonomousInit() {

@@ -1,13 +1,14 @@
 package org.frogforce503.robot.auto.autos;
 
-import java.util.function.BooleanSupplier;
-
 import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 
@@ -18,30 +19,35 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
 public class ShootPreloadGoToNZOnce implements AutoMode {
+    private final Drive drive;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
     private final Feeder feeder;
+    private final Hood hood;
+    private final Flywheels flywheels;
     private final GameViz gameViz;
     private final FollowPath.Builder autoBuilder;
-    private final BooleanSupplier isShotFeasibleSupplier;
 
     private final Path path;
 
     public ShootPreloadGoToNZOnce(
+        Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
         Feeder feeder,
+        Hood hood,
+        Flywheels flywheels,
         GameViz gameViz,
-        FollowPath.Builder autoBuilder,
-        BooleanSupplier isShotFeasibleSupplier
+        FollowPath.Builder autoBuilder
     ) {
+        this.drive = drive;
         this.intakePivot = intakePivot;
         this.intakeRoller = intakeRoller;
         this.feeder = feeder;
+        this.hood = hood;
+        this.flywheels = flywheels;
         this.gameViz = gameViz;
         this.autoBuilder = autoBuilder;
-
-        this.isShotFeasibleSupplier = isShotFeasibleSupplier;
 
         path = new Path("FirstTimeToNZ");
     }
@@ -49,12 +55,12 @@ public class ShootPreloadGoToNZOnce implements AutoMode {
     @Override
     public Command getCommand() {
         return Commands.sequence(
-            new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasibleSupplier).withTimeout(3), // shoot preload
+            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(3), // shoot preload
             Commands.deadline(
                 autoBuilder.build(path),
                 new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz) // first intake from NZ
             ),
-            new ShootFuelIntoHubOrLob(feeder, gameViz, isShotFeasibleSupplier)
+            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
         );
     }
 

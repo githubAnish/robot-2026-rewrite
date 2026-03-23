@@ -1,26 +1,34 @@
 package org.frogforce503.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
 import org.frogforce503.robot.GameViz;
+import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootFuelIntoHubOrLob extends Command {
+    private final Drive drive;
     private final Feeder feeder;
+    private final Hood hood;
+    private final Flywheels flywheels;
     private final GameViz gameViz;
-    private final BooleanSupplier isShotFeasibleSupplier;
 
-    public ShootFuelIntoHubOrLob(Feeder feeder, GameViz gameViz, BooleanSupplier isShotFeasibleSupplier) {
+    public ShootFuelIntoHubOrLob(Drive drive, Feeder feeder, Hood hood, Flywheels flywheels, GameViz gameViz) {
+        this.drive = drive;
         this.feeder = feeder;
+        this.hood = hood;
+        this.flywheels = flywheels;
         this.gameViz = gameViz;
 
-        this.isShotFeasibleSupplier = isShotFeasibleSupplier;
-
-        addRequirements(feeder);
+        addRequirements(feeder, hood, flywheels);
     }
 
     @Override
@@ -28,9 +36,52 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     @Override
     public void execute() {
-        boolean isShotFeasible = isShotFeasibleSupplier.getAsBoolean();
+        // Define shot parameters
+        double hoodAngleRad = 0.0;
+        double hoodVelocityRadPerSec = 0.0;
+        double flywheelsVelocityRadPerSec = 0.0;
 
-        // Run feeder if shot feasible (flywheels already run in TrackTargetCommand)
+        // Get latest shot info
+        switch (ShotCalculator.getInstance().getShotPreset()) {
+            case NONE:
+                ShotInfo shotInfo =
+                    ShotCalculator.getInstance().calculateShotInfo(
+                        drive.getPose(),
+                        drive.getRobotVelocity(),
+                        drive.getFieldVelocity());
+
+                hoodAngleRad = shotInfo.hoodAngleRad();
+                hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();
+                flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
+                break;
+
+            case BATTER:
+                hoodAngleRad = HoodConstants.BATTER;
+                hoodVelocityRadPerSec = 0.0;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
+                break;
+
+            case TRENCH:
+                hoodAngleRad = HoodConstants.TRENCH;
+                hoodVelocityRadPerSec = 0.0;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
+                break;
+
+            case DEPOT:
+                hoodAngleRad = HoodConstants.DEPOT;
+                hoodVelocityRadPerSec = 0.0;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.DEPOT;
+                break;   
+        }
+
+        // Run subsystems
+        hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
+        flywheels.setVelocity(flywheelsVelocityRadPerSec);
+
+        // Check if shot feasible
+        boolean isShotFeasible = ShotCalculator.getInstance().isShotFeasible();
+
+        // Run feeder if shot feasible
         if (isShotFeasible) {
             feeder.setVelocity(FeederConstants.SHOOT);
         }
@@ -49,5 +100,7 @@ public class ShootFuelIntoHubOrLob extends Command {
     @Override
     public void end(boolean interrupted) {
         feeder.stop();
+        hood.stop();
+        flywheels.stop();
     }
 }
