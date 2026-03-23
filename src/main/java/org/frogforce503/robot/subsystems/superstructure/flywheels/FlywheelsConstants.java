@@ -28,9 +28,8 @@ public class FlywheelsConstants {
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double IDLE = Units.rotationsPerMinuteToRadiansPerSecond(1500);
-    public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(100);
-
     public static final double BATTER = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double TRENCH = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double DEPOT = Units.rotationsPerMinuteToRadiansPerSecond(0);
+    public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(100);
 }

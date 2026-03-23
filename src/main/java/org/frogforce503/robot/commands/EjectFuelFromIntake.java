@@ -34,10 +34,10 @@ public class EjectFuelFromIntake extends Command {
 
     @Override
     public void initialize() {
-        intakePivot.setAngle(IntakePivotConstants.EJECT);
+        intakePivot.setAngle(IntakePivotConstants.INTAKE);
         intakeRoller.setVelocity(IntakeRollerConstants.EJECT);
         indexer.setVelocity(IndexerConstants.EJECT);
-        feeder.setVelocity(FeederConstants.EJECT_FROM_SHOOTER);
+        feeder.setVelocity(FeederConstants.EJECT_FROM_INTAKE);
     }
 
     @Override

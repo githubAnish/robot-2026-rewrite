@@ -34,5 +34,4 @@ public class IntakePivotConstants {
 
     public static final double STOW = START;
     public static final double INTAKE = Units.degreesToRadians(-5);
-    public static final double EJECT = INTAKE;
 }
