@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class ShootFuelIntoHubOrLob extends Command {
     private final Feeder feeder;
     private final GameViz gameViz;
-
     private final BooleanSupplier isShotFeasibleSupplier;
 
     public ShootFuelIntoHubOrLob(Feeder feeder, GameViz gameViz, BooleanSupplier isShotFeasibleSupplier) {

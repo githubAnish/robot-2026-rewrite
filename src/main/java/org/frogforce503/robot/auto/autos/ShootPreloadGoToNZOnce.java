@@ -23,7 +23,6 @@ public class ShootPreloadGoToNZOnce implements AutoMode {
     private final Feeder feeder;
     private final GameViz gameViz;
     private final FollowPath.Builder autoBuilder;
-
     private final BooleanSupplier isShotFeasibleSupplier;
 
     private final Path path;

@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class RunIndexerWhenReady extends Command {
     private final Indexer indexer;
-
     private final BooleanSupplier isIntakingSupplier;
     private final BooleanSupplier isShootingSupplier;
     private final BooleanSupplier isShotFeasibleSupplier;

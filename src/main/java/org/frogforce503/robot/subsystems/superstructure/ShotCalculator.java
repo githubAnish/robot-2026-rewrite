@@ -32,11 +32,11 @@ public class ShotCalculator {
 
     private static final double phaseDelay = 0.03;
 
-    public static final double minDistanceHubShoot = 0.8789512555744705; // Update based on hub shotmap
-    public static final double maxDistanceHubShoot = 6.011086792618746; // Update based on hub shotmap
+    public static final double minDistanceHubShoot = 0.8789512555744705;
+    public static final double maxDistanceHubShoot = 6.011086792618746;
 
-    public static final double minDistanceLobShoot = 4.548765387286399; // Update based on lob shotmap
-    public static final double maxDistanceLobShoot = 15.0; // Update based on lob shotmap
+    public static final double minDistanceLobShoot = 4.548765387286399;
+    public static final double maxDistanceLobShoot = 15.0;
 
     // Maps
     private static final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
