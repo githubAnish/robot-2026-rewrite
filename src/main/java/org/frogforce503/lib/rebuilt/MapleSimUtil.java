@@ -55,7 +55,7 @@ public class MapleSimUtil {
     private static final Transform3d robotToHopperOffset = new Transform3d(new Translation3d(0, 0, Units.inchesToMeters(9)), Rotation3d.kZero);
 
     // Shoot Constants
-    private static final Translation3d shotTolerance = new Translation3d(0.5, 0.5, 0.5);
+    private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
 
     // Bump Constants
     private static final double maxLinearSpeedOverBumpMetersPerSec = DriveConstants.maxLinearSpeed / 5;

@@ -1,5 +1,6 @@
 package org.frogforce503.robot;
 
+import java.util.OptionalDouble;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -19,7 +20,6 @@ import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
-import org.frogforce503.robot.commands.tuning.TuneHood;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
 import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
@@ -81,7 +81,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.lib.BLine.FollowPath;
 import lombok.experimental.ExtensionMethod;
@@ -293,16 +292,16 @@ public class RobotContainer {
         isShotFeasible = new Trigger(trackTargetCommand::isShotFeasible);
 
         // Configure default commands
-        // drive.setDefaultCommand(teleopDriveCommand);
-        // indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
-        // flywheels.setDefaultCommand(trackTargetCommand);
+        drive.setDefaultCommand(teleopDriveCommand);
+        indexer.setDefaultCommand(new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
+        flywheels.setDefaultCommand(trackTargetCommand);
 
-        // leds.setDefaultCommand(
-        //     Commands.either(
-        //         Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
-        //         Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
-        //         isShotFeasible)
-        //     .withName("Leds Default Command"));
+        leds.setDefaultCommand(
+            Commands.either(
+                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
+                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
+                isShotFeasible)
+            .withName("Leds Default Command"));
 
         // Configure autos & button bindings
         configureAutos();
@@ -322,8 +321,16 @@ public class RobotContainer {
         final BiConsumer<Trigger, ShotPreset> bindShotPreset =
             (trigger, shotPreset) ->
                 trigger
-                    .whileTrue(Commands.runOnce(() -> trackTargetCommand.setShotPreset(shotPreset)))
-                    .onFalse(Commands.runOnce(() -> trackTargetCommand.setShotPreset(ShotPreset.NONE)));
+                    .whileTrue(
+                        Commands.runOnce(() -> {
+                            trackTargetCommand.setHoodAngleOverride(OptionalDouble.of(shotPreset.getHoodAngleRad()));
+                            trackTargetCommand.setFlywheelsVelocityOverride(OptionalDouble.of(shotPreset.getFlywheelsVelocityRadPerSec()));
+                        }))
+                    .onFalse(
+                        Commands.runOnce(() -> {
+                            trackTargetCommand.setHoodAngleOverride(OptionalDouble.empty());
+                            trackTargetCommand.setFlywheelsVelocityOverride(OptionalDouble.empty());
+                        }));
 
         // Bind main controls
         intakeGround
@@ -354,7 +361,6 @@ public class RobotContainer {
         toggleRobotRelative.onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
         resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
         xWheels.onTrue(Commands.runOnce(drive::brake));
-
         seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
     }
 
@@ -390,6 +396,6 @@ public class RobotContainer {
     }
 
     public void test() {
-        RobotModeTriggers.teleop().onTrue(new TuneHood(hood));   
+        
     }
 }

@@ -15,7 +15,7 @@ public class ClimberHookConstants {
 
     public static final boolean motorInverted = false;
     
-    public static final int statorCurrentLimit = 60;
+    public static final int statorCurrentLimit = 80;
 
     public static final PIDConfig kPID = new PIDConfig(10, 0, 0);
     public static final FFConfig kFF = new FFConfig(0, 1.794, 15, 0);

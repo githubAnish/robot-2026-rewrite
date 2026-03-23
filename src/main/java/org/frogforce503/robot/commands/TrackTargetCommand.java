@@ -1,5 +1,6 @@
 package org.frogforce503.robot.commands;
 
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 
 import org.frogforce503.lib.math.MathUtils;
@@ -7,7 +8,6 @@ import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
@@ -31,15 +31,16 @@ public class TrackTargetCommand extends Command {
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
-
     private final BooleanSupplier isShootingSupplier;
 
-    // Constants
     private final double trenchDuckLookaheadSec = 0.5;
 
-    // State
-    @Setter private ShotPreset shotPreset = ShotPreset.NONE;
+    @Getter private boolean trackingHub = false;
+    @Getter private double turretToTargetDistance = 0.0;
     @Getter private boolean isShotFeasible = false;
+
+    @Setter private OptionalDouble hoodAngleOverride = OptionalDouble.empty();
+    @Setter private OptionalDouble flywheelsVelocityOverride = OptionalDouble.empty();
 
     public TrackTargetCommand(
         Drive drive,
@@ -54,19 +55,13 @@ public class TrackTargetCommand extends Command {
         this.turret = turret;
         this.hood = hood;
         this.flywheels = flywheels;
-
         this.isShootingSupplier = isShootingSupplier;
         
         addRequirements(turret, hood, flywheels);
     }
 
     @Override
-    public void initialize() {
-        vision.setDesiredAprilTagGoal(
-            FieldConstants.inAllianceZone(drive.getPose()) // check if should aim at hub
-                ? AprilTagGoal.TURRET_HUB_AIMING
-                : AprilTagGoal.GLOBAL_LOCALIZATION);
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
@@ -75,63 +70,32 @@ public class TrackTargetCommand extends Command {
         final ChassisSpeeds robotRelativeVelocity = drive.getRobotVelocity();
         final ChassisSpeeds fieldRelativeVelocity = drive.getFieldVelocity();
 
-        final boolean trackingHub = FieldConstants.inAllianceZone(robotPose);
+        trackingHub = FieldConstants.inAllianceZone(robotPose);
         final boolean underTrench = FieldConstants.Trench.contains(robotPose, fieldRelativeVelocity, trenchDuckLookaheadSec);
 
-        // Define shot params
-        Rotation2d turretFieldRelativeAngle = Rotation2d.kZero;
-        double turretVelocityRadPerSec = 0.0;
-        double hoodAngleRad = 0.0;
-        double hoodVelocityRadPerSec = 0.0;
-        double flywheelsVelocityRadPerSec = 0.0;
+        // Set vision goal
+        vision.setDesiredAprilTagGoal(trackingHub ? AprilTagGoal.TURRET_HUB_AIMING : AprilTagGoal.GLOBAL_LOCALIZATION);
 
-        // Calculate shot params
-        switch (shotPreset) {
-            case NONE:
-                ShotInfo shotInfo =
-                    ShotCalculator.calculateShotInfo(
-                        robotPose,
-                        robotRelativeVelocity,
-                        fieldRelativeVelocity);
+        // Calculate shot parameters
+        ShotInfo shotInfo =
+            ShotCalculator.calculateShotInfo(
+                robotPose,
+                robotRelativeVelocity,
+                fieldRelativeVelocity);
 
-                turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
-                turretVelocityRadPerSec = shotInfo.turretVelocityRadPerSec();
-                hoodAngleRad = shotInfo.hoodAngleRad();
-                hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();
-                flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
-                isShotFeasible =
-                    trackingHub
-                        ? MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot)
-                        : MathUtils.inRange(shotInfo.turretToTargetDistance(), ShotCalculator.minDistanceLobShoot, ShotCalculator.maxDistanceLobShoot);
-                break;
+        Rotation2d turretFieldRelativeAngle = shotInfo.turretFieldRelativeAngle();
+        double turretVelocityRadPerSec = shotInfo.turretVelocityRadPerSec();
 
-            case BATTER:
-                turretFieldRelativeAngle = TurretConstants.BATTER_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
-                hoodAngleRad = HoodConstants.BATTER;
-                hoodVelocityRadPerSec = 0.0;
-                flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
-                isShotFeasible = true;
-                break;
+        double hoodAngleRad = hoodAngleOverride.isPresent() ? hoodAngleOverride.getAsDouble() : shotInfo.hoodAngleRad();
+        double hoodVelocityRadPerSec = hoodAngleOverride.isPresent() ? 0.0 : shotInfo.hoodVelocityRadPerSec();
+        double flywheelsVelocityRadPerSec = flywheelsVelocityOverride.isPresent() ? flywheelsVelocityOverride.getAsDouble() : shotInfo.flywheelsVelocityRadPerSec();
 
-            case TRENCH:
-                turretFieldRelativeAngle = TurretConstants.TRENCH_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
-                hoodAngleRad = HoodConstants.TRENCH;
-                hoodVelocityRadPerSec = 0.0;
-                flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
-                isShotFeasible = true;
-                break;
+        turretToTargetDistance = shotInfo.turretToTargetDistance();
 
-            case DEPOT:
-                turretFieldRelativeAngle = TurretConstants.DEPOT_FIELD_RELATIVE;
-                turretVelocityRadPerSec = 0.0;
-                hoodAngleRad = HoodConstants.DEPOT;
-                hoodVelocityRadPerSec = 0.0;
-                flywheelsVelocityRadPerSec = FlywheelsConstants.DEPOT;
-                isShotFeasible = true;
-                break;
-        }
+        isShotFeasible =
+            trackingHub
+                ? MathUtils.inRange(turretToTargetDistance, ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot)
+                : MathUtils.inRange(turretToTargetDistance, ShotCalculator.minDistanceLobShoot, ShotCalculator.maxDistanceLobShoot);
 
         if (underTrench) {
             hoodAngleRad = HoodConstants.DUCK_UNDER_TRENCH;

@@ -17,7 +17,7 @@ public class ClimberDeployConstants {
     public static final boolean motorInverted = false;
     public static final boolean absoluteEncoderInverted = false;
 
-    public static final int statorCurrentLimit = 60;
+    public static final int statorCurrentLimit = 80;
 
     public static final double absoluteEncoderZeroOffset = 0.0;
 

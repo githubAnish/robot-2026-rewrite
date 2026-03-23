@@ -3,7 +3,6 @@ package org.frogforce503.robot.subsystems.superstructure.turret;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -45,8 +44,4 @@ public class TurretConstants {
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards
-
-    public static final Rotation2d BATTER_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d TRENCH_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
-    public static final Rotation2d DEPOT_FIELD_RELATIVE = Rotation2d.fromDegrees(0);
 }

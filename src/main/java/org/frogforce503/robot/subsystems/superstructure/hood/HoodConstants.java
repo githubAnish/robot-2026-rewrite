@@ -22,9 +22,9 @@ public class HoodConstants {
 
     public static final double absoluteEncoderZeroOffset = 0.651;
 
-    public static final PIDConfig kPID = new PIDConfig();
+    public static final PIDConfig kPID = new PIDConfig(1, 0, 0.5);
     public static final FFConfig kFF = new FFConfig();
-    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(0), Units.degreesToRadians(0));
+    public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(720));
     
     public static final double minAngle = Units.degreesToRadians(0.5); // from robot-2026 repo
     public static final double maxAngle = Units.degreesToRadians(34); // from robot-2026 repo

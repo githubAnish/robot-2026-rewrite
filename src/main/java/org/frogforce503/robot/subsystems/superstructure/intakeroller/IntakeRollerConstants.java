@@ -13,7 +13,7 @@ public class IntakeRollerConstants {
 
     public static final boolean motorInverted = true;
     
-    public static final int statorCurrentLimit = 60;
+    public static final int statorCurrentLimit = 80;
     
     public static final PIDConfig kPID = new PIDConfig(0.00001, 0, 0);
     public static final FFConfig kFF = new FFConfig(0, 0, 0.0397, 0);

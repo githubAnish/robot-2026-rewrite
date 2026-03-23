@@ -32,58 +32,74 @@ public class ShotCalculator {
 
     private static final double phaseDelay = 0.03;
 
-    public static final double minDistanceHubShoot = 1.205; // Update based on shotmap
-    public static final double maxDistanceHubShoot = 5.427;
+    public static final double minDistanceHubShoot = 0.8789512555744705; // Update based on hub shotmap
+    public static final double maxDistanceHubShoot = 6.011086792618746; // Update based on hub shotmap
 
-    public static final double minDistanceLobShoot = 0.0; // Update based on shotmap distance range
-    public static final double maxDistanceLobShoot = 20.0; // Update based on shotmap distance range
+    public static final double minDistanceLobShoot = 4.548765387286399; // Update based on lob shotmap
+    public static final double maxDistanceLobShoot = 15.0; // Update based on lob shotmap
 
     // Maps
     private static final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap hubFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap hubFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap hubTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     private static final InterpolatingDoubleTreeMap lobHoodAngleMap = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap lobFlywheelSpeedMap = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap lobFlywheelsSpeedMap = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap lobTimeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     static {
         // Configure hub shotmaps (tuned in sim)
-        hubHoodAngleMap.put(1.205, Units.degreesToRadians(10));
-        hubHoodAngleMap.put(2.056, Units.degreesToRadians(20));
-        hubHoodAngleMap.put(2.585, Units.degreesToRadians(26));
-        hubHoodAngleMap.put(2.905, Units.degreesToRadians(30));
-        hubHoodAngleMap.put(3.110, Units.degreesToRadians(33));
-        hubHoodAngleMap.put(3.716, Units.degreesToRadians(35));
-        hubHoodAngleMap.put(4.360, Units.degreesToRadians(36));
-        hubHoodAngleMap.put(4.950, Units.degreesToRadians(40));
-        hubHoodAngleMap.put(5.427, Units.degreesToRadians(41));
+        hubHoodAngleMap.put(0.8789512555744705, Units.degreesToRadians(4.0));
+        hubHoodAngleMap.put(1.5750158519083022, Units.degreesToRadians(15.0));
+        hubHoodAngleMap.put(2.1927194507792565, Units.degreesToRadians(15.0));
+        hubHoodAngleMap.put(2.8789697547312643, Units.degreesToRadians(20.0));
+        hubHoodAngleMap.put(3.3990839065891034, Units.degreesToRadians(23.0));
+        hubHoodAngleMap.put(4.0109712851978365, Units.degreesToRadians(24.0));
+        hubHoodAngleMap.put(4.712478631465277, Units.degreesToRadians(27.0));
+        hubHoodAngleMap.put(5.254298900120757, Units.degreesToRadians(30.0));
+        hubHoodAngleMap.put(6.011086792618746, Units.degreesToRadians(33.0));
 
-        hubFlywheelSpeedMap.put(1.263, Units.rotationsPerMinuteToRadiansPerSecond(1600));
-        hubFlywheelSpeedMap.put(2.056, Units.rotationsPerMinuteToRadiansPerSecond(1600));
-        hubFlywheelSpeedMap.put(2.585, Units.rotationsPerMinuteToRadiansPerSecond(1650));
-        hubFlywheelSpeedMap.put(2.905, Units.rotationsPerMinuteToRadiansPerSecond(1750));
-        hubFlywheelSpeedMap.put(3.110, Units.rotationsPerMinuteToRadiansPerSecond(1775));
-        hubFlywheelSpeedMap.put(3.716, Units.rotationsPerMinuteToRadiansPerSecond(1900));
-        hubFlywheelSpeedMap.put(4.360, Units.rotationsPerMinuteToRadiansPerSecond(2000));
-        hubFlywheelSpeedMap.put(4.950, Units.rotationsPerMinuteToRadiansPerSecond(2100));
-        hubFlywheelSpeedMap.put(5.427, Units.rotationsPerMinuteToRadiansPerSecond(2200));
+        hubFlywheelsSpeedMap.put(0.8789512555744705, Units.rotationsPerMinuteToRadiansPerSecond(1750.0));
+        hubFlywheelsSpeedMap.put(1.5750158519083022, Units.rotationsPerMinuteToRadiansPerSecond(1750.0));
+        hubFlywheelsSpeedMap.put(2.1927194507792565, Units.rotationsPerMinuteToRadiansPerSecond(1900.0));
+        hubFlywheelsSpeedMap.put(2.8789697547312643, Units.rotationsPerMinuteToRadiansPerSecond(2000.0));
+        hubFlywheelsSpeedMap.put(3.3990839065891034, Units.rotationsPerMinuteToRadiansPerSecond(2000.0));
+        hubFlywheelsSpeedMap.put(4.0109712851978365, Units.rotationsPerMinuteToRadiansPerSecond(2100.0));
+        hubFlywheelsSpeedMap.put(4.712478631465277, Units.rotationsPerMinuteToRadiansPerSecond(2150.0));
+        hubFlywheelsSpeedMap.put(5.254298900120757, Units.rotationsPerMinuteToRadiansPerSecond(2200.0));
+        hubFlywheelsSpeedMap.put(6.011086792618746, Units.rotationsPerMinuteToRadiansPerSecond(2250.0));
 
-        hubTimeOfFlightMap.put(1.263, 0.62);
-        hubTimeOfFlightMap.put(2.585, 0.71);
-        hubTimeOfFlightMap.put(3.110, 0.75);
-        hubTimeOfFlightMap.put(4.360, 0.95);
-        hubTimeOfFlightMap.put(5.427, 1.1);
+        hubTimeOfFlightMap.put(0.8789512555744705, 1.1);
+        hubTimeOfFlightMap.put(1.5750158519083022, 1.0);
+        hubTimeOfFlightMap.put(2.1927194507792565, 1.1);
+        hubTimeOfFlightMap.put(2.8789697547312643, 1.25);
+        hubTimeOfFlightMap.put(3.3990839065891034, 1.3);
+        hubTimeOfFlightMap.put(4.0109712851978365, 1.2);
+        hubTimeOfFlightMap.put(4.712478631465277, 1.2);
+        hubTimeOfFlightMap.put(5.254298900120757, 1.19);
+        hubTimeOfFlightMap.put(6.011086792618746, 1.19);
 
         // Configure lob shotmaps (tuned in sim)
-        lobHoodAngleMap.put(8.095, Units.degreesToRadians(45));
-        lobHoodAngleMap.put(9.861, Units.degreesToRadians(45));
+        lobHoodAngleMap.put(4.548765387286399, Units.degreesToRadians(34.0));
+        lobHoodAngleMap.put(6.5700978946700115, Units.degreesToRadians(34.0));
+        lobHoodAngleMap.put(8.066151061468178, Units.degreesToRadians(34.0));
+        lobHoodAngleMap.put(9.36979128257135, Units.degreesToRadians(34.0));
+        lobHoodAngleMap.put(10.13710863970844, Units.degreesToRadians(34.0));
+        lobHoodAngleMap.put(12.054478922470933, Units.degreesToRadians(34.0));
 
-        lobFlywheelSpeedMap.put(8.095, Units.rotationsPerMinuteToRadiansPerSecond(2000));
-        lobFlywheelSpeedMap.put(9.861, Units.rotationsPerMinuteToRadiansPerSecond(2500));
+        lobFlywheelsSpeedMap.put(4.548765387286399, Units.rotationsPerMinuteToRadiansPerSecond(1500.0));
+        lobFlywheelsSpeedMap.put(6.5700978946700115, Units.rotationsPerMinuteToRadiansPerSecond(1850.0));
+        lobFlywheelsSpeedMap.put(8.066151061468178, Units.rotationsPerMinuteToRadiansPerSecond(2150.0));
+        lobFlywheelsSpeedMap.put(9.36979128257135, Units.rotationsPerMinuteToRadiansPerSecond(2250.0));
+        lobFlywheelsSpeedMap.put(10.13710863970844, Units.rotationsPerMinuteToRadiansPerSecond(2500.0));
+        lobFlywheelsSpeedMap.put(12.054478922470933, Units.rotationsPerMinuteToRadiansPerSecond(2750.0));
 
-        lobTimeOfFlightMap.put(8.095, 1.2);
-        lobTimeOfFlightMap.put(9.861, 1.4);
+        lobTimeOfFlightMap.put(4.548765387286399, 1.0);
+        lobTimeOfFlightMap.put(6.5700978946700115, 1.2);
+        lobTimeOfFlightMap.put(8.066151061468178, 1.3);
+        lobTimeOfFlightMap.put(9.36979128257135, 1.4);
+        lobTimeOfFlightMap.put(10.13710863970844, 1.7);
+        lobTimeOfFlightMap.put(12.054478922470933, 2.6);
     }
 
     public static ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
@@ -91,7 +107,7 @@ public class ShotCalculator {
         final boolean isHubShot = FieldConstants.inAllianceZone(robotPose);
         final Translation2d target = FieldConstants.getShotTarget(robotPose).toTranslation2d();
         final InterpolatingDoubleTreeMap hoodAngleMap = isHubShot ? hubHoodAngleMap : lobHoodAngleMap;
-        final InterpolatingDoubleTreeMap flywheelSpeedMap = isHubShot ? hubFlywheelSpeedMap : lobFlywheelSpeedMap;
+        final InterpolatingDoubleTreeMap flywheelsSpeedMap = isHubShot ? hubFlywheelsSpeedMap : lobFlywheelsSpeedMap;
         final InterpolatingDoubleTreeMap timeOfFlightMap = isHubShot ? hubTimeOfFlightMap : lobTimeOfFlightMap;
 
         // Calculate estimated pose while accounting for phase delay
@@ -169,7 +185,7 @@ public class ShotCalculator {
                 turretVelocity,
                 hoodAngle,
                 hoodVelocity,
-                flywheelSpeedMap.get(lookaheadTurretToTargetDistance),
+                flywheelsSpeedMap.get(lookaheadTurretToTargetDistance),
                 lookaheadTurretToTargetDistance);
 
         // Log calculated values
