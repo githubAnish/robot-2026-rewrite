@@ -19,7 +19,7 @@ public class FeederConstants {
     public static final FFConfig kFF = new FFConfig(0, 0, 0.0225, 0);
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
+    public static final double tolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double EJECT_FROM_INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(-100);

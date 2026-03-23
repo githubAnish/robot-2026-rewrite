@@ -24,7 +24,7 @@ public class FlywheelsConstants {
     public static final double kSimRadiusMeters = Units.inchesToMeters(1.5);
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(50.0);
+    public static final double tolerance = Units.rotationsPerMinuteToRadiansPerSecond(50.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
     public static final double IDLE = Units.rotationsPerMinuteToRadiansPerSecond(1500);

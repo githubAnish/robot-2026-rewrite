@@ -19,7 +19,7 @@ public class IndexerConstants {
     public static final FFConfig kFF = new FFConfig(0, 0, 0.073, 0);
 
     // Setpoints
-    public static final double kTolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
+    public static final double tolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
 

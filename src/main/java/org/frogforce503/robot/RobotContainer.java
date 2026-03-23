@@ -383,9 +383,9 @@ public class RobotContainer {
 
         // Check if shot feasible
         boolean isShotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
-        boolean turretAtGoal = turret.isAtAngle(shotInfo.turretFieldRelativeAngle(), TurretConstants.kShootOnMoveTolerance);
-        boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.kShootOnMoveTolerance);
-        boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.kTolerance);
+        boolean turretAtGoal = turret.isAtAngle(shotInfo.turretFieldRelativeAngle(), TurretConstants.shootOnMoveTolerance);
+        boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
+        boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
 
         boolean isCalculatedShotFeasible =
             isShotDistanceValid && turretAtGoal && hoodAtGoal && flywheelsAtGoal;

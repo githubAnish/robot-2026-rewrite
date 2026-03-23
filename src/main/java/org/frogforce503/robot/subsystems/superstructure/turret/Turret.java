@@ -94,7 +94,7 @@ public class Turret extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, TurretConstants.kFixedTolerance);
+            atGoal = isAtAngle(goalState.position, TurretConstants.fixedTolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));

@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.BLine.FollowPath;
 import lombok.Getter;
 
-/** */
 public class AutoChooser {
     private final Drive drive;
     @Getter private final FollowPath.Builder blineAutoBuilder;

@@ -29,7 +29,7 @@ public class ClimberDeployConstants {
     public static final double maxAngle = Units.degreesToRadians(180);
 
     // Setpoints
-    public static final double kTolerance = Units.degreesToRadians(3.0);
+    public static final double tolerance = Units.degreesToRadians(3.0);
 
     public static final double START = maxAngle;
     public static final double CLIMB = minAngle;

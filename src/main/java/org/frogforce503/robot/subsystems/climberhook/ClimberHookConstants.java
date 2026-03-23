@@ -25,7 +25,7 @@ public class ClimberHookConstants {
     public static final double maxHeight = Units.inchesToMeters(10);
 
     // Setpoints
-    public static final double kTolerance = Units.inchesToMeters(1);
+    public static final double tolerance = Units.inchesToMeters(1);
 
     public static final double START = Units.inchesToMeters(0);
 }

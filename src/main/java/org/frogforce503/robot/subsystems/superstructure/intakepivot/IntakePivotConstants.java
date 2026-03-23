@@ -28,7 +28,7 @@ public class IntakePivotConstants {
     public static final double maxAngle = Units.degreesToRadians(110);
 
     // Setpoints
-    public static final double kTolerance = Units.degreesToRadians(3.0);
+    public static final double tolerance = Units.degreesToRadians(3.0);
 
     public static final double START = maxAngle;
 

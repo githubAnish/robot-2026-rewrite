@@ -40,7 +40,7 @@ public class Feeder extends FFSubsystemBase {
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, FeederConstants.kTolerance);
+            atGoal = isAtVelocity(targetVelocityRadPerSec, FeederConstants.tolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state

@@ -48,7 +48,7 @@ public class Flywheels extends FFSubsystemBase {
             double previousVelocity = setpoint;
 
             setpoint = profile.calculate(targetVelocityRadPerSec);
-            atGoal = isAtVelocity(targetVelocityRadPerSec, FlywheelsConstants.kTolerance);
+            atGoal = isAtVelocity(targetVelocityRadPerSec, FlywheelsConstants.tolerance);
 
             double accel = (setpoint - previousVelocity) / Constants.loopPeriodSecs;
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec, accel));

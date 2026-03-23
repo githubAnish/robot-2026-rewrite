@@ -39,7 +39,7 @@ public class Indexer extends FFSubsystemBase {
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, IndexerConstants.kTolerance);
+            atGoal = isAtVelocity(targetVelocityRadPerSec, IndexerConstants.tolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state

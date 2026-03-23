@@ -55,7 +55,7 @@ public class ClimberDeploy extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, ClimberDeployConstants.kTolerance);
+            atGoal = isAtAngle(goalState.position, ClimberDeployConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.position, setpoint.velocity, accel));

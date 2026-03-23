@@ -63,7 +63,7 @@ public class ClimberHook extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtHeight(goalState.position, ClimberHookConstants.kTolerance);
+            atGoal = isAtHeight(goalState.position, ClimberHookConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));

@@ -32,8 +32,8 @@ public class HoodConstants {
     public static final Transform3d turretToHood = new Transform3d(0.09, 0.0, 0.09, Rotation3d.kZero); // Sim turret to hood
     
     // Setpoints
-    public static final double kFixedTolerance = Units.degreesToRadians(0.5);
-    public static final double kShootOnMoveTolerance = Units.degreesToRadians(10);
+    public static final double fixedTolerance = Units.degreesToRadians(0.5);
+    public static final double shootOnMoveTolerance = Units.degreesToRadians(10);
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(0);

@@ -39,8 +39,8 @@ public class TurretConstants {
             Rotation3d.kZero);
 
     // Setpoints
-    public static final double kFixedTolerance = Units.degreesToRadians(0.5);
-    public static final double kShootOnMoveTolerance = Units.degreesToRadians(5);
+    public static final double fixedTolerance = Units.degreesToRadians(0.5);
+    public static final double shootOnMoveTolerance = Units.degreesToRadians(5);
 
     public static final double START = Units.degreesToRadians(0);
     public static final double CLIMB = Units.degreesToRadians(180); // robot-relative, faces backwards

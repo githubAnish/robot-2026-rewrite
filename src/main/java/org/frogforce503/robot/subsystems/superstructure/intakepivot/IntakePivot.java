@@ -55,7 +55,7 @@ public class IntakePivot extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, IntakePivotConstants.kTolerance);
+            atGoal = isAtAngle(goalState.position, IntakePivotConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.position, setpoint.velocity, accel));
