@@ -80,20 +80,16 @@ public class Robot extends LoggedRobot {
         // Configure brownout voltage
         RobotController.setBrownoutVoltage(6.0);
 
-        // Configure DriverStation for sim
-        RoboRioSim.setTeamNumber(503);
-
+        // Configure sim
         if (RobotBase.isSimulation()) {
-            DriverStation.silenceJoystickConnectionWarning(true);
+            DriverStation.silenceJoystickConnectionWarning(true); // Silence joystick warnings in sim
 
+            RoboRioSim.setTeamNumber(503);
             DriverStationSim.setDsAttached(true);
             DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
             DriverStationSim.notifyNewData();
-        }
 
-        // Set field up for MapleSim
-        if (RobotBase.isSimulation()) {
-            MapleSimUtil.initializeArena();
+            MapleSimUtil.initializeArena(); // Setup MapleSim arena
         }
 
         // Initialize RobotContainer

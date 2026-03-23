@@ -335,12 +335,8 @@ public class RobotContainer {
         final BiConsumer<Trigger, ShotPreset> bindShotPreset =
             (trigger, shotPreset) ->
                 trigger
-                    .onTrue(
-                        Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset))
-                            .withName("Enabling Preset " + shotPreset.toString()))
-                    .onFalse(
-                        Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE))
-                            .withName("Disabling Preset " + shotPreset.toString()));
+                    .onTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
+                    .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
 
         // Bind main controls
         intakeGround
