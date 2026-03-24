@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,12 +26,11 @@ public class BLineUtil {
                 drive::getPose,
                 drive::getRobotVelocity,
                 drive::runVelocity,
-                new PIDController(5.0, 0.0, 0.0),
-                new PIDController(3.0, 0.0, 0.0),
-                new PIDController(2.0, 0.0, 0.0)
+                DriveConstants.blineLinearPID.toPIDController(),
+                DriveConstants.blineThetaPID.toPIDController(),
+                DriveConstants.blineCtePID.toPIDController()
             )
-            .withDefaultShouldFlip()
-            .withPoseReset(drive::setPose);
+            .withDefaultShouldFlip();
     }
 
     public static Pose2d[] getPoses(Path... paths) {

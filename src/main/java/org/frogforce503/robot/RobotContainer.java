@@ -9,7 +9,7 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.auto.autos.ShootPreloadGoToNZOnce;
+import org.frogforce503.robot.auto.autos.ShootPreloadNZTwice;
 import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
@@ -296,7 +296,7 @@ public class RobotContainer {
 
         autoChooser.addAuto(
             "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadGoToNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
+            new ShootPreloadNZTwice(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
     }
 
     private void configureButtonBindings() {
@@ -362,6 +362,7 @@ public class RobotContainer {
             isCalculatedShotFeasible ||
             ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // true if calculated shot feasible or using preset
 
+        Logger.recordOutput("ShotCalculator/Drive At Goal?", driveAtGoal);
         Logger.recordOutput("ShotCalculator/Hood At Goal?", hoodAtGoal);
         Logger.recordOutput("ShotCalculator/Flywheels At Goal?", flywheelsAtGoal);
 

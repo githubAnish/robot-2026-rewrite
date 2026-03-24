@@ -5,8 +5,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.ironmaple.simulation.IntakeSimulation;
@@ -20,7 +20,9 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -52,12 +54,9 @@ public class MapleSimUtil {
     private static final Transform3d robotToHopperOffset = new Transform3d(0, 0, Units.inchesToMeters(9), Rotation3d.kZero);
 
     // Shoot Constants
-    private static final double fuelReleasedPerShot = 4;
     private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
+    private static final Transform2d initialFuelPositionOffset = new Transform2d(Units.inchesToMeters(3), 0, Rotation2d.kZero);
     private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
-
-    // Bump Constants
-    private static final double maxLinearSpeedOverBump = DriveConstants.maxLinearSpeed / 5;
 
     private MapleSimUtil() {}
     
@@ -114,22 +113,25 @@ public class MapleSimUtil {
         return balls;
     }
 
-    private static void createFuelProjectile(
+    public static void createFuelProjectile(
         Pose2d pose,
         ChassisSpeeds robotFieldRelativeVelocity,
         double hoodAngleRad,
         double flywheelsSpeedRadPerSec,
-        Transform3d fuelLaunchPositionOffset
+        Transform2d fuelLaunchPositionOffset
     ) {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
-                pose.getTranslation(),
-                HoodConstants.robotToHood
+                pose
+                    .plus(GeomUtil.toTransform2d(HoodConstants.robotToHood))
+                    .plus(initialFuelPositionOffset)
                     .plus(fuelLaunchPositionOffset)
-                    .getTranslation()
-                    .toTranslation2d(),
+                    .getTranslation(),
+                Translation2d.kZero,
                 robotFieldRelativeVelocity,
-                pose.getRotation(),
+                pose
+                    .getRotation()
+                    .plus(Rotation2d.kPi), // launcher is on opposite side of front
                 Pose3d.kZero
                     .plus(HoodConstants.robotToHood)
                     .plus(initialShotHeightOffset)
@@ -146,41 +148,5 @@ public class MapleSimUtil {
             );
 
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
-    }
-
-    public static void createFuelProjectiles(
-        Pose2d pose,
-        ChassisSpeeds robotFieldRelativeVelocity,
-        double hoodAngleRad,
-        double flywheelsSpeedRadPerSec
-    ) {
-        // for (int i= 0; i < 1; i++) {
-        //     createFuelProjectile(
-        //         pose,
-        //         robotFieldRelativeVelocity,
-        //         hoodAngleRad,
-        //         flywheelsSpeedRadPerSec,
-        //         initialShotHeightOffset);
-        // }
-    }
-    
-    /** Applies max velocity to bumps instead of blocking them out like MapleSim */
-    public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
-        double linearSpeed =
-            Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
-
-        boolean inBump = FieldConstants.Bump.contains(robotTranslation);
-
-        if (inBump && linearSpeed > maxLinearSpeedOverBump) {
-            double scalar = maxLinearSpeedOverBump / linearSpeed;
-
-            return new ChassisSpeeds(
-                robotVelocity.vxMetersPerSecond * scalar,
-                robotVelocity.vyMetersPerSecond * scalar,
-                robotVelocity.omegaRadiansPerSecond);
-            
-        }
-
-        return robotVelocity;
     }
 }

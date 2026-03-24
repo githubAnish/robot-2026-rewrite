@@ -234,24 +234,24 @@ public class ShotCalculator {
     }
 
     private static Rotation2d getDriveAngleWithLauncherOffset(Pose2d robotPose, Translation2d target) {
-        Rotation2d fieldToHubAngle =
+        Rotation2d fieldToTargetAngle =
             target
                 .minus(robotPose.getTranslation())
                 .getAngle();
 
-        Rotation2d hubAngle =
+        Rotation2d offsetCorrection =
             new Rotation2d(
                 Math.asin(
                     MathUtil.clamp(
-                        HoodConstants.robotToHood.getTranslation().getY()
-                            / target.getDistance(robotPose.getTranslation()),
+                        HoodConstants.robotToHood.getTranslation().getY() / target.getDistance(robotPose.getTranslation()),
                         -1.0,
                         1.0)));
                         
         return
-            fieldToHubAngle
-                .plus(hubAngle)
-                .plus(HoodConstants.robotToHood.getRotation().toRotation2d());
+            fieldToTargetAngle
+                .plus(offsetCorrection)
+                .plus(HoodConstants.robotToHood.getRotation().toRotation2d())
+                .plus(Rotation2d.kPi); // launcher is on opposite side of front
     }
 
     public record ShotInfo(

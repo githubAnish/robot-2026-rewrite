@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
-public class ShootPreloadGoToNZOnce implements AutoMode {
+public class ShootPreloadNZTwice implements AutoMode {
     private final Drive drive;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
@@ -30,7 +30,7 @@ public class ShootPreloadGoToNZOnce implements AutoMode {
 
     private final Path path;
 
-    public ShootPreloadGoToNZOnce(
+    public ShootPreloadNZTwice(
         Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,

@@ -29,7 +29,7 @@ public class HoodConstants {
     public static final double minAngle = Units.degreesToRadians(0.5); // from robot-2026 repo
     public static final double maxAngle = Units.degreesToRadians(34); // from robot-2026 repo
 
-    public static final Transform3d robotToHood = new Transform3d(0.09, 0.0, 0.09, Rotation3d.kZero); // Sim robot to hood
+    public static final Transform3d robotToHood = new Transform3d(-0.27, 0.0, 0.48, Rotation3d.kZero); // Sim robot to hood
     
     // Setpoints
     public static final double fixedTolerance = Units.degreesToRadians(0.5);

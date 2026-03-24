@@ -2,6 +2,7 @@ package org.frogforce503.robot;
 
 import java.util.Arrays;
 
+import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
@@ -15,12 +16,14 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import lombok.Setter;
 
 /** Simulates the field, including interaction with & movement of game elements. Uses physics simulation. */
 public class GameViz {
@@ -32,17 +35,21 @@ public class GameViz {
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
+    private final BumpPhysicsSim bumpSim = new BumpPhysicsSim();
 
     private IntakeSimulation intakeSimulation;
 
-    @Setter private double robotHeightMeters = 0.0;
+    private double robotClimbHeightMeters = 0.0;
 
     // Shoot Sim Constants
+    private final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
+    private final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
+    private final double fuelReleasedPerShot = 3; // How many balls are fired at once?
     private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
     private final Timer shotTimer = new Timer();
 
     // Climb Sim Constants
-    private final double climbRateScalarMetersPerSec = 44.5;
+    private final double climbRateScalarMetersPerSec = 1.0 / 60.0;
     private final Timer climbTimer = new Timer();
     
     public GameViz(
@@ -72,9 +79,11 @@ public class GameViz {
     }
 
     public void update() {
+        Pose3d terrainPose = bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
+
         Pose3d drivePose3d =
-            new Pose3d(drive.getPose())
-                .plus(new Transform3d(0.0, 0.0, robotHeightMeters, Rotation3d.kZero));
+            terrainPose.plus(
+                new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
 
         visionViz.update(drive.getPose());
         
@@ -120,15 +129,28 @@ public class GameViz {
             return; // Cooldown not done; skip creating new projectile
         }
 
+        // Check fuel amount
+        int available = intakeSimulation.getGamePiecesAmount();
+        int fuelToShoot = (int) Math.min(fuelReleasedPerShot, available);
+
         // Index fuel
-        intakeSimulation.obtainGamePieceFromIntake();
+        for (int i = 0; i < fuelToShoot; i++) {
+            intakeSimulation.obtainGamePieceFromIntake();
+        }
 
         // Shoot fuel
-        MapleSimUtil.createFuelProjectiles(
-            drive.getPose(),
-            drive.getFieldVelocity(),
-            hood.getAngleRad(),
-            flywheels.getVelocityRadPerSec());
+        double step = (fuelToShoot > 1) ? (rightMostFuelPositionOffset - leftMostFuelPositionOffset) / (fuelToShoot - 1) : 0.0;
+
+        for (int i = 0; i < fuelToShoot; i++) {
+            double offset = (fuelToShoot == 1) ? 0.0 : leftMostFuelPositionOffset + i * step;
+
+            MapleSimUtil.createFuelProjectile(
+                drive.getPose(),
+                drive.getFieldVelocity(),
+                hood.getAngleRad(),
+                flywheels.getVelocityRadPerSec(),
+                new Transform2d(0.0, offset, Rotation2d.kZero));
+        }
 
         // Restart cooldown timer after firing
         shotTimer.restart();
@@ -140,7 +162,7 @@ public class GameViz {
 
     public void climb() {
         // Scale climber velocity to restrict robot height & climbing speed to tower
-        robotHeightMeters += climber.getVelocityMetersPerSec() / climbRateScalarMetersPerSec * climbTimer.get();
+        robotClimbHeightMeters += -climber.getVelocityMetersPerSec() * climbRateScalarMetersPerSec * climbTimer.get();
     }
 
     public void stopClimb() {
