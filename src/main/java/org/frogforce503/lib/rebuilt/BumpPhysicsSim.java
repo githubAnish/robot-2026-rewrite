@@ -1,5 +1,8 @@
 package org.frogforce503.lib.rebuilt;
 
+import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -7,26 +10,19 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 public class BumpPhysicsSim {
-    private static final double GRAVITY = 9.81;
-    private double currentZ = 0.0;
-    private double velocityZ = 0.0;
+    private final double GRAVITY = 9.81;
+    private final double BUMP_KICK_SCALAR = 0.2; // Tune this (1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp)
 
-    // Use bumper dimensions from DriveConstants to fix clipping
     private final double halfLength = DriveConstants.bumperLength / 2.0; 
     private final double halfWidth = DriveConstants.bumperWidth / 2.0;
 
-    // ... (Keep your existing class variables) ...
+    private double currentZ = 0.0;
+    private double velocityZ = 0.0;
 
     public Pose3d update(Pose2d robot2dPose, ChassisSpeeds fieldVelocity, double dt) {
         Rotation2d yaw = robot2dPose.getRotation();
-        
-        // TUNE THIS: 1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp
-        // 0.4 to 0.6 is usually the sweet spot for a standard FRC swerve drive hitting a bump.
-        final double BUMP_KICK_SCALAR = 0.2; 
 
         // 1. Sample 4 corners AND the center point
         Translation2d pos = robot2dPose.getTranslation();
@@ -54,14 +50,18 @@ public class BumpPhysicsSim {
         double bl_z_offset =  dz_pitch + dz_roll;
         double br_z_offset =  dz_pitch - dz_roll;
 
-        double targetZ = Math.max(center.height(), Math.max(
-            Math.max(fl.height() - fl_z_offset, fr.height() - fr_z_offset),
-            Math.max(bl.height() - bl_z_offset, br.height() - br_z_offset)
-        ));
+        double targetZ =
+            Math.max(
+                center.height(),
+                Math.max(
+                    Math.max(fl.height() - fl_z_offset, fr.height() - fr_z_offset),
+                    Math.max(bl.height() - bl_z_offset, br.height() - br_z_offset)
+                ));
 
         // 4. Needed Vertical Velocity for "Kick" (Now with dampening!)
-        double neededVelocityZ = (fieldVelocity.vxMetersPerSecond * center.slopeX()) + 
-                                 (fieldVelocity.vyMetersPerSecond * center.slopeY());
+        double neededVelocityZ =
+            (fieldVelocity.vxMetersPerSecond * center.slopeX()) + 
+            (fieldVelocity.vyMetersPerSecond * center.slopeY());
         
         // Apply the dampener to simulate tire squish and energy loss
         neededVelocityZ *= BUMP_KICK_SCALAR;
@@ -76,14 +76,17 @@ public class BumpPhysicsSim {
             velocityZ = Math.max(velocityZ, neededVelocityZ);
         }
 
-        return new Pose3d(robot2dPose.getX(), robot2dPose.getY(), currentZ, 
-                          new Rotation3d(roll, pitch, yaw.getRadians()));
+        return new Pose3d(
+            robot2dPose.getX(),
+            robot2dPose.getY(),
+            currentZ, 
+            new Rotation3d(roll, pitch, yaw.getRadians()));
     }
 
-    private record TerrainState(double height, double slopeX, double slopeY) {}
-
     private TerrainState getTerrainState(Translation2d pos) {
-        if (!FieldConstants.Bump.contains(pos)) return new TerrainState(0, 0, 0);
+        if (!FieldConstants.Bump.contains(pos)) {
+            return new TerrainState(0, 0, 0);
+        }
 
         // Constants from Field Manual
         final double bumpDepth = Units.inchesToMeters(44.4);
@@ -95,6 +98,7 @@ public class BumpPhysicsSim {
         if (pos.getX() < FieldConstants.fieldLength / 2.0) {
             distFromInit = pos.getX() - FieldConstants.Lines.blueInitLineX;
             slopeDir = 1.0;
+
         } else {
             double redInitLineX = FieldConstants.fieldLength - FieldConstants.Lines.blueInitLineX;
             distFromInit = redInitLineX - pos.getX();
@@ -109,4 +113,6 @@ public class BumpPhysicsSim {
             return new TerrainState((bumpDepth - x) * tan15, -tan15 * slopeDir, 0);
         }
     }
+
+    private record TerrainState(double height, double slopeX, double slopeY) {}
 }

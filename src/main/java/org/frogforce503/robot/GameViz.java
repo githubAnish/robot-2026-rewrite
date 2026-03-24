@@ -79,12 +79,15 @@ public class GameViz {
     }
 
     public void update() {
-        Pose3d terrainPose = bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
+        // Apply bump physics
+        Pose3d terrainPose =
+            bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
 
+        // Add robot climb height
         Pose3d drivePose3d =
-            terrainPose.plus(
-                new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
+            terrainPose.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
 
+        // Update visualizers
         visionViz.update(drive.getPose());
         
         superstructureViz.update(
@@ -93,6 +96,7 @@ public class GameViz {
             intakePivot.getAngleRad(),
             climber.getHeightMeters());
 
+        // Visualize fuel
         Translation3d[] fuelInHopper =
             MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
@@ -102,6 +106,7 @@ public class GameViz {
                 .map(Pose3d::getTranslation)
                 .toArray(Translation3d[]::new);
 
+        // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
         Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
         Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
