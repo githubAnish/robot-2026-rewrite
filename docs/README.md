@@ -8,7 +8,7 @@ This is a ground-up rewrite of our robot code for the 2026 FIRST Robotics game *
 
 ![Controller Layout](../images/ControllerLayout.png)
 
-[View interactive version on PadCrafter](https://www.padcrafter.com/?templates=Controller+Scheme&plat=0&leftStick=&rightStickClick=&rightStick=Rotate&leftStickClick=Translate&dpadUp=Reset+Swerve+Rotation&dpadRight=&dpadLeft=&dpadDown=Set+Drive+To+Brake+%28X+Wheels%29&backButton=Set+Slow+Mode&startButton=Set+Robot+Relative&yButton=Set+Batter+Preset&xButton=Set+Trench+Preset&aButton=Set+Depot+Preset&bButton=Climb&leftTrigger=Intake+Fuel+From+Ground&rightTrigger=Score+Fuel+Into+Hub+or+Lob&leftBumper=Eject+From+Intake+%28Unjam%29&rightBumper=Eject+From+Shooter&col=%2523242424%2C%2523606A6E%2C%2523FFFFFF)
+[View interactive version on PadCrafter](https://www.padcrafter.com/?templates=FF+2026+Drum+Bot+Controls&plat=0&leftStick=&rightStickClick=&rightStick=Rotate&leftStickClick=Translate&dpadUp=Reset+Swerve+Rotation&dpadRight=Align+to+Tower+%28for+Climb%29&dpadLeft=&dpadDown=Set+Drive+To+Brake+%28X+Wheels%29&backButton=Set+Slow+Mode&startButton=Set+Robot+Relative&yButton=Set+Batter+Preset&xButton=Set+Trench+Preset&aButton=Set+Depot+Preset&bButton=Climb&leftTrigger=Intake+Fuel+From+Ground&rightTrigger=Score+Fuel+Into+Hub+or+Lob&leftBumper=Eject+From+Intake+%28Unjam%29&rightBumper=Eject+From+Shooter&col=%2523242424%2C%2523606A6E%2C%2523FFFFFF)
 
 [If using a keyboard, read the simulation docs for this repository](../sim/README.md)
 

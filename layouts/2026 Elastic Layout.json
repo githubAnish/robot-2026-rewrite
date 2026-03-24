@@ -51,10 +51,10 @@
         "containers": [
           {
             "title": "Alerts",
-            "x": 640.0,
+            "x": 1024.0,
             "y": 0.0,
-            "width": 640.0,
-            "height": 512.0,
+            "width": 896.0,
+            "height": 896.0,
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/Alerts",
@@ -62,24 +62,11 @@
             }
           },
           {
-            "title": "FUEL_CAMERA-processed",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 640.0,
-            "height": 512.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/FUEL_CAMERA-processed",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
             "title": "Is Shot Feasible?",
             "x": 0.0,
-            "y": 512.0,
-            "width": 1920.0,
-            "height": 384.0,
+            "y": 0.0,
+            "width": 1024.0,
+            "height": 896.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/TrackTargetCommand/Is Shot Feasible?",
@@ -100,10 +87,10 @@
         "layouts": [
           {
             "title": "Coast Mode",
-            "x": 1536.0,
+            "x": 1280.0,
             "y": 0.0,
-            "width": 384.0,
-            "height": 768.0,
+            "width": 640.0,
+            "height": 640.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -208,8 +195,8 @@
             "title": "Scheduler",
             "x": 0.0,
             "y": 0.0,
-            "width": 384.0,
-            "height": 768.0,
+            "width": 640.0,
+            "height": 640.0,
             "type": "Scheduler",
             "properties": {
               "topic": "/SmartDashboard/Scheduler",

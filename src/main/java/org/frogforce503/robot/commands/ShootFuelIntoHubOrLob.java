@@ -1,5 +1,6 @@
 package org.frogforce503.robot.commands;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.frogforce503.lib.io.JoystickUtil;
@@ -16,6 +17,7 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConst
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -34,7 +36,9 @@ public class ShootFuelIntoHubOrLob extends Command {
     private final Hood hood;
     private final Flywheels flywheels;
     private final GameViz gameViz;
+    
     private final Supplier<Translation2d> linearVelocitySupplier;
+    private final DoubleSupplier omegaSupplier;
 
     private final ProfiledPIDController thetaController =
         new ProfiledPIDController(
@@ -42,6 +46,8 @@ public class ShootFuelIntoHubOrLob extends Command {
             0.0,
             0.5,
             new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));
+
+    private final double maxDriverOmega = DriveConstants.maxOmega * 0.05;
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
@@ -57,6 +63,7 @@ public class ShootFuelIntoHubOrLob extends Command {
         this.flywheels = flywheels;
         this.gameViz = gameViz;
         this.linearVelocitySupplier = () -> xboxController.getLinearVelocityFromJoysticks();
+        this.omegaSupplier = () -> xboxController.getOmegaFromJoysticks();
 
         // Enable continuous input for theta controller
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -77,6 +84,7 @@ public class ShootFuelIntoHubOrLob extends Command {
         this.flywheels = flywheels;
         this.gameViz = gameViz;
         this.linearVelocitySupplier = Translation2d::new;
+        this.omegaSupplier = () -> 0.0;
 
         // Enable continuous input for theta controller
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -167,6 +175,7 @@ public class ShootFuelIntoHubOrLob extends Command {
     private void aimAtTarget(Rotation2d driveAngle, double driveVelocity) {
         // Get driver input velocities
         Translation2d driverLinearVelocity = linearVelocitySupplier.get();
+        double driverOmega = omegaSupplier.getAsDouble();
 
         // Calculate speeds
         double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed;
@@ -176,6 +185,11 @@ public class ShootFuelIntoHubOrLob extends Command {
                 drive.getAngle().getRadians(),
                 new State(driveAngle.getRadians(), driveVelocity));
 
+        // Fuse driver omega with calculated output
+        final double thetaS = Math.abs(driverOmega) * 3.0;
+        omega = MathUtil.interpolate(omega, driverOmega * maxDriverOmega, thetaS);
+
+        // Apply speeds
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
 
         drive.runVelocity(

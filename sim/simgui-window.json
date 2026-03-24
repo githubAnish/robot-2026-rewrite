@@ -23,8 +23,8 @@
     },
     "###/SmartDashboard/Alerts": {
       "Collapsed": "0",
-      "Pos": "1513,856",
-      "Size": "403,147"
+      "Pos": "1434,701",
+      "Size": "482,301"
     },
     "###/SmartDashboard/Auto": {
       "Collapsed": "0",
@@ -53,8 +53,8 @@
     },
     "###/SmartDashboard/Scheduler": {
       "Collapsed": "0",
-      "Pos": "1513,701",
-      "Size": "405,152"
+      "Pos": "999,700",
+      "Size": "431,304"
     },
     "###FMS": {
       "Collapsed": "0",
@@ -64,7 +64,7 @@
     "###Joysticks": {
       "Collapsed": "0",
       "Pos": "199,700",
-      "Size": "796,73"
+      "Size": "796,240"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
@@ -74,7 +74,7 @@
     "###NetworkTables": {
       "Collapsed": "0",
       "Pos": "959,23",
-      "Size": "702,677"
+      "Size": "954,675"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",

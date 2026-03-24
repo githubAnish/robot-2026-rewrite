@@ -9,7 +9,7 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.auto.autos.ShootPreloadNZTwice;
+import org.frogforce503.robot.auto.autos.ShootPreloadNZOnce;
 import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
@@ -17,6 +17,7 @@ import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
@@ -73,6 +74,8 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -128,6 +131,7 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
+    final Trigger alignToTower = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
@@ -296,7 +300,7 @@ public class RobotContainer {
 
         autoChooser.addAuto(
             "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadNZTwice(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
+            new ShootPreloadNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
     }
 
     private void configureButtonBindings() {
@@ -336,6 +340,7 @@ public class RobotContainer {
         toggleRobotRelative.onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
         resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
         xWheels.onTrue(Commands.runOnce(drive::stopWithX));
+        alignToTower.onTrue(new DriveToPose(drive, () -> new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78))));
     }
 
     public void robotPeriodic() {

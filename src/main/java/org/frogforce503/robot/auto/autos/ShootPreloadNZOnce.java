@@ -5,6 +5,7 @@ import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
@@ -18,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
-public class ShootPreloadNZTwice implements AutoMode {
+public class ShootPreloadNZOnce implements AutoMode {
     private final Drive drive;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
@@ -30,7 +31,7 @@ public class ShootPreloadNZTwice implements AutoMode {
 
     private final Path path;
 
-    public ShootPreloadNZTwice(
+    public ShootPreloadNZOnce(
         Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
@@ -58,7 +59,7 @@ public class ShootPreloadNZTwice implements AutoMode {
             new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(3), // shoot preload
             Commands.deadline(
                 autoBuilder.build(path),
-                new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz) // first intake from NZ
+                Commands.waitSeconds(1).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz)) // first intake from NZ
             ),
             new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
         );
@@ -66,6 +67,9 @@ public class ShootPreloadNZTwice implements AutoMode {
 
     @Override
     public Pose2d[] getPoses() {
+        if (FieldConstants.isRed()) {
+            path.flip();
+        }
         return BLineUtil.getPoses(path);
     }
 }
