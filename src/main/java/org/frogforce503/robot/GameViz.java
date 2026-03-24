@@ -15,6 +15,7 @@ import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -44,7 +45,7 @@ public class GameViz {
     // Shoot Sim Constants
     private final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
     private final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
-    private final double fuelReleasedPerShot = 3; // How many balls are fired at once?
+    private final double fuelReleasedPerShot = 4; // How many balls are fired at once?
     private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
     private final Timer shotTimer = new Timer();
 
@@ -121,6 +122,45 @@ public class GameViz {
         intakeSimulation.stopIntake();
     }
 
+    private int computeFuelToShoot(int available) {
+        if (available <= 0) {
+            return 0;
+        }
+
+        double fillRatio = (double) available / 40.0; // Normalize (0 → 1)
+        double curvedFill = Math.pow(fillRatio, 0.7); // Smooth curve
+        double scaledMax = fuelReleasedPerShot * curvedFill; // Scale burst size
+
+        // Bounds
+        int minShot = Math.max(1, (int) Math.floor(scaledMax * 0.5));
+        int maxShot = Math.max(1, (int) Math.ceil(scaledMax));
+
+        // Weighted randomness
+        double bias = curvedFill;
+        double rand = Math.random();
+        double weightedRand = (rand * (1 - bias)) + (Math.pow(rand, 0.5) * bias);
+
+        int fuelToShoot = minShot + (int)(weightedRand * (maxShot - minShot + 1));
+
+        // Simulate indexing inconsistency
+        double misfeedChance = 0.15 * (1.0 - fillRatio); // Misfeed
+        if (Math.random() < misfeedChance) {
+            fuelToShoot -= 1;
+        }
+
+        double doubleFeedChance = 0.08 * fillRatio; // Double feed
+        if (Math.random() < doubleFeedChance) {
+            fuelToShoot += 1;
+        }
+
+        double stutterChance = 0.1; // Stutter
+        if (Math.random() < stutterChance) {
+            fuelToShoot += Math.random() < 0.5 ? -1 : 1;
+        }
+
+        return MathUtil.clamp(fuelToShoot, 1, available);
+    }
+
     public void shootFuel(boolean needFuelFromIntakeForShoot) {
         if (needFuelFromIntakeForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
             return; // Don't shoot balls if there are none
@@ -136,7 +176,7 @@ public class GameViz {
 
         // Check fuel amount
         int available = intakeSimulation.getGamePiecesAmount();
-        int fuelToShoot = (int) Math.min(fuelReleasedPerShot, available);
+        int fuelToShoot = computeFuelToShoot(available);
 
         // Index fuel
         for (int i = 0; i < fuelToShoot; i++) {

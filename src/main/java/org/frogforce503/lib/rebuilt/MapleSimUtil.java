@@ -44,14 +44,14 @@ public class MapleSimUtil {
     // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
     private static final Distance intakeLengthExtended = Inches.of(9.5);
-    private static final int fuelCapacity = 30;
+    private static final int fuelCapacity = 40;
 
     // Hopper Constants
-    private static final int cols = 5;
-    private static final int rows = 3;
+    private static final int cols = 3;
+    private static final int rows = 5;
     private static final int perLayer = cols * rows;
     private static final double fuelToFuelOffset = Units.inchesToMeters(4);
-    private static final Transform3d robotToHopperOffset = new Transform3d(0, 0, Units.inchesToMeters(9), Rotation3d.kZero);
+    private static final Transform3d robotToHopperOffset = new Transform3d(Units.inchesToMeters(3), Units.inchesToMeters(2), Units.inchesToMeters(9), Rotation3d.kZero);
 
     // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
