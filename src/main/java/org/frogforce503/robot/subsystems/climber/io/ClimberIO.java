@@ -1,26 +1,26 @@
-package org.frogforce503.robot.subsystems.superstructure.turret.io;
+package org.frogforce503.robot.subsystems.climber.io;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface TurretIO {
+public interface ClimberIO {
     @AutoLog
-    class TurretIOInputs {
+    class ClimberIOInputs {
         public boolean motorConnected = false;
-        public double positionRad = 0.0;
-        public double absolutePositionRad = 0.0;
-        public double velocityRadPerSec = 0.0;
+        public double positionMeters = 0.0;
+        public double velocityMetersPerSec = 0.0;
         public double appliedVolts = 0.0;
         public double statorCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
+        public boolean limitSwitchPressed = false;
     }
 
-    default void updateInputs(TurretIOInputs inputs) {}
+    default void updateInputs(ClimberIOInputs inputs) {}
 
     default void runOpenLoop(double output) {}
 
     default void runVolts(double volts) {}
 
-    default void runPosition(double positionRad, double feedforward) {}
+    default void runPosition(double positionMeters, double feedforward) {}
 
     default void stop() {}
 
@@ -28,5 +28,5 @@ public interface TurretIO {
 
     default void setBrakeMode(boolean enabled) {}
 
-    default void setRelativePosition(double positionRad) {}
+    default void setRelativePosition(double positionMeters) {}
 }

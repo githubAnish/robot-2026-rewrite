@@ -17,18 +17,14 @@ import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
-import org.frogforce503.robot.commands.TrackTargetCommand;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSim;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSpark;
-import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIO;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSim;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSpark;
+import org.frogforce503.robot.subsystems.climber.Climber;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
@@ -65,11 +61,6 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSpark;
-import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
-import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
-import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIO;
-import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSim;
-import org.frogforce503.robot.subsystems.superstructure.turret.io.TurretIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
@@ -81,6 +72,7 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonVision;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -93,7 +85,7 @@ import lombok.experimental.ExtensionMethod;
  * Main container for robot subsystems, commands, and controller bindings.
  * Use https://www.padcrafter.com to visualize the controller bindings.
  */
-@ExtensionMethod(TriggerUtil.class)
+@ExtensionMethod({TriggerUtil.class})
 public class RobotContainer {
     // Subsystems
     private Drive drive;
@@ -102,11 +94,9 @@ public class RobotContainer {
     private IntakeRoller intakeRoller;
     private Indexer indexer;
     private Feeder feeder;
-    private Turret turret;
     private Hood hood;
     private Flywheels flywheels;
-    private ClimberDeploy climberDeploy;
-    private ClimberHook climberHook;
+    private Climber climber;
     private Leds leds;
 
     // Sim
@@ -138,7 +128,6 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-    final Trigger seedTurretRelativePosition = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
@@ -161,12 +150,10 @@ public class RobotContainer {
                     intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
                     indexer = new Indexer(new IndexerIOSpark());
                     feeder = new Feeder(new FeederIOSpark());
-                    turret = new Turret(new TurretIOSpark(), drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
                     hood = new Hood(new HoodIOSpark());
                     flywheels = new Flywheels(new FlywheelsIOSpark());
 
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
-                    climberHook = new ClimberHook(new ClimberHookIOSpark());
+                    climber = new Climber(new ClimberIOSpark());
 
                     leds = new Leds(new LedsIOCANdle());
 
@@ -174,9 +161,7 @@ public class RobotContainer {
                         new Vision(
                             visionEstimateConsumer,
                             drive::getPose,
-                            turret::getRobotRelativeAngleRad,
                             new AprilTagIO[] {
-                                new AprilTagIOPhotonVision(CameraName.TURRET_CAMERA),
                                 new AprilTagIOPhotonVision(CameraName.LEFT_CAMERA),
                                 new AprilTagIOPhotonVision(CameraName.RIGHT_CAMERA),
                                 new AprilTagIOPhotonVision(CameraName.BACK_CAMERA),
@@ -198,12 +183,10 @@ public class RobotContainer {
                     intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
                     indexer = new Indexer(new IndexerIOSim());
                     feeder = new Feeder(new FeederIOSim());
-                    turret = new Turret(new TurretIOSim(), drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
                     hood = new Hood(new HoodIOSim());
                     flywheels = new Flywheels(new FlywheelsIOSim());
 
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSim());
-                    climberHook = new ClimberHook(new ClimberHookIOSim());
+                    climber = new Climber(new ClimberIOSim());
                     
                     leds = new Leds(new LedsIO() {});
 
@@ -211,9 +194,7 @@ public class RobotContainer {
                         new Vision(
                             visionEstimateConsumer,
                             drive::getPose,
-                            turret::getRobotRelativeAngleRad,
                             new AprilTagIO[] {
-                                new AprilTagIOPhotonSim(CameraName.TURRET_CAMERA, visionViz),
                                 new AprilTagIOPhotonSim(CameraName.LEFT_CAMERA, visionViz),
                                 new AprilTagIOPhotonSim(CameraName.RIGHT_CAMERA, visionViz),
                                 new AprilTagIOPhotonSim(CameraName.BACK_CAMERA, visionViz),
@@ -245,10 +226,6 @@ public class RobotContainer {
         if (feeder == null) {
             feeder = new Feeder(new FeederIO() {});
         }
-
-        if (turret == null) {
-            turret = new Turret(new TurretIO() {}, drive::getAngle, () -> drive.getRobotVelocity().omegaRadiansPerSecond);
-        }
             
         if (hood == null) {
             hood = new Hood(new HoodIO() {});
@@ -258,12 +235,8 @@ public class RobotContainer {
             flywheels = new Flywheels(new FlywheelsIO() {});
         }
 
-        if (climberDeploy == null) {
-            climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
-        }
-
-        if (climberHook == null) {
-            climberHook = new ClimberHook(new ClimberHookIO() {});
+        if (climber == null) {
+            climber = new Climber(new ClimberIO() {});
         }
 
         if (leds == null) {
@@ -275,13 +248,12 @@ public class RobotContainer {
                 new Vision(
                     visionEstimateConsumer,
                     drive::getPose,
-                    turret::getRobotRelativeAngleRad,
                     new AprilTagIO[] {},
                     new ObjectDetectionIO[] {});
         }
 
         // Create sim requirements
-        gameViz = new GameViz(drive, intakePivot, turret, hood, flywheels, climberDeploy, climberHook, visionViz);
+        gameViz = new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive);
@@ -298,9 +270,6 @@ public class RobotContainer {
         
         indexer.setDefaultCommand(
             new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
-
-        turret.setDefaultCommand(
-            new TrackTargetCommand(drive, vision, turret));
 
         hood.setDefaultCommand(
             Commands.runOnce(() -> hood.setAngle(HoodConstants.DUCK_UNDER_TRENCH, 0.0), hood)
@@ -343,7 +312,7 @@ public class RobotContainer {
             .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
-            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz))
+            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz, driverXbox))
             .and(intakeGround.negate())
             .whileTrue(
                 Commands.repeatingSequence(
@@ -359,15 +328,14 @@ public class RobotContainer {
         bindShotPreset.accept(setDepotPreset, ShotPreset.DEPOT);
 
         climb.onTrue(
-            new ClimbSequence(turret, hood, flywheels, climberDeploy, climberHook, gameViz, climb)
+            new ClimbSequence(climber, gameViz, climb)
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other commands from interrupting (including itself re-scheduling)
 
         // Bind override controls
         toggleSlowMode.onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
         toggleRobotRelative.onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
         resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
-        xWheels.onTrue(Commands.runOnce(drive::brake));
-        seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
+        xWheels.onTrue(Commands.runOnce(drive::stopWithX));
     }
 
     public void robotPeriodic() {
@@ -383,18 +351,17 @@ public class RobotContainer {
 
         // Check if shot feasible
         boolean isShotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
-        boolean turretAtGoal = turret.isAtAngle(shotInfo.turretFieldRelativeAngle(), TurretConstants.shootOnMoveTolerance);
+        boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getAngle().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
 
         boolean isCalculatedShotFeasible =
-            isShotDistanceValid && turretAtGoal && hoodAtGoal && flywheelsAtGoal;
+            isShotDistanceValid && driveAtGoal && hoodAtGoal && flywheelsAtGoal;
 
         ShotCalculator.getInstance().setShotFeasible(
             isCalculatedShotFeasible ||
             ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // true if calculated shot feasible or using preset
 
-        Logger.recordOutput("ShotCalculator/Turret At Goal?", turretAtGoal);
         Logger.recordOutput("ShotCalculator/Hood At Goal?", hoodAtGoal);
         Logger.recordOutput("ShotCalculator/Flywheels At Goal?", flywheelsAtGoal);
 
@@ -424,7 +391,6 @@ public class RobotContainer {
     public void disabledPeriodic() {
         autoChooser.periodic();
         warmupExecutor.periodic();
-        turret.seedRelativePosition();
     }
 
     public void test() {

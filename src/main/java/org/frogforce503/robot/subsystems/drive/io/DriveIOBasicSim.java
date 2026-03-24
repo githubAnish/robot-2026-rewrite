@@ -56,7 +56,7 @@ public class DriveIOBasicSim implements DriveIO {
     }
 
     @Override
-    public void brake() {
+    public void stopWithX() {
         currentVelocity = new ChassisSpeeds();
     }
 

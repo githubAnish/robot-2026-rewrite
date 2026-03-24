@@ -57,8 +57,6 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
         this.camera = new PhotonCamera(cameraName.name());
         if (VisionConstants.robotToFixedCameraOffsets.containsKey(cameraName)) {
             this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
-        } else { 
-            this.robotToCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName); // Default to identity transform if not found
         }
 
 

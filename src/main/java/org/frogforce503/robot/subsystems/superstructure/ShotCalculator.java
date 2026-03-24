@@ -1,5 +1,6 @@
 package org.frogforce503.robot.subsystems.superstructure;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,18 +17,14 @@ import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculator {
     private static ShotCalculator instance;
 
-    private Rotation2d lastTurretAngle;
     private double lastHoodAngle;
-    private Rotation2d turretAngle;
-    private double hoodAngle = Double.NaN;
-    private double turretVelocity;
-    private double hoodVelocity;
+    private Rotation2d lastDriveAngle;
 
     // Cached info
     private ShotInfo latestShotInfo = null;
@@ -34,10 +32,10 @@ public class ShotCalculator {
     @Setter @Getter private ShotPreset shotPreset = ShotPreset.NONE;
 
     // Constants
-    private final LinearFilter turretAngleFilter =
+    private final LinearFilter hoodAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
-    private final LinearFilter hoodAngleFilter =
+    private final LinearFilter driveAngleFilter =
         LinearFilter.movingAverage((int) (0.1 / Constants.loopPeriodSecs));
 
     private final double phaseDelay = 0.03;
@@ -122,8 +120,12 @@ public class ShotCalculator {
     public boolean isShotDistanceValid(Pose2d robotPose) {
         return
             FieldConstants.inAllianceZone(robotPose)
-                ? MathUtils.inRange(latestShotInfo.turretToTargetDistance(), minDistanceHubShoot, maxDistanceHubShoot)
-                : MathUtils.inRange(latestShotInfo.turretToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
+                ? MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceHubShoot, maxDistanceHubShoot)
+                : MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
+    }
+
+    public double getNaiveTOF(double distance) {
+        return hubTimeOfFlightMap.get(distance);
     }
 
     public ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
@@ -146,82 +148,79 @@ public class ShotCalculator {
                     robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
                     robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
-        // Calculate distance from turret to target
-        Pose2d turretPosition = robotPose.plus(GeomUtil.toTransform2d(TurretConstants.robotToTurret));
-        double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
+        // Calculate target
+        Pose2d launcherPosition = robotPose.transformBy(GeomUtil.toTransform2d(HoodConstants.robotToHood));
+        double launcherToTargetDistance = target.getDistance(launcherPosition.getTranslation());
 
-        // Calculate field relative turret velocity
-        ChassisSpeeds robotVelocity = fieldRelativeVelocity;
-        double robotAngle = robotPose.getRotation().getRadians();
-        
-        double turretVelocityX =
-            robotVelocity.vxMetersPerSecond
-                + robotVelocity.omegaRadiansPerSecond
-                    * (TurretConstants.robotToTurret.getY() * Math.cos(robotAngle)
-                        - TurretConstants.robotToTurret.getX() * Math.sin(robotAngle));
+        // Calculate field relative launcher velocity
+        var robotVelocity = fieldRelativeVelocity;
+        var robotAngle = robotPose.getRotation();
 
-        double turretVelocityY =
-            robotVelocity.vyMetersPerSecond
-                + robotVelocity.omegaRadiansPerSecond
-                    * (TurretConstants.robotToTurret.getX() * Math.cos(robotAngle)
-                        - TurretConstants.robotToTurret.getY() * Math.sin(robotAngle));
+        ChassisSpeeds launcherVelocity =
+            DriverStation.isAutonomous()
+                ? robotVelocity
+                : GeomUtil.transformVelocity(
+                        robotVelocity, HoodConstants.robotToHood.getTranslation().toTranslation2d(), robotAngle);
 
-        // Account for imparted velocity by robot (turret) to offset
-        double timeOfFlight;
-        Pose2d lookaheadPose = turretPosition;
-        double lookaheadTurretToTargetDistance = turretToTargetDistance;
-        
+        // Account for imparted velocity by robot (launcher) to offset
+        double timeOfFlight = timeOfFlightMap.get(launcherToTargetDistance);
+        Pose2d lookaheadPose = launcherPosition;
+        double lookaheadLauncherToTargetDistance = launcherToTargetDistance;
+
         for (int i = 0; i < 20; i++) {
-            timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+            timeOfFlight = timeOfFlightMap.get(lookaheadLauncherToTargetDistance);
 
-            double offsetX = turretVelocityX * timeOfFlight;
-            double offsetY = turretVelocityY * timeOfFlight;
+            double offsetX = launcherVelocity.vxMetersPerSecond * timeOfFlight;
+            double offsetY = launcherVelocity.vyMetersPerSecond * timeOfFlight;
 
             lookaheadPose =
                 new Pose2d(
-                    turretPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-                    turretPosition.getRotation());
-
-            lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
+                    launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+                    launcherPosition.getRotation());
+            lookaheadLauncherToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
         }
 
-        // Calculate parameters accounted for imparted velocity
-        turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
-        hoodAngle = hoodAngleMap.get(lookaheadTurretToTargetDistance);
+        // Account for launcher being off center
+        Pose2d lookaheadRobotPose = lookaheadPose.transformBy(GeomUtil.toTransform2d(HoodConstants.robotToHood).inverse());
+        Rotation2d driveAngle = getDriveAngleWithLauncherOffset(lookaheadRobotPose, target);
 
-        if (lastTurretAngle == null) {
-            lastTurretAngle = turretAngle;
+        // Calculate remaining parameters
+        double hoodAngle = hoodAngleMap.get(lookaheadLauncherToTargetDistance);
+
+        if (lastDriveAngle == null) {
+            lastDriveAngle = driveAngle;
         }
 
         if (Double.isNaN(lastHoodAngle)) {
             lastHoodAngle = hoodAngle;
         }
 
-        turretVelocity =
-            turretAngleFilter.calculate(
-                turretAngle.minus(lastTurretAngle).getRadians() / Constants.loopPeriodSecs);
-
-        hoodVelocity =
+        double hoodVelocity =
             hoodAngleFilter.calculate((hoodAngle - lastHoodAngle) / Constants.loopPeriodSecs);
 
-        lastTurretAngle = turretAngle;
+        double driveVelocity =
+            driveAngleFilter.calculate(
+                driveAngle.minus(lastDriveAngle).getRadians() / Constants.loopPeriodSecs);
+
         lastHoodAngle = hoodAngle;
+        lastDriveAngle = driveAngle;
 
         // Update latest shot info
         latestShotInfo =
             new ShotInfo(
-                turretAngle,
-                turretVelocity,
+                driveAngle,
+                driveVelocity,
                 hoodAngle,
                 hoodVelocity,
-                flywheelsSpeedMap.get(lookaheadTurretToTargetDistance),
-                lookaheadTurretToTargetDistance);
+                flywheelsSpeedMap.get(lookaheadLauncherToTargetDistance),
+                lookaheadLauncherToTargetDistance,
+                launcherToTargetDistance);
 
         // Log data
         Logger.recordOutput("ShotCalculator/Is Hub Shot?", isHubShot);
         Logger.recordOutput("ShotCalculator/TargetTranslation", target);
 
-        Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadPose);
+        Logger.recordOutput("ShotCalculator/LookaheadPose", lookaheadRobotPose);
         Logger.recordOutput("ShotCalculator/LatestShotInfo", latestShotInfo);
         Logger.recordOutput("ShotCalculator/Is Shot Feasible?", isShotFeasible);
 
@@ -234,11 +233,33 @@ public class ShotCalculator {
         latestShotInfo = null;
     }
 
+    private static Rotation2d getDriveAngleWithLauncherOffset(Pose2d robotPose, Translation2d target) {
+        Rotation2d fieldToHubAngle =
+            target
+                .minus(robotPose.getTranslation())
+                .getAngle();
+
+        Rotation2d hubAngle =
+            new Rotation2d(
+                Math.asin(
+                    MathUtil.clamp(
+                        HoodConstants.robotToHood.getTranslation().getY()
+                            / target.getDistance(robotPose.getTranslation()),
+                        -1.0,
+                        1.0)));
+                        
+        return
+            fieldToHubAngle
+                .plus(hubAngle)
+                .plus(HoodConstants.robotToHood.getRotation().toRotation2d());
+    }
+
     public record ShotInfo(
-        Rotation2d turretFieldRelativeAngle,
-        double turretVelocityRadPerSec,
+        Rotation2d driveAngle,
+        double driveVelocity,
         double hoodAngleRad,
         double hoodVelocityRadPerSec,
         double flywheelsVelocityRadPerSec,
-        double turretToTargetDistance) {}
+        double launcherToTargetDistance,
+        double launcherToTargetDistanceNoLookahead) {}
 }

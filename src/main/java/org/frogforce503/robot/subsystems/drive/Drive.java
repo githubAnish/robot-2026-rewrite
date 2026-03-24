@@ -114,8 +114,8 @@ public class Drive extends SubsystemBase {
     }
 
     /** Stops the drivetrain by aligning the modules in X manner. */
-    public void brake() {
-        io.brake();
+    public void stopWithX() {
+        io.stopWithX();
     }
 
     public void stop() {

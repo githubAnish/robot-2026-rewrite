@@ -43,6 +43,8 @@ public class DriveConstants {
     public static final PIDConfig linearPID = new PIDConfig(0.25, 0.0, 0.1);
     public static final PIDConfig thetaPID = new PIDConfig(3.0, 0.0, 0.0);
 
+    public static final double aimTolerance = Units.degreesToRadians(5);
+
     static {
         Translation2d frontLeftModuleTranslation = new Translation2d(frontLeft.LocationX, frontLeft.LocationY);
         Translation2d frontRightModuleTranslation = new Translation2d(frontRight.LocationX, frontRight.LocationY);

@@ -5,20 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "java",
-      "name": "Constants$CheckPullRequest",
-      "request": "launch",
-      "mainClass": "org.frogforce503.robot.Constants$CheckPullRequest",
-      "projectName": "robot-2026"
-    },
-    {
-      "type": "java",
-      "name": "Constants$CheckDeploy",
-      "request": "launch",
-      "mainClass": "org.frogforce503.robot.Constants$CheckDeploy",
-      "projectName": "robot-2026"
-    },
-    {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",

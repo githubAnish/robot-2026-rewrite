@@ -34,25 +34,8 @@ import lombok.Getter;
 public class VisionConstants {
     // Hardware / Configuration
     public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
-    public static final EnumMap<CameraName, Transform3d> turretToTurretCameraOffsets = new EnumMap<>(CameraName.class);
     
     static {
-        turretToTurretCameraOffsets.put(
-            CameraName.TURRET_CAMERA,
-            new Transform3d(
-                new Translation3d(
-                    Units.inchesToMeters(5.493439), 
-                    Units.inchesToMeters(2.075000), 
-                    Units.inchesToMeters(6.244572)
-                ),
-                new Rotation3d(
-                    Units.degreesToRadians(0), 
-                    Units.degreesToRadians(-15), 
-                    Units.degreesToRadians(0)
-                )
-            )
-        );
-
         robotToFixedCameraOffsets.put(
             CameraName.LEFT_CAMERA,
             new Transform3d(
@@ -119,7 +102,6 @@ public class VisionConstants {
      */
     public enum CameraName {
         // AprilTag Detection Cameras
-        TURRET_CAMERA,
         LEFT_CAMERA,
         RIGHT_CAMERA,
         BACK_CAMERA,
@@ -152,8 +134,7 @@ public class VisionConstants {
         GLOBAL_LOCALIZATION(
             EnumSet.of(
                 CameraName.LEFT_CAMERA, 
-                CameraName.RIGHT_CAMERA, 
-                // CameraName.TURRET_CAMERA,
+                CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
             ),
 
@@ -181,113 +162,10 @@ public class VisionConstants {
 
             Optional.empty()
         ),
-
-
-
-        /**
-         * Uses backup AprilTag cameras for aiming tasks when primary turret cameras are unreliable.
-         * Suitable for fallback scenarios during aiming.
-         */
-        STANDARD_HUB_AIM(
-            EnumSet.of(
-                // CameraName.TURRET_CAMERA, 
-                CameraName.LEFT_CAMERA,
-                CameraName.RIGHT_CAMERA,
-                CameraName.BACK_CAMERA
-            ),
-            poseObservation -> {
-                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
-                
-                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
-                double distance = VisionUtils.getLowestDistanceToCamera(tags);
-
-                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
-                double maxDistance = tags.length > 1 ? Units.feetToMeters(21.5) : Units.feetToMeters(15); 
-
-                return ambiguity <= maxAmbiguity && distance <= maxDistance;
-            },
-             aprilTagIO -> {
-                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
-                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
-                } 
-
-                Set<Integer> ignoredTags = new HashSet<Integer>();
-                ignoredTags.addAll(RED_TRENCH_TAGS);
-                ignoredTags.addAll(BLUE_TRENCH_TAGS);
-                ignoredTags.addAll(RED_OUTPOST_TAGS);
-                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
-                ignoredTags.addAll(RED_TOWER_TAGS);
-                ignoredTags.addAll(BLUE_TOWER_TAGS);
-                
-                if (FieldConstants.isRed()) {
-                    ignoredTags.addAll(BLUE_HUB_TAGS);
-                } else {
-                    ignoredTags.addAll(RED_HUB_TAGS);
-                }
-
-                aprilTagIO.setIgnoredAprilTags(ignoredTags);
-            },
-
-            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-            // Optional.of(GLOBAL_LOCALIZATION)
-            Optional.empty() 
-        ),
-
-        /**
-         * Uses only turret-mounted AprilTag cameras for precise aiming tasks.
-         * Suitable for tasks such as shooting or precise alignment.
-         */
-        TURRET_HUB_AIMING(
-            EnumSet.of(
-                CameraName.TURRET_CAMERA
-            ),
-
-            poseObservation -> {
-                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
-                
-                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
-                double distance = VisionUtils.getLowestDistanceToCamera(tags);
-
-                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
-                double maxDistance = tags.length > 1 ? Units.feetToMeters(21.5) : Units.feetToMeters(15); 
-
-                return ambiguity <= maxAmbiguity && distance <= maxDistance;
-            },
-
-            aprilTagIO -> {
-                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
-                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
-                }
-                
-                Set<Integer> ignoredTags = new HashSet<Integer>();
-                ignoredTags.addAll(RED_TRENCH_TAGS);
-                ignoredTags.addAll(BLUE_TRENCH_TAGS);
-                ignoredTags.addAll(RED_OUTPOST_TAGS);
-                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
-                ignoredTags.addAll(RED_TOWER_TAGS);
-                ignoredTags.addAll(BLUE_TOWER_TAGS);
-                
-                if (FieldConstants.isRed()) {
-                    ignoredTags.addAll(BLUE_HUB_TAGS);
-                } else {
-                    ignoredTags.addAll(RED_HUB_TAGS);
-                }
-
-                aprilTagIO.setIgnoredAprilTags(ignoredTags);
-            },
-
-            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-
-            Optional.of(STANDARD_HUB_AIM)
-        ),
-
         TOWER_ALIGNMENT(
             EnumSet.of(
                 CameraName.LEFT_CAMERA, 
-                CameraName.RIGHT_CAMERA, 
-                CameraName.TURRET_CAMERA, 
+                CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
             ),
             poseObservation -> {
@@ -329,7 +207,6 @@ public class VisionConstants {
 
         OUTPOST_ALIGNMENT(
             EnumSet.of(
-                CameraName.TURRET_CAMERA, 
                 CameraName.LEFT_CAMERA,
                 CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA

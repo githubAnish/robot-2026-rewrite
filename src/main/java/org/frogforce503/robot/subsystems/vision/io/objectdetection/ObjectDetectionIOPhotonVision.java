@@ -42,8 +42,6 @@ public class ObjectDetectionIOPhotonVision implements ObjectDetectionIO {
 
         if (VisionConstants.robotToFixedCameraOffsets.containsKey(cameraName)) {
             this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
-        } else { 
-            this.robotToCameraOffset = VisionConstants.turretToTurretCameraOffsets.get(cameraName); // Default to identity transform if not found
         }
     }
 

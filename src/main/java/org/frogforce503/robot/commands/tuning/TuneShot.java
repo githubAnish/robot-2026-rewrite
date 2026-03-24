@@ -73,10 +73,10 @@ public class TuneShot extends Command {
         }
 
         // Record shot
-        recordShot(shotInfo.turretToTargetDistance());
+        recordShot(shotInfo.launcherToTargetDistance());
     }
 
-    private void recordShot(double turretToTargetDistance) {
+    private void recordShot(double launcherToTargetDistance) {
         if (!recordShot.get()) {
             return;
         }
@@ -84,10 +84,10 @@ public class TuneShot extends Command {
         final String prefix = FieldConstants.inAllianceZone(drive.getPose()) ? "hub" : "lob";
 
         hoodMapEntries +=
-            prefix + "HoodAngleMap.put(" + turretToTargetDistance + ", Units.degreesToRadians(" + hoodAngleDeg.get() + "));\n";
+            prefix + "HoodAngleMap.put(" + launcherToTargetDistance + ", Units.degreesToRadians(" + hoodAngleDeg.get() + "));\n";
 
         flywheelsMapEntries +=
-            prefix + "FlywheelSpeedMap.put(" + turretToTargetDistance + ", Units.rotationsPerMinuteToRadiansPerSecond(" + flywheelsVelocityRpm.get() + "));\n";
+            prefix + "FlywheelSpeedMap.put(" + launcherToTargetDistance + ", Units.rotationsPerMinuteToRadiansPerSecond(" + flywheelsVelocityRpm.get() + "));\n";
 
         Logger.recordOutput("TuneShot/Shot Info (for map)", hoodMapEntries + "\n" + flywheelsMapEntries);
 

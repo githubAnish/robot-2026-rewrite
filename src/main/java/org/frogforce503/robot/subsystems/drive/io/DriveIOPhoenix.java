@@ -105,7 +105,7 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     }
 
     @Override
-    public void brake() {
+    public void stopWithX() {
         super.setControl(new SwerveDriveBrake());
     }
 

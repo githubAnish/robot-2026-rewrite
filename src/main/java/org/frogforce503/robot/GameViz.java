@@ -3,14 +3,12 @@ package org.frogforce503.robot;
 import java.util.Arrays;
 
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
-import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
+import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.turret.Turret;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -28,11 +26,9 @@ import lombok.Setter;
 public class GameViz {
     private final Drive drive;
     private final IntakePivot intakePivot;
-    private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
-    private final ClimberDeploy climberDeploy;
-    private final ClimberHook climberHook;
+    private final Climber climber;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
@@ -52,20 +48,16 @@ public class GameViz {
     public GameViz(
         Drive drive,
         IntakePivot intakePivot,
-        Turret turret,
         Hood hood,
         Flywheels flywheels,
-        ClimberDeploy climberDeploy,
-        ClimberHook climberHook,
+        Climber climber,
         VisionSimulator visionViz
     ) {
         this.drive = drive;
         this.intakePivot = intakePivot;
-        this.turret = turret;
         this.hood = hood;
         this.flywheels = flywheels;
-        this.climberDeploy = climberDeploy;
-        this.climberHook = climberHook;
+        this.climber = climber;
         
         this.visionViz = visionViz;
 
@@ -88,10 +80,9 @@ public class GameViz {
         
         superstructureViz.update(
             drivePose3d,
-            turret.getRobotRelativeAngleRad(),
             hood.getAngleRad(),
             intakePivot.getAngleRad(),
-            climberDeploy.getAngleRad());
+            climber.getHeightMeters());
 
         Translation3d[] fuelInHopper =
             MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
@@ -133,10 +124,9 @@ public class GameViz {
         intakeSimulation.obtainGamePieceFromIntake();
 
         // Shoot fuel
-        MapleSimUtil.createFuelProjectile(
+        MapleSimUtil.createFuelProjectiles(
             drive.getPose(),
             drive.getFieldVelocity(),
-            turret.getFieldRelativeAngle(),
             hood.getAngleRad(),
             flywheels.getVelocityRadPerSec());
 
@@ -150,7 +140,7 @@ public class GameViz {
 
     public void climb() {
         // Scale climber velocity to restrict robot height & climbing speed to tower
-        robotHeightMeters += climberHook.getVelocityMetersPerSec() / climbRateScalarMetersPerSec * climbTimer.get();
+        robotHeightMeters += climber.getVelocityMetersPerSec() / climbRateScalarMetersPerSec * climbTimer.get();
     }
 
     public void stopClimb() {
