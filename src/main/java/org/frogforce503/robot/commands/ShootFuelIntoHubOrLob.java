@@ -47,7 +47,8 @@ public class ShootFuelIntoHubOrLob extends Command {
             0.5,
             new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));
 
-    private final double maxDriverOmega = DriveConstants.maxOmega * 0.05;
+    private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
+    private final double translationScalarShootOnMove = 0.25;
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
@@ -178,8 +179,8 @@ public class ShootFuelIntoHubOrLob extends Command {
         double driverOmega = omegaSupplier.getAsDouble();
 
         // Calculate speeds
-        double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed;
-        double yVelocity = driverLinearVelocity.getY() * DriveConstants.maxLinearSpeed;
+        double xVelocity = driverLinearVelocity.getX() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
+        double yVelocity = driverLinearVelocity.getY() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
         double omega =
             thetaController.calculate(
                 drive.getAngle().getRadians(),
