@@ -1,7 +1,7 @@
-package org.frogforce503.robot.subsystems.climberhook.io;
+package org.frogforce503.robot.subsystems.climber.io;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.subsystems.climberhook.ClimberHookConstants;
+import org.frogforce503.robot.subsystems.climber.ClimberConstants;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
@@ -10,7 +10,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
-public class ClimberHookIOSim extends ClimberHookIOSpark {
+public class ClimberIOSim extends ClimberIOSpark {
     // Control
     private final SparkMaxSim motorSim;
     private final ElevatorSim physicsSim;
@@ -19,26 +19,26 @@ public class ClimberHookIOSim extends ClimberHookIOSpark {
     private final DCMotor motorModel = DCMotor.getNEO(1);
     private final double simCarriageMass = DriveConstants.mass; // has to lift robot weight
 
-    public ClimberHookIOSim() {
+    public ClimberIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);
         physicsSim =
             new ElevatorSim(
                 motorModel,
-                ClimberHookConstants.mechanismRatio,
+                ClimberConstants.mechanismRatio,
                 simCarriageMass,
-                ClimberHookConstants.sprocketPitchDiameter / 2,
-                ClimberHookConstants.minHeight,
-                ClimberHookConstants.maxHeight,
+                ClimberConstants.sprocketPitchDiameter / 2,
+                ClimberConstants.minHeight,
+                ClimberConstants.maxHeight,
                 true,
-                ClimberHookConstants.START);
+                ClimberConstants.START);
 
         // Sync physics and motor sim positions
-        motorSim.setPosition(ClimberHookConstants.START);
+        motorSim.setPosition(ClimberConstants.START);
         motorSim.setVelocity(0.0);
     }
 
     @Override
-    public void updateInputs(ClimberHookIOInputs inputs) {
+    public void updateInputs(ClimberIOInputs inputs) {
         double appliedVolts = motorSim.getAppliedOutput() * RobotController.getBatteryVoltage();
         
         // Apply physics

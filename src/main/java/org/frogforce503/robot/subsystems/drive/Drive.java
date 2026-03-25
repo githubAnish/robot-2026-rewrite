@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.LoggerUtil;
-import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -15,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lombok.Getter;
 import lombok.Setter;
@@ -114,8 +112,8 @@ public class Drive extends SubsystemBase {
     }
 
     /** Stops the drivetrain by aligning the modules in X manner. */
-    public void brake() {
-        io.brake();
+    public void stopWithX() {
+        io.stopWithX();
     }
 
     public void stop() {
@@ -124,19 +122,11 @@ public class Drive extends SubsystemBase {
 
     /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
     public void runVelocity(ChassisSpeeds speeds) {
-        if (RobotBase.isSimulation()) {
-            speeds = MapleSimUtil.limitVelocityOverBumps(getPose().getTranslation(), speeds);
-        }
-
         io.runVelocity(speeds);
     }
 
     /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
     public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
-        if (RobotBase.isSimulation()) {
-            speeds = MapleSimUtil.limitVelocityOverBumps(getPose().getTranslation(), speeds);
-        }
-
         io.runVelocity(speeds, moduleForcesX, moduleForcesY);
     }
 

@@ -1,10 +1,10 @@
-package org.frogforce503.robot.subsystems.climberhook;
+package org.frogforce503.robot.subsystems.climber;
 
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOInputsAutoLogged;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIO;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
@@ -15,15 +15,15 @@ import edu.wpi.first.wpilibj.RobotState;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ClimberHook extends FFSubsystemBase {
-    private final ClimberHookIO io;
-    private final ClimberHookIOInputsAutoLogged inputs = new ClimberHookIOInputsAutoLogged();
+public class Climber extends FFSubsystemBase {
+    private final ClimberIO io;
+    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
     // Constants
     @Setter private ElevatorFeedforward feedforward;
     
     // Control
-    private double targetHeightMeters = ClimberHookConstants.START;
+    private double targetHeightMeters = ClimberConstants.START;
     private double lastHeightMeters = 0.0;
 
     private boolean shouldRunProfile = true;
@@ -31,11 +31,11 @@ public class ClimberHook extends FFSubsystemBase {
     @Getter private State setpoint = new State();
     private boolean atGoal = false;
 
-    public ClimberHook(ClimberHookIO io) {
+    public Climber(ClimberIO io) {
         this.io = io;
         
-        feedforward = ClimberHookConstants.kFF.getElevatorFF();
-        profile = new TrapezoidProfile(ClimberHookConstants.kConstraints);
+        feedforward = ClimberConstants.kFF.getElevatorFF();
+        profile = new TrapezoidProfile(ClimberConstants.kConstraints);
     }
 
     @Override
@@ -43,13 +43,13 @@ public class ClimberHook extends FFSubsystemBase {
         super.periodic();
 
         io.updateInputs(inputs);
-        Logger.processInputs("ClimberHook", inputs);
+        Logger.processInputs("Climber", inputs);
 
         // Reset encoder if limit switch pressed & climber is going down
         if (inputs.limitSwitchPressed && getHeightMeters() < lastHeightMeters) {
-            double heightAtLimitSwitch = ClimberHookConstants.minHeight; // assume limit switch at bottom
+            double heightAtLimitSwitch = ClimberConstants.minHeight; // assume limit switch at bottom
 
-            setRelativePosition(heightAtLimitSwitch);
+            io.setRelativePosition(heightAtLimitSwitch);
             setpoint = new State(heightAtLimitSwitch, 0.0);
         }
 
@@ -57,38 +57,38 @@ public class ClimberHook extends FFSubsystemBase {
         if (shouldRunProfile && RobotState.isEnabled()) {
             var goalState =
                 new State(
-                    MathUtil.clamp(targetHeightMeters, ClimberHookConstants.minHeight, ClimberHookConstants.maxHeight),
+                    MathUtil.clamp(targetHeightMeters, ClimberConstants.minHeight, ClimberConstants.maxHeight),
                     0.0);
 
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtHeight(goalState.position, ClimberHookConstants.tolerance);
+            atGoal = isAtHeight(goalState.position, ClimberConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
 
             /// Log state
-            Logger.recordOutput("ClimberHook/Profile/SetpointPositionMeters", setpoint.position);
-            Logger.recordOutput("ClimberHook/Profile/SetpointVelocityMetersPerSec", setpoint.velocity);
-            Logger.recordOutput("ClimberHook/Profile/GoalPositionMeters", goalState.position);
-            Logger.recordOutput("ClimberHook/AtGoal", atGoal);
+            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", setpoint.position);
+            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", setpoint.velocity);
+            Logger.recordOutput("Climber/Profile/GoalPositionMeters", goalState.position);
+            Logger.recordOutput("Climber/AtGoal", atGoal);
         } else {
             // Reset setpoint
             setpoint = new State(getHeightMeters(), 0.0);
       
             // Clear logs
-            Logger.recordOutput("ClimberHook/Profile/SetpointPositionMeters", 0.0);
-            Logger.recordOutput("ClimberHook/Profile/SetpointVelocityMetersPerSec", 0.0);
-            Logger.recordOutput("ClimberHook/Profile/GoalPositionMeters", 0.0);
-            Logger.recordOutput("ClimberHook/AtGoal", true);
+            Logger.recordOutput("Climber/Profile/SetpointPositionMeters", 0.0);
+            Logger.recordOutput("Climber/Profile/SetpointVelocityMetersPerSec", 0.0);
+            Logger.recordOutput("Climber/Profile/GoalPositionMeters", 0.0);
+            Logger.recordOutput("Climber/AtGoal", true);
         }
 
-        Logger.recordOutput("ClimberHook/CurrentPositionMeters", getHeightMeters());
+        Logger.recordOutput("Climber/CurrentPositionMeters", getHeightMeters());
         lastHeightMeters = getHeightMeters();
 
         // Record cycle time
-        LoggedTracer.record("ClimberHook");
+        LoggedTracer.record("Climber");
     }
 
     public double getHeightMeters() {
@@ -100,10 +100,6 @@ public class ClimberHook extends FFSubsystemBase {
     }
 
     // Actions
-    public void setRelativePosition(double positionMeters) {
-        io.setRelativePosition(positionMeters);
-    }
-
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }

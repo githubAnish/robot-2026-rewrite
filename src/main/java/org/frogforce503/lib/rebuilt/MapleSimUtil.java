@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.Radians;
 import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.turret.TurretConstants;
@@ -45,11 +44,11 @@ public class MapleSimUtil {
     // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
     private static final Distance intakeLengthExtended = Inches.of(9.5);
-    private static final int fuelCapacity = 30;
+    private static final int fuelCapacity = 40;
 
     // Hopper Constants
     private static final int cols = 5;
-    private static final int rows = 3;
+    private static final int rows = 4;
     private static final int perLayer = cols * rows;
     private static final double fuelToFuelOffset = Units.inchesToMeters(4);
     private static final Transform3d robotToHopperOffset = new Transform3d(0, 0, Units.inchesToMeters(9), Rotation3d.kZero);
@@ -57,9 +56,6 @@ public class MapleSimUtil {
     // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
     private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
-
-    // Bump Constants
-    private static final double maxLinearSpeedOverBump = DriveConstants.maxLinearSpeed / 5;
 
     private MapleSimUtil() {}
     
@@ -149,25 +145,5 @@ public class MapleSimUtil {
             );
 
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
-    }
-    
-    /** Applies max velocity to bumps instead of blocking them out like MapleSim */
-    public static ChassisSpeeds limitVelocityOverBumps(Translation2d robotTranslation, ChassisSpeeds robotVelocity) {
-        double linearSpeed =
-            Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond);
-
-        boolean inBump = FieldConstants.Bump.contains(robotTranslation);
-
-        if (inBump && linearSpeed > maxLinearSpeedOverBump) {
-            double scalar = maxLinearSpeedOverBump / linearSpeed;
-
-            return new ChassisSpeeds(
-                robotVelocity.vxMetersPerSecond * scalar,
-                robotVelocity.vyMetersPerSecond * scalar,
-                robotVelocity.omegaRadiansPerSecond);
-            
-        }
-
-        return robotVelocity;
     }
 }

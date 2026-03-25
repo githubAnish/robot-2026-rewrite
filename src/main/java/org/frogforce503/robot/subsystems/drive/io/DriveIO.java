@@ -37,7 +37,7 @@ public interface DriveIO {
 
     default void acceptVisionMeasurement(Pose2d poseEstimate, double timestamp, Matrix<N3, N1> stdDevs) {}
 
-    default void brake() {}
+    default void stopWithX() {}
 
     default void coast() {}
 

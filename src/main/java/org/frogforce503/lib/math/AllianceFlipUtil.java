@@ -17,7 +17,7 @@ public class AllianceFlipUtil {
 
     private AllianceFlipUtil() {}
 
-    public static boolean shouldFlip() {
+    private static boolean shouldFlip() {
         return FieldConstants.isRed() || override;
     }
 

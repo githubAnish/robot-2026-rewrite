@@ -9,7 +9,7 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.auto.autos.ShootPreloadGoToNZOnce;
+import org.frogforce503.robot.auto.autos.ShootPreloadNZOnce;
 import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
@@ -18,16 +18,13 @@ import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TrackTargetCommand;
+import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIO;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSim;
-import org.frogforce503.robot.subsystems.climberdeploy.io.ClimberDeployIOSpark;
-import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIO;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSim;
-import org.frogforce503.robot.subsystems.climberhook.io.ClimberHookIOSpark;
+import org.frogforce503.robot.subsystems.climber.Climber;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
+import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
@@ -81,6 +78,8 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonVision;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -105,8 +104,7 @@ public class RobotContainer {
     private Turret turret;
     private Hood hood;
     private Flywheels flywheels;
-    private ClimberDeploy climberDeploy;
-    private ClimberHook climberHook;
+    private Climber climber;
     private Leds leds;
 
     // Sim
@@ -138,7 +136,8 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-    final Trigger seedTurretRelativePosition = driverXbox.povRight();
+    final Trigger alignToTower = driverXbox.povRight();
+    final Trigger seedTurretRelativePosition = driverXbox.povLeft();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
@@ -165,8 +164,7 @@ public class RobotContainer {
                     hood = new Hood(new HoodIOSpark());
                     flywheels = new Flywheels(new FlywheelsIOSpark());
 
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSpark());
-                    climberHook = new ClimberHook(new ClimberHookIOSpark());
+                    climber = new Climber(new ClimberIOSpark());
 
                     leds = new Leds(new LedsIOCANdle());
 
@@ -202,8 +200,7 @@ public class RobotContainer {
                     hood = new Hood(new HoodIOSim());
                     flywheels = new Flywheels(new FlywheelsIOSim());
 
-                    climberDeploy = new ClimberDeploy(new ClimberDeployIOSim());
-                    climberHook = new ClimberHook(new ClimberHookIOSim());
+                    climber = new Climber(new ClimberIOSim());
                     
                     leds = new Leds(new LedsIO() {});
 
@@ -258,12 +255,8 @@ public class RobotContainer {
             flywheels = new Flywheels(new FlywheelsIO() {});
         }
 
-        if (climberDeploy == null) {
-            climberDeploy = new ClimberDeploy(new ClimberDeployIO() {});
-        }
-
-        if (climberHook == null) {
-            climberHook = new ClimberHook(new ClimberHookIO() {});
+        if (climber == null) {
+            climber = new Climber(new ClimberIO() {});
         }
 
         if (leds == null) {
@@ -281,7 +274,7 @@ public class RobotContainer {
         }
 
         // Create sim requirements
-        gameViz = new GameViz(drive, intakePivot, turret, hood, flywheels, climberDeploy, climberHook, visionViz);
+        gameViz = new GameViz(drive, intakePivot, turret, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive);
@@ -327,7 +320,7 @@ public class RobotContainer {
 
         autoChooser.addAuto(
             "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadGoToNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
+            new ShootPreloadNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
     }
 
     private void configureButtonBindings() {
@@ -359,15 +352,16 @@ public class RobotContainer {
         bindShotPreset.accept(setDepotPreset, ShotPreset.DEPOT);
 
         climb.onTrue(
-            new ClimbSequence(turret, hood, flywheels, climberDeploy, climberHook, gameViz, climb)
+            new ClimbSequence(climber, gameViz, climb)
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other commands from interrupting (including itself re-scheduling)
 
         // Bind override controls
         toggleSlowMode.onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
         toggleRobotRelative.onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
         resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
-        xWheels.onTrue(Commands.runOnce(drive::brake));
+        xWheels.onTrue(Commands.runOnce(drive::stopWithX));
         seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
+        alignToTower.onTrue(new DriveToPose(drive, () -> new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78))));
     }
 
     public void robotPeriodic() {

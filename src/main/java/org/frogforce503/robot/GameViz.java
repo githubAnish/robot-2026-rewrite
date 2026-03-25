@@ -2,9 +2,9 @@ package org.frogforce503.robot;
 
 import java.util.Arrays;
 
+import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.robot.subsystems.climberdeploy.ClimberDeploy;
-import org.frogforce503.robot.subsystems.climberhook.ClimberHook;
+import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
@@ -22,7 +22,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import lombok.Setter;
 
 /** Simulates the field, including interaction with & movement of game elements. Uses physics simulation. */
 public class GameViz {
@@ -31,22 +30,22 @@ public class GameViz {
     private final Turret turret;
     private final Hood hood;
     private final Flywheels flywheels;
-    private final ClimberDeploy climberDeploy;
-    private final ClimberHook climberHook;
+    private final Climber climber;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
+    private final BumpPhysicsSim bumpSim = new BumpPhysicsSim();
 
     private IntakeSimulation intakeSimulation;
 
-    @Setter private double robotHeightMeters = 0.0;
+    private double robotClimbHeightMeters = 0.0;
 
     // Shoot Sim Constants
     private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
     private final Timer shotTimer = new Timer();
 
     // Climb Sim Constants
-    private final double climbRateScalarMetersPerSec = 44.5;
+    private final double climbRateScalarMetersPerSec = 1.0 / 100.0;
     private final Timer climbTimer = new Timer();
     
     public GameViz(
@@ -55,8 +54,7 @@ public class GameViz {
         Turret turret,
         Hood hood,
         Flywheels flywheels,
-        ClimberDeploy climberDeploy,
-        ClimberHook climberHook,
+        Climber climber,
         VisionSimulator visionViz
     ) {
         this.drive = drive;
@@ -64,8 +62,7 @@ public class GameViz {
         this.turret = turret;
         this.hood = hood;
         this.flywheels = flywheels;
-        this.climberDeploy = climberDeploy;
-        this.climberHook = climberHook;
+        this.climber = climber;
         
         this.visionViz = visionViz;
 
@@ -80,19 +77,24 @@ public class GameViz {
     }
 
     public void update() {
-        Pose3d drivePose3d =
-            new Pose3d(drive.getPose())
-                .plus(new Transform3d(0.0, 0.0, robotHeightMeters, Rotation3d.kZero));
+        // Apply bump physics
+        Pose3d terrainPose =
+            bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
 
+        // Add robot climb height
+        Pose3d drivePose3d =
+            terrainPose.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
+
+        // Update visualizers
         visionViz.update(drive.getPose());
         
         superstructureViz.update(
             drivePose3d,
             turret.getRobotRelativeAngleRad(),
             hood.getAngleRad(),
-            intakePivot.getAngleRad(),
-            climberDeploy.getAngleRad());
+            intakePivot.getAngleRad());
 
+        // Visualize fuel
         Translation3d[] fuelInHopper =
             MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
@@ -102,6 +104,7 @@ public class GameViz {
                 .map(Pose3d::getTranslation)
                 .toArray(Translation3d[]::new);
 
+        // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
         Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
         Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
@@ -150,7 +153,7 @@ public class GameViz {
 
     public void climb() {
         // Scale climber velocity to restrict robot height & climbing speed to tower
-        robotHeightMeters += climberHook.getVelocityMetersPerSec() / climbRateScalarMetersPerSec * climbTimer.get();
+        robotClimbHeightMeters += -climber.getVelocityMetersPerSec() * climbRateScalarMetersPerSec * climbTimer.get();
     }
 
     public void stopClimb() {

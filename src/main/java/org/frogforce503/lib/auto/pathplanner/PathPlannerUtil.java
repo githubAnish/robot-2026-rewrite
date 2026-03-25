@@ -23,8 +23,8 @@ public class PathPlannerUtil {
     private PathPlannerUtil() {}
 
     public static void configureAutoBuilder(Drive drive) {
-        final PIDConfig linearPID = DriveConstants.linearPID;
-        final PIDConfig thetaPID = DriveConstants.thetaPID;
+        final PIDConfig linearPID = DriveConstants.pathplannerLinearPID;
+        final PIDConfig thetaPID = DriveConstants.pathplannerThetaPID;
 
         try {
             var config = RobotConfig.fromGUISettings();

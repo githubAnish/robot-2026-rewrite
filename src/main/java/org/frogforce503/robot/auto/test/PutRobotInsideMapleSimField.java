@@ -1,5 +1,6 @@
 package org.frogforce503.robot.auto.test;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.subsystems.drive.Drive;
 
@@ -22,11 +23,11 @@ public class PutRobotInsideMapleSimField implements AutoMode {
 
     @Override
     public Command getCommand() {
-        return Commands.runOnce(() -> drive.setPose(targetPose));
+        return Commands.runOnce(() -> drive.setPose(AllianceFlipUtil.apply(targetPose)));
     }
 
     @Override
     public Pose2d[] getPoses() {
-        return new Pose2d[] {targetPose};
+        return new Pose2d[] { AllianceFlipUtil.apply(targetPose) };
     }
 }

@@ -40,8 +40,12 @@ public class DriveConstants {
     public static final SwerveDriveKinematics kinematics;
     public static final SwervePathController pathFollower;
 
-    public static final PIDConfig linearPID = new PIDConfig(0.25, 0.0, 0.1);
-    public static final PIDConfig thetaPID = new PIDConfig(3.0, 0.0, 0.0);
+    public static final PIDConfig pathplannerLinearPID = new PIDConfig(0.25, 0, 0.1);
+    public static final PIDConfig pathplannerThetaPID = new PIDConfig(3, 0, 0);
+
+    public static final PIDConfig blineLinearPID = new PIDConfig(5, 0, 0.5);
+    public static final PIDConfig blineThetaPID = new PIDConfig(3, 0, 0);
+    public static final PIDConfig blineCtePID = new PIDConfig(2, 0, 0);
 
     static {
         Translation2d frontLeftModuleTranslation = new Translation2d(frontLeft.LocationX, frontLeft.LocationY);
@@ -72,8 +76,8 @@ public class DriveConstants {
 
         pathFollower =
             new SwervePathController(
-                linearPID.toPIDController(),
-                linearPID.toPIDController(),
-                thetaPID.toPIDController());
+                pathplannerLinearPID.toPIDController(),
+                pathplannerLinearPID.toPIDController(),
+                pathplannerThetaPID.toPIDController());
     }
 }
