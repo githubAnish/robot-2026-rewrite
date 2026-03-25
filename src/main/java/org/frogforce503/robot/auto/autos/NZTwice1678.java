@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
-public class ShootPreloadNZOnce implements AutoMode {
+public class NZTwice1678 implements AutoMode {
     private final Drive drive;
     private final IntakePivot intakePivot;
     private final IntakeRoller intakeRoller;
@@ -29,9 +29,10 @@ public class ShootPreloadNZOnce implements AutoMode {
     private final GameViz gameViz;
     private final FollowPath.Builder autoBuilder;
 
-    private final Path path;
+    private final Path firstTimeToNZAndBack;
+    private final Path secondTimeToNZAndBack;
 
-    public ShootPreloadNZOnce(
+    public NZTwice1678(
         Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
@@ -50,16 +51,21 @@ public class ShootPreloadNZOnce implements AutoMode {
         this.gameViz = gameViz;
         this.autoBuilder = autoBuilder;
 
-        path = new Path("FirstTimeToNZ");
+        firstTimeToNZAndBack = new Path("FirstTimeToNZAndBack");
+        secondTimeToNZAndBack = new Path("SecondTimeToNZAndBack");
     }
 
     @Override
     public Command getCommand() {
         return Commands.sequence(
-            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(3), // shoot preload
             Commands.deadline(
-                autoBuilder.build(path),
-                Commands.waitSeconds(1).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz)) // first intake from NZ
+                autoBuilder.build(firstTimeToNZAndBack),
+                new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz)
+            ),
+            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(4),
+            Commands.deadline(
+                autoBuilder.build(secondTimeToNZAndBack),
+                Commands.waitSeconds(2).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz))
             ),
             new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
         );
@@ -68,8 +74,9 @@ public class ShootPreloadNZOnce implements AutoMode {
     @Override
     public Pose2d[] getPoses() {
         if (FieldConstants.isRed()) {
-            path.flip();
+            firstTimeToNZAndBack.flip();
+            secondTimeToNZAndBack.flip();
         }
-        return BLineUtil.getPoses(path);
+        return BLineUtil.getPoses(firstTimeToNZAndBack, secondTimeToNZAndBack);
     }
 }
