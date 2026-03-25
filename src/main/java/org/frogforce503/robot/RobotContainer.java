@@ -10,7 +10,7 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.auto.autos.ShootPreloadNZOnce;
+import org.frogforce503.robot.auto.autos.NZTwice1678;
 import org.frogforce503.robot.commands.ClimbSequence;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.EjectFuelFromShooter;
@@ -300,8 +300,8 @@ public class RobotContainer {
         final FollowPath.Builder bLineAutoBuilder = autoChooser.getBlineAutoBuilder();
 
         autoChooser.addAuto(
-            "Shoot Preload, Go To NZ Once, Shoot",
-            new ShootPreloadNZOnce(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
+            "NZ Twice 1678",
+            new NZTwice1678(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
     }
 
     private void configureButtonBindings() {
