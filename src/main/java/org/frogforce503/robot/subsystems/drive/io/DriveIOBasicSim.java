@@ -7,14 +7,13 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 public class DriveIOBasicSim implements DriveIO {
-    // Constants
-    private final double theoreticalWheelRadiusInches = 2.00; // Inches
+    private final SwerveDriveKinematics kinematics;
 
-    // State
     private SwerveModuleState[] moduleStates =
         new SwerveModuleState[] {
             new SwerveModuleState(),
@@ -27,6 +26,12 @@ public class DriveIOBasicSim implements DriveIO {
 
     private double lastUpdatedTime = -1.0;
     private double dt = 0;
+
+    private final double theoreticalWheelRadiusInches = 2.00;
+
+    public DriveIOBasicSim() {
+        kinematics = new SwerveDriveKinematics(DriveConstants.moduleTranslations);
+    }
 
     @Override
     public void updateInputs(DriveIOInputs inputs) {
@@ -61,9 +66,14 @@ public class DriveIOBasicSim implements DriveIO {
     }
 
     @Override
+    public void stopWithO() {
+        currentVelocity = new ChassisSpeeds();
+    }
+
+    @Override
     public void runVelocity(ChassisSpeeds speeds) {
         currentVelocity = speeds;
-        moduleStates = DriveConstants.kinematics.toSwerveModuleStates(currentVelocity);
+        moduleStates = kinematics.toSwerveModuleStates(currentVelocity);
     }
 
     @Override

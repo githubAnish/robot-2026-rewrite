@@ -16,6 +16,7 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -49,6 +50,9 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
     private final double translationScalarShootOnMove = 0.25;
+
+    private final double lockMetersPerSecondThreshold = 0.1;
+    private final double lockOmegaRadsPerSecThreshold = 0.15;
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
@@ -190,14 +194,27 @@ public class ShootFuelIntoHubOrLob extends Command {
         final double thetaS = Math.abs(driverOmega) * 3.0;
         omega = MathUtil.interpolate(omega, driverOmega * maxDriverOmega, thetaS);
 
-        // Apply speeds
+        // Calculate speeds
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
 
-        drive.runVelocity(
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                FieldConstants.isRed()
-                    ? drive.getAngle().plus(Rotation2d.kPi)
-                    : drive.getAngle()));
+        // Apply O lock
+        boolean oLock =
+              Math.hypot(drive.getFieldVelocity().vxMetersPerSecond, drive.getFieldVelocity().vyMetersPerSecond) < lockMetersPerSecondThreshold &&
+              Math.abs(drive.getFieldVelocity().omegaRadiansPerSecond) < lockOmegaRadsPerSecThreshold;
+
+        // Apply speeds
+        if (oLock) {
+            drive.stopWithO();
+        } else {
+            drive.runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds,
+                    FieldConstants.isRed()
+                        ? drive.getAngle().plus(Rotation2d.kPi)
+                        : drive.getAngle()));
+        }
+
+        // Log data
+        Logger.recordOutput("ShootFuelIntoHubOrLob/OLock", oLock);
     }
 }

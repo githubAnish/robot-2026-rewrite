@@ -20,12 +20,15 @@ public interface DriveIO {
 
         public void fromSwerveDriveState(SwerveDriveState other) {
             this.Pose = other.Pose;
-            this.SuccessfulDaqs = other.SuccessfulDaqs;
-            this.FailedDaqs = other.FailedDaqs;
+            this.Speeds = other.Speeds;
             this.ModuleStates = other.ModuleStates;
             this.ModuleTargets = other.ModuleTargets;
-            this.Speeds = other.Speeds;
+            this.ModulePositions = other.ModulePositions;
+            this.RawHeading = other.RawHeading;
+            this.Timestamp = other.Timestamp;
             this.OdometryPeriod = other.OdometryPeriod;
+            this.SuccessfulDaqs = other.SuccessfulDaqs;
+            this.FailedDaqs = other.FailedDaqs;
         }
     }
 
@@ -38,6 +41,8 @@ public interface DriveIO {
     default void acceptVisionMeasurement(Pose2d poseEstimate, double timestamp, Matrix<N3, N1> stdDevs) {}
 
     default void stopWithX() {}
+
+    default void stopWithO() {}
 
     default void coast() {}
 
