@@ -152,8 +152,7 @@ public class VisionConstants {
         GLOBAL_LOCALIZATION(
             EnumSet.of(
                 CameraName.LEFT_CAMERA, 
-                CameraName.RIGHT_CAMERA, 
-                // CameraName.TURRET_CAMERA,
+                CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
             ),
 
@@ -190,7 +189,6 @@ public class VisionConstants {
          */
         STANDARD_HUB_AIM(
             EnumSet.of(
-                // CameraName.TURRET_CAMERA, 
                 CameraName.LEFT_CAMERA,
                 CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
@@ -230,7 +228,6 @@ public class VisionConstants {
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-            // Optional.of(GLOBAL_LOCALIZATION)
             Optional.empty() 
         ),
 
