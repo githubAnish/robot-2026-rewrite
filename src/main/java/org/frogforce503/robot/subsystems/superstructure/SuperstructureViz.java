@@ -16,7 +16,7 @@ public class SuperstructureViz {
     private final Transform3d robotToIntakePivot = new Transform3d(0.28, 0.01, 0.206, Rotation3d.kZero);
     private final Transform3d robotToHopperExtender = new Transform3d(0.306, 0.01, 0.31, Rotation3d.kZero);
 
-    public void update(Pose3d drivePose3d, double hoodAngleRad, double intakePivotAngleRad, double climberHeightMeters) {
+    public void update(Pose3d drivePose3d, double hoodAngleRad, double intakePivotAngleRad) {
         // Calculate subsystem poses
         var hoodPose =
             Pose3d.kZero

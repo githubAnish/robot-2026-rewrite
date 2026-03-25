@@ -88,7 +88,7 @@ import lombok.experimental.ExtensionMethod;
  * Main container for robot subsystems, commands, and controller bindings.
  * Use https://www.padcrafter.com to visualize the controller bindings.
  */
-@ExtensionMethod({TriggerUtil.class})
+@ExtensionMethod(TriggerUtil.class)
 public class RobotContainer {
     // Subsystems
     private Drive drive;

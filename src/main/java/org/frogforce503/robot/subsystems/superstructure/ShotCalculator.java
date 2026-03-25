@@ -124,10 +124,6 @@ public class ShotCalculator {
                 : MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
     }
 
-    public double getNaiveTOF(double distance) {
-        return hubTimeOfFlightMap.get(distance);
-    }
-
     public ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
         if (latestShotInfo != null) {
             return latestShotInfo;
