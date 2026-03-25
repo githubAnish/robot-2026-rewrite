@@ -14,8 +14,6 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -23,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class WarmupExecutor {
     private final Drive drive;
     
-    private final String choreoPathSuffix = ".traj";
     private final String pathPlannerPathSuffix = ".path";
 
     public WarmupExecutor(Drive drive) {
@@ -44,7 +41,6 @@ public class WarmupExecutor {
 
     public void periodic() {
         warmupPathPlannerPaths();
-        warmupChoreoPaths();
         warmupDrive();
         warmupShotCalculator();
     }
@@ -84,25 +80,6 @@ public class WarmupExecutor {
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to warmup PathPlanner paths", e);
-        }
-    }
-
-    private void warmupChoreoPaths() {
-        Path choreoDir =
-            Path.of(
-                Filesystem.getDeployDirectory().getAbsolutePath(),
-                "choreo");
-
-        try (Stream<Path> paths = Files.list(choreoDir)) {
-            paths
-                .filter(path -> path.getFileName().toString().endsWith(choreoPathSuffix))
-                .map(path -> stripExtension(path, choreoPathSuffix))
-                .forEach(name -> {
-                    PathPlannerUtil.loadChoreoTrajectory(name);
-                });
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to warmup choreo paths", e);
         }
     }
     
