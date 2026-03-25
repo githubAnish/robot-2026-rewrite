@@ -11,7 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
@@ -24,6 +23,8 @@ public class DriveConstants {
 
     public static final double trackWidthX;
     public static final double trackWidthY;
+    public static final double bumperLength = Units.inchesToMeters(30);
+    public static final double bumperWidth = Units.inchesToMeters(35);
 
     public static final double driveBaseRadius;
     public static final Translation2d centerOfRotation = Translation2d.kZero;
@@ -33,11 +34,10 @@ public class DriveConstants {
 
     public static final double mass = Units.lbsToKilograms(87.4200862); // from CAD
     public static final double wheelCOF = 1.9;
-    public static final double bumperLength = Units.inchesToMeters(30);
-    public static final double bumperWidth = Units.inchesToMeters(35);
+
+    public static final Translation2d[] moduleTranslations;
 
     // Swerve Control
-    public static final SwerveDriveKinematics kinematics;
     public static final SwervePathController pathFollower;
 
     public static final PIDConfig pathplannerLinearPID = new PIDConfig(0.25, 0, 0.1);
@@ -66,13 +66,12 @@ public class DriveConstants {
         maxLinearSpeed = frontLeft.SpeedAt12Volts;
         maxOmega = maxLinearSpeed / driveBaseRadius;
 
-        kinematics =
-            new SwerveDriveKinematics(
-                new Translation2d[] {
-                    frontLeftModuleTranslation,
-                    frontRightModuleTranslation,
-                    backLeftModuleTranslation,
-                    backRightModuleTranslation});
+        moduleTranslations =
+            new Translation2d[] {
+                frontLeftModuleTranslation,
+                frontRightModuleTranslation,
+                backLeftModuleTranslation,
+                backRightModuleTranslation};
 
         pathFollower =
             new SwervePathController(

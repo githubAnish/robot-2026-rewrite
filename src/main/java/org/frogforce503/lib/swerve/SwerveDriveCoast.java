@@ -12,6 +12,7 @@ public class SwerveDriveCoast implements SwerveRequest {
     private final CoastOut driveRequest = new CoastOut();
     private final CoastOut steerRequest = new CoastOut();
 
+    @Override
     public StatusCode apply(SwerveControlParameters parameters, SwerveModule<?, ?, ?>... modulesToApply) {
         for (SwerveModule<?, ?, ?> module : modulesToApply) {
             module.apply(driveRequest, steerRequest);

@@ -111,9 +111,19 @@ public class Drive extends SubsystemBase {
         io.coast();
     }
 
-    /** Stops the drivetrain by aligning the modules in X manner. */
+    /**
+     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
+     * return to their normal orientations the next time a nonzero velocity is requested.
+     */
     public void stopWithX() {
         io.stopWithX();
+        stop();
+    }
+
+    /** Stops the drive and turns the modules to an O arrangement to resist movement. */
+    public void stopWithO() {
+        io.stopWithO();
+        stop();
     }
 
     public void stop() {
