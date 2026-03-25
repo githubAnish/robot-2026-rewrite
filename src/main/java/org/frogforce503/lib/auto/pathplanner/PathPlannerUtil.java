@@ -63,16 +63,6 @@ public class PathPlannerUtil {
         }
     }
 
-    public static PathPlannerPath loadChoreoTrajectory(String name) {
-        try {
-            return PathPlannerPath.fromChoreoTrajectory(name);
-        } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error loading path " + name + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static Pose2d[] getPoses(PathPlannerPath... paths) {
         return
             Arrays
