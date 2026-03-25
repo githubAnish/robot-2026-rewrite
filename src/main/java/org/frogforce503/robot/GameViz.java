@@ -45,7 +45,7 @@ public class GameViz {
     private final Timer shotTimer = new Timer();
 
     // Climb Sim Constants
-    private final double climbRateScalarMetersPerSec = 1.0 / 100.0;
+    private final double climbRateScalarMetersPerSec = 1.0 / 200.0;
     private final Timer climbTimer = new Timer();
     
     public GameViz(
