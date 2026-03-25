@@ -21,11 +21,11 @@ public class BumpPhysicsSim {
     private double currentZ = 0.0;
     private double velocityZ = 0.0;
 
-    public Pose3d update(Pose2d robot2dPose, ChassisSpeeds fieldVelocity, double dt) {
-        Rotation2d yaw = robot2dPose.getRotation();
+    public Pose3d update(Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double dt) {
+        Rotation2d yaw = robotPose.getRotation();
 
         // 1. Sample 4 corners AND the center point
-        Translation2d pos = robot2dPose.getTranslation();
+        Translation2d pos = robotPose.getTranslation();
         TerrainState center = getTerrainState(pos);
         TerrainState fl = getTerrainState(pos.plus(new Translation2d(halfLength, halfWidth).rotateBy(yaw)));
         TerrainState fr = getTerrainState(pos.plus(new Translation2d(halfLength, -halfWidth).rotateBy(yaw)));
@@ -60,8 +60,8 @@ public class BumpPhysicsSim {
 
         // 4. Needed Vertical Velocity for "Kick" (Now with dampening!)
         double neededVelocityZ =
-            (fieldVelocity.vxMetersPerSecond * center.slopeX()) + 
-            (fieldVelocity.vyMetersPerSecond * center.slopeY());
+            (fieldRelativeVelocity.vxMetersPerSecond * center.slopeX()) + 
+            (fieldRelativeVelocity.vyMetersPerSecond * center.slopeY());
         
         // Apply the dampener to simulate tire squish and energy loss
         neededVelocityZ *= BUMP_KICK_SCALAR;
@@ -77,8 +77,8 @@ public class BumpPhysicsSim {
         }
 
         return new Pose3d(
-            robot2dPose.getX(),
-            robot2dPose.getY(),
+            robotPose.getX(),
+            robotPose.getY(),
             currentZ, 
             new Rotation3d(roll, pitch, yaw.getRadians()));
     }

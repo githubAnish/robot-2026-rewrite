@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
+import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -361,7 +362,7 @@ public class RobotContainer {
         resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
         xWheels.onTrue(Commands.runOnce(drive::stopWithX));
         seedTurretRelativePosition.onTrue(Commands.runOnce(turret::seedRelativePosition));
-        alignToTower.onTrue(new DriveToPose(drive, () -> new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78))));
+        alignToTower.onTrue(new DriveToPose(drive, () -> AllianceFlipUtil.apply(new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78)))));
     }
 
     public void robotPeriodic() {
