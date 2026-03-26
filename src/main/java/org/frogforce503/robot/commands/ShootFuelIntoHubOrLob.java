@@ -16,7 +16,6 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -38,8 +37,8 @@ public class ShootFuelIntoHubOrLob extends Command {
     private final Flywheels flywheels;
     private final GameViz gameViz;
     
-    private final Supplier<Translation2d> linearVelocitySupplier;
-    private final DoubleSupplier omegaSupplier;
+    private Supplier<Translation2d> linearVelocitySupplier = Translation2d::new;
+    private DoubleSupplier omegaSupplier = () -> 0.0;
 
     private final ProfiledPIDController thetaController =
         new ProfiledPIDController(
@@ -50,31 +49,6 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
     private final double translationScalarShootOnMove = 0.25;
-
-    private final double lockMetersPerSecondThreshold = 0.1;
-    private final double lockOmegaRadsPerSecThreshold = 0.15;
-
-    public ShootFuelIntoHubOrLob(
-        Drive drive,
-        Feeder feeder,
-        Hood hood,
-        Flywheels flywheels,
-        GameViz gameViz,
-        CommandXboxController xboxController
-    ) {
-        this.drive = drive;
-        this.feeder = feeder;
-        this.hood = hood;
-        this.flywheels = flywheels;
-        this.gameViz = gameViz;
-        this.linearVelocitySupplier = () -> xboxController.getLinearVelocityFromJoysticks();
-        this.omegaSupplier = () -> xboxController.getOmegaFromJoysticks();
-
-        // Enable continuous input for theta controller
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        addRequirements(drive, feeder, hood, flywheels);
-    }
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
@@ -88,13 +62,25 @@ public class ShootFuelIntoHubOrLob extends Command {
         this.hood = hood;
         this.flywheels = flywheels;
         this.gameViz = gameViz;
-        this.linearVelocitySupplier = Translation2d::new;
-        this.omegaSupplier = () -> 0.0;
 
         // Enable continuous input for theta controller
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         addRequirements(drive, feeder, hood, flywheels);
+    }
+
+    public ShootFuelIntoHubOrLob(
+        Drive drive,
+        Feeder feeder,
+        Hood hood,
+        Flywheels flywheels,
+        GameViz gameViz,
+        CommandXboxController xboxController
+    ) {
+        this(drive, feeder, hood, flywheels, gameViz);
+        
+        this.linearVelocitySupplier = () -> xboxController.getLinearVelocityFromJoysticks();
+        this.omegaSupplier = () -> xboxController.getOmegaFromJoysticks();
     }
 
     @Override
@@ -197,24 +183,12 @@ public class ShootFuelIntoHubOrLob extends Command {
         // Calculate speeds
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
 
-        // Apply O lock
-        boolean oLock =
-              Math.hypot(drive.getFieldVelocity().vxMetersPerSecond, drive.getFieldVelocity().vyMetersPerSecond) < lockMetersPerSecondThreshold &&
-              Math.abs(drive.getFieldVelocity().omegaRadiansPerSecond) < lockOmegaRadsPerSecThreshold;
-
         // Apply speeds
-        if (oLock) {
-            drive.stopWithO();
-        } else {
-            drive.runVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    speeds,
-                    FieldConstants.isRed()
-                        ? drive.getAngle().plus(Rotation2d.kPi)
-                        : drive.getAngle()));
-        }
-
-        // Log data
-        Logger.recordOutput("ShootFuelIntoHubOrLob/OLock", oLock);
+        drive.runVelocity(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                FieldConstants.isRed()
+                    ? drive.getAngle().plus(Rotation2d.kPi)
+                    : drive.getAngle()));
     }
 }
