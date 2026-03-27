@@ -42,7 +42,7 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     private final ProfiledPIDController thetaController =
         new ProfiledPIDController(
-            10.0,
+            15.0,
             0.0,
             0.5,
             new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));

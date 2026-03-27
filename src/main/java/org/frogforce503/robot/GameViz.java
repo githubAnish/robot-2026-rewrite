@@ -3,6 +3,7 @@ package org.frogforce503.robot;
 import java.util.Arrays;
 
 import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
+import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
@@ -23,6 +24,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -41,6 +44,9 @@ public class GameViz {
     private IntakeSimulation intakeSimulation;
 
     private double robotClimbHeightMeters = 0.0;
+
+    // Arena Constants
+    private int fuelShotInMatch = 0;
 
     // Shoot Sim Constants
     private final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
@@ -111,6 +117,23 @@ public class GameViz {
         Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
         Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
+        Logger.recordOutput("GameViz/Fuel Shot In Match", fuelShotInMatch);
+
+        Logger.recordOutput(
+            "Shifts/Remaining Shift Time",
+            String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
+
+        Logger.recordOutput("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
+
+        Logger.recordOutput(
+            "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
+
+        Logger.recordOutput(
+            "Shifts/Active First?",
+            DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
+
+        Logger.recordOutput("GameViz/HubShiftOfficial", HubShiftUtil.getOfficialShiftInfo());
+        Logger.recordOutput("GameViz/HubShiftShifted", HubShiftUtil.getShiftedShiftInfo());
     }
 
     public void startIntake() {
@@ -193,7 +216,8 @@ public class GameViz {
                 drive.getFieldVelocity(),
                 hood.getAngleRad(),
                 flywheels.getVelocityRadPerSec(),
-                new Transform2d(0.0, offset, Rotation2d.kZero));
+                new Transform2d(0.0, offset, Rotation2d.kZero),
+                () -> fuelShotInMatch++);
         }
 
         // Restart cooldown timer after firing

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.frogforce503.lib.io.TriggerUtil;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -383,15 +384,27 @@ public class RobotContainer {
 
     public void autonomousInit() {
         autoChooser.startAuto();
+
+        if (RobotBase.isSimulation()) {
+            HubShiftUtil.initialize();
+        }
     }
 
     public void teleopInit() {
         autoChooser.close();
+
+        if (RobotBase.isSimulation()) {
+            HubShiftUtil.initialize();
+        }
     }
 
     public void disabledInit() {
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
+        }
+        
+        if (RobotBase.isSimulation()) {
+            HubShiftUtil.initialize();
         }
     }
 

@@ -118,7 +118,8 @@ public class MapleSimUtil {
         ChassisSpeeds robotFieldRelativeVelocity,
         double hoodAngleRad,
         double flywheelsSpeedRadPerSec,
-        Transform2d fuelLaunchPositionOffset
+        Transform2d fuelLaunchPositionOffset,
+        Runnable addFuelShotInMatch
     ) {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
@@ -145,7 +146,8 @@ public class MapleSimUtil {
             .withProjectileTrajectoryDisplayCallBack(
                 pose3ds -> Logger.recordOutput("GameViz/SuccessfulFuelShot", pose3ds.toArray(Pose3d[]::new)),
                 pose3ds -> Logger.recordOutput("GameViz/UnsucessfulFuelShot", pose3ds.toArray(Pose3d[]::new))
-            );
+            )
+            .setHitTargetCallBack(addFuelShotInMatch);
 
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
     }

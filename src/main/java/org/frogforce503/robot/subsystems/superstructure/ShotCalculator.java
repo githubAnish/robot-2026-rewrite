@@ -117,15 +117,23 @@ public class ShotCalculator {
         return instance;
     }
 
+    public double getMinTimeOfFlight() {
+        return hubTimeOfFlightMap.get(minDistanceHubShoot);
+    }
+
+    public double getMaxTimeOfFlight() {
+        return hubTimeOfFlightMap.get(maxDistanceHubShoot);
+    }
+
+    public double getNaiveTOF(double distance) {
+        return hubTimeOfFlightMap.get(distance);
+    }
+
     public boolean isShotDistanceValid(Pose2d robotPose) {
         return
             FieldConstants.inAllianceZone(robotPose)
                 ? MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceHubShoot, maxDistanceHubShoot)
                 : MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
-    }
-
-    public double getNaiveTOF(double distance) {
-        return hubTimeOfFlightMap.get(distance);
     }
 
     public ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
