@@ -26,6 +26,8 @@ public class AutoChooser {
     private Command autoCommand;
     private AutoMode lastSelectedAuto;
 
+    private final double simAutoTimeSec = 20;
+
     public AutoChooser(Drive drive) {
         this.drive = drive;
 
@@ -57,6 +59,10 @@ public class AutoChooser {
             selectedAuto
                 .getCommand()
                 .withName(selectedAuto.getClass().getSimpleName());
+
+        if (RobotBase.isSimulation()) {
+            autoCommand = autoCommand.withTimeout(simAutoTimeSec);
+        }
 
         if (autoCommand != null) {
             CommandScheduler.getInstance().schedule(autoCommand);

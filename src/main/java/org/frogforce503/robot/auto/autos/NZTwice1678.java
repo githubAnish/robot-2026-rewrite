@@ -62,10 +62,10 @@ public class NZTwice1678 implements AutoMode {
                 autoBuilder.build(firstTimeToNZAndBack),
                 new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz)
             ),
-            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(4),
+            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(3.5),
             Commands.deadline(
                 autoBuilder.build(secondTimeToNZAndBack),
-                Commands.waitSeconds(2).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz))
+                Commands.waitSeconds(1.5).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz))
             ),
             new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
         );
