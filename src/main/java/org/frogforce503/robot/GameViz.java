@@ -2,9 +2,11 @@ package org.frogforce503.robot;
 
 import java.util.Arrays;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
@@ -16,16 +18,12 @@ import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -43,16 +41,12 @@ public class GameViz {
 
     private IntakeSimulation intakeSimulation;
 
-    private double robotClimbHeightMeters = 0.0;
-
     // Arena Constants
+    private final double outpostDumpThresholdDist = Units.inchesToMeters(6);
+    private double robotClimbHeightMeters = 0.0;
     private int fuelShotInMatch = 0;
 
     // Shoot Sim Constants
-    private final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
-    private final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
-    private final double fuelReleasedPerShot = 4; // How many balls are fired at once?
-    private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
     private final Timer shotTimer = new Timer();
 
     // Climb Sim Constants
@@ -72,7 +66,6 @@ public class GameViz {
         this.hood = hood;
         this.flywheels = flywheels;
         this.climber = climber;
-        
         this.visionViz = visionViz;
 
         if (RobotBase.isSimulation()) {
@@ -86,21 +79,27 @@ public class GameViz {
     }
 
     public void update() {
+        // Get inputs
+        Pose2d drivePose = drive.getPose();
+        double distanceToOutpost =
+            drivePose
+                .getTranslation()
+                .getDistance(AllianceFlipUtil.apply(FieldConstants.Outpost.blue).getTranslation());
+
+        if (distanceToOutpost < outpostDumpThresholdDist) {
+            MapleSimUtil.dumpFromOutpost();
+        }
+
         // Apply bump physics
-        Pose3d terrainPose =
-            bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
+        Pose3d drivePose3d =
+            bumpSim.update(drivePose, drive.getFieldVelocity(), Constants.loopPeriodSecs);
 
         // Add robot climb height
-        Pose3d drivePose3d =
-            terrainPose.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
+        drivePose3d = drivePose3d.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
 
         // Update visualizers
-        visionViz.update(drive.getPose());
-        
-        superstructureViz.update(
-            drivePose3d,
-            hood.getAngleRad(),
-            intakePivot.getAngleRad());
+        visionViz.update(drivePose);
+        superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad());
 
         // Visualize fuel
         Translation3d[] fuelInHopper =
@@ -120,20 +119,12 @@ public class GameViz {
         Logger.recordOutput("GameViz/Fuel Shot In Match", fuelShotInMatch);
 
         Logger.recordOutput(
-            "Shifts/Remaining Shift Time",
+            "GameViz/Remaining Shift Time",
             String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
 
-        Logger.recordOutput("Shifts/Shift Active", HubShiftUtil.getShiftedShiftInfo().active());
-
         Logger.recordOutput(
-            "Shifts/Game State", HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
-
-        Logger.recordOutput(
-            "Shifts/Active First?",
-            DriverStation.getAlliance().orElse(Alliance.Blue) == HubShiftUtil.getFirstActiveAlliance());
-
-        Logger.recordOutput("GameViz/HubShiftOfficial", HubShiftUtil.getOfficialShiftInfo());
-        Logger.recordOutput("GameViz/HubShiftShifted", HubShiftUtil.getShiftedShiftInfo());
+            "GameViz/Current Shift",
+            HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
     }
 
     public void startIntake() {
@@ -144,84 +135,16 @@ public class GameViz {
         intakeSimulation.stopIntake();
     }
 
-    private int computeFuelToShoot(int available) {
-        if (available <= 0) {
-            return 0;
-        }
-
-        double fillRatio = (double) available / 40.0; // Normalize (0 → 1)
-        double curvedFill = Math.pow(fillRatio, 0.7); // Smooth curve
-        double scaledMax = fuelReleasedPerShot * curvedFill; // Scale burst size
-
-        // Bounds
-        int minShot = Math.max(1, (int) Math.floor(scaledMax * 0.5));
-        int maxShot = Math.max(1, (int) Math.ceil(scaledMax));
-
-        // Weighted randomness
-        double bias = curvedFill;
-        double rand = Math.random();
-        double weightedRand = (rand * (1 - bias)) + (Math.pow(rand, 0.5) * bias);
-
-        int fuelToShoot = minShot + (int)(weightedRand * (maxShot - minShot + 1));
-
-        // Simulate indexing inconsistency
-        double misfeedChance = 0.15 * (1.0 - fillRatio); // Misfeed
-        if (Math.random() < misfeedChance) {
-            fuelToShoot -= 1;
-        }
-
-        double doubleFeedChance = 0.08 * fillRatio; // Double feed
-        if (Math.random() < doubleFeedChance) {
-            fuelToShoot += 1;
-        }
-
-        double stutterChance = 0.1; // Stutter
-        if (Math.random() < stutterChance) {
-            fuelToShoot += Math.random() < 0.5 ? -1 : 1;
-        }
-
-        return MathUtil.clamp(fuelToShoot, 1, available);
-    }
-
     public void shootFuel(boolean needFuelFromIntakeForShoot) {
-        if (needFuelFromIntakeForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
-            return; // Don't shoot balls if there are none
-        }
-
-        double shotRateBallsPerSec = shooterFireRateBallsPerSec;
-        double shotDelaySec = 1.0 / shotRateBallsPerSec;
-
-        // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
-        if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {
-            return; // Cooldown not done; skip creating new projectile
-        }
-
-        // Check fuel amount
-        int available = intakeSimulation.getGamePiecesAmount();
-        int fuelToShoot = computeFuelToShoot(available);
-
-        // Index fuel
-        for (int i = 0; i < fuelToShoot; i++) {
-            intakeSimulation.obtainGamePieceFromIntake();
-        }
-
-        // Shoot fuel
-        double step = (fuelToShoot > 1) ? (rightMostFuelPositionOffset - leftMostFuelPositionOffset) / (fuelToShoot - 1) : 0.0;
-
-        for (int i = 0; i < fuelToShoot; i++) {
-            double offset = (fuelToShoot == 1) ? 0.0 : leftMostFuelPositionOffset + i * step;
-
-            MapleSimUtil.createFuelProjectile(
-                drive.getPose(),
-                drive.getFieldVelocity(),
-                hood.getAngleRad(),
-                flywheels.getVelocityRadPerSec(),
-                new Transform2d(0.0, offset, Rotation2d.kZero),
-                () -> fuelShotInMatch++);
-        }
-
-        // Restart cooldown timer after firing
-        shotTimer.restart();
+        MapleSimUtil.shootFuel(
+            drive.getPose(),
+            drive.getFieldVelocity(),
+            hood.getAngleRad(),
+            flywheels.getVelocityRadPerSec(), 
+            intakeSimulation,
+            shotTimer,
+            needFuelFromIntakeForShoot,
+            () -> fuelShotInMatch++);
     }
 
     public void startClimb() {

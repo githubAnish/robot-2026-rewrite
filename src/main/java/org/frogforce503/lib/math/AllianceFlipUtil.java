@@ -2,11 +2,11 @@ package org.frogforce503.lib.math;
 
 import java.util.function.UnaryOperator;
 
+import org.frogforce503.lib.util.Zone;
 import org.frogforce503.robot.constants.field.FieldConstants;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -66,8 +66,8 @@ public class AllianceFlipUtil {
         return new Pose3d(apply(pose.getTranslation()), apply(pose.getRotation()));
     }
 
-    public static Rectangle2d apply(Rectangle2d rectangle) {
-        return new Rectangle2d(
-            apply(rectangle.getCenter()), rectangle.getXWidth(), rectangle.getYWidth());
+    public static Zone apply(Zone zone) {
+        return new Zone(
+            apply(zone.getCenter()), zone.getXWidth(), zone.getYWidth());
     }
 }

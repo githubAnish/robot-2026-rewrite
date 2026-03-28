@@ -5,36 +5,32 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotC
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 
-public class ShakeIntake extends Command {
-    private final IntakePivot intakePivot;
-    private final IntakeRoller intakeRoller;
+/** Repeatedly shakes the intake up and down to agitate fuel into the hopper. */
+public class ShakeIntake extends RepeatCommand {
+    public ShakeIntake(IntakePivot intakePivot, IntakeRoller intakeRoller, double cycleDurationSecs) {
+        super(
+            Commands.sequence(
+                Commands.run(() -> {
+                    intakePivot.setAngle(IntakePivotConstants.INTAKE);
+                    intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
+                })
+                .withTimeout(cycleDurationSecs),
 
-    public ShakeIntake(IntakePivot intakePivot, IntakeRoller intakeRoller) {
-        this.intakePivot = intakePivot;
-        this.intakeRoller = intakeRoller;
+                Commands.run(() -> {
+                    intakePivot.setAngle(IntakePivotConstants.STOW);
+                    intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
+                })
+                .withTimeout(cycleDurationSecs)
+            )
+        );
 
         addRequirements(intakePivot, intakeRoller);
     }
 
-    @Override
-    public void initialize() {
-        intakePivot.setAngle(IntakePivotConstants.INTAKE);
-        intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
-    }
-
-    @Override
-    public void execute() {}
-
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        intakePivot.setAngle(IntakePivotConstants.STOW);
-        intakeRoller.setVelocity(IntakeRollerConstants.INTAKE);
+    public ShakeIntake(IntakePivot intakePivot, IntakeRoller intakeRoller) {
+        this(intakePivot, intakeRoller, 0.5);
     }
 }

@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
-import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
@@ -13,11 +12,10 @@ import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,17 +27,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Timer;
 
 public class MapleSimUtil {
     // Arena Constants
-    private static final Translation2d blueDepotBottomLeftCorner =
-        FieldConstants.Depot.blue.getCenter().getTranslation()
-            .plus(
-                new Translation2d(
-                    -FieldConstants.Depot.blue.getXWidth() / 2,
-                    FieldConstants.Depot.blue.getYWidth() / 2));
-
-    private static final double fuelDiameter = Units.inchesToMeters(5.91);
+    private static final FFArena2026Rebuilt arena = new FFArena2026Rebuilt(false);
     
     // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
@@ -57,28 +49,23 @@ public class MapleSimUtil {
     private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
     private static final Transform2d initialFuelPositionOffset = new Transform2d(Units.inchesToMeters(3), 0, Rotation2d.kZero);
     private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
+    private static final double fuelReleasedPerShot = 4; // How many balls are fired at once?
+    private static final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
+    private static final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
+    private static final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
 
     private MapleSimUtil() {}
     
     public static void initializeArena() {
-        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false)); // Allow MapleSim to cross over bump
+        SimulatedArena.overrideInstance(arena); // Allow MapleSim to cross over bump
     }
 
-    public static void resetArena() {
-        SimulatedArena.getInstance().resetFieldForAuto();
+    public static void dumpFromOutpost() {
+        arena.outpostDump(!FieldConstants.isRed());
+    }
 
-        // Add depot fuel
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 6; y++) {
-                Translation2d fuelPosition =
-                    AllianceFlipUtil.apply(
-                        blueDepotBottomLeftCorner
-                            .plus(new Translation2d(fuelDiameter / 2, -(fuelDiameter + Units.inchesToMeters(0.5)))) // bottom left corner to bottom left fuel offset
-                            .plus(new Translation2d(fuelDiameter * x, -fuelDiameter * y)));
-
-                SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(fuelPosition));
-            }
-        }
+    public static void hpThrowFromOutpost() {
+        arena.outpostThrowForGoal(!FieldConstants.isRed());
     }
 
     public static IntakeSimulation createIntake(SwerveDriveSimulation driveSimulation) {
@@ -113,7 +100,46 @@ public class MapleSimUtil {
         return balls;
     }
 
-    public static void createFuelProjectile(
+    public static int computeFuelToShoot(int available) {
+        if (available <= 0) {
+            return 0;
+        }
+
+        double fillRatio = (double) available / 40.0; // Normalize (0 → 1)
+        double curvedFill = Math.pow(fillRatio, 0.35); // Smooth curve
+        double scaledMax = fuelReleasedPerShot * curvedFill; // Scale burst size
+
+        // Bounds
+        int minShot = Math.max(1, (int) Math.floor(scaledMax * 0.5));
+        int maxShot = Math.max(1, (int) Math.ceil(scaledMax));
+
+        // Weighted randomness
+        double bias = curvedFill;
+        double rand = Math.random();
+        double weightedRand = (rand * (1 - bias)) + (Math.pow(rand, 0.5) * bias);
+
+        int fuelToShoot = minShot + (int) (weightedRand * (maxShot - minShot + 1));
+
+        // Simulate indexing inconsistency
+        double misfeedChance = 0.15 * (1.0 - fillRatio);
+        if (Math.random() < misfeedChance) {
+            fuelToShoot -= 1;
+        }
+
+        double doubleFeedChance = 0.08 * fillRatio;
+        if (Math.random() < doubleFeedChance) {
+            fuelToShoot += 1;
+        }
+
+        double stutterChance = 0.1;
+        if (Math.random() < stutterChance) {
+            fuelToShoot += Math.random() < 0.5 ? -1 : 1;
+        }
+
+        return MathUtil.clamp(fuelToShoot, 1, available);
+    }
+
+    private static void createFuelProjectile(
         Pose2d pose,
         ChassisSpeeds robotFieldRelativeVelocity,
         double hoodAngleRad,
@@ -150,5 +176,55 @@ public class MapleSimUtil {
             .setHitTargetCallBack(addFuelShotInMatch);
 
         SimulatedArena.getInstance().addGamePieceProjectile(fuel);
+    }
+
+    public static void shootFuel(
+        Pose2d robotPose,
+        ChassisSpeeds fieldRelativeVelocity,
+        double hoodAngleRad,
+        double flywheelsSpeedRadPerSec,
+        IntakeSimulation intakeSimulation,
+        Timer shotTimer,
+        boolean needFuelFromIntakeForShoot,
+        Runnable addFuelShotInMatch
+    ) {
+        if (needFuelFromIntakeForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
+            return; // Don't shoot balls if there are none
+        }
+
+        double shotRateBallsPerSec = shooterFireRateBallsPerSec;
+        double shotDelaySec = 1.0 / shotRateBallsPerSec;
+
+        // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
+        if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {
+            return; // Cooldown not done; skip creating new projectile
+        }
+
+        // Check fuel amount
+        int available = intakeSimulation.getGamePiecesAmount();
+        int fuelToShoot = MapleSimUtil.computeFuelToShoot(available);
+
+        // Index fuel
+        for (int i = 0; i < fuelToShoot; i++) {
+            intakeSimulation.obtainGamePieceFromIntake();
+        }
+
+        // Shoot fuel
+        double step = (fuelToShoot > 1) ? (rightMostFuelPositionOffset - leftMostFuelPositionOffset) / (fuelToShoot - 1) : 0.0;
+
+        for (int i = 0; i < fuelToShoot; i++) {
+            double offset = (fuelToShoot == 1) ? 0.0 : leftMostFuelPositionOffset + i * step;
+
+            createFuelProjectile(
+                robotPose,
+                fieldRelativeVelocity,
+                hoodAngleRad,
+                flywheelsSpeedRadPerSec,
+                new Transform2d(0.0, offset, Rotation2d.kZero),
+                addFuelShotInMatch);
+        }
+
+        // Restart cooldown timer after firing
+        shotTimer.restart();
     }
 }

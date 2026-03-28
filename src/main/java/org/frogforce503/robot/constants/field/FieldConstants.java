@@ -5,11 +5,11 @@ import java.util.List;
 import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.util.ErrorUtil;
+import org.frogforce503.lib.util.Zone;
 import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -94,7 +94,7 @@ public class FieldConstants {
     }
 
     public static class Depot {
-        public static final Rectangle2d blue;
+        public static final Zone blue;
 
         static {
             final double depotLength = Units.inchesToMeters(26.7);
@@ -105,7 +105,7 @@ public class FieldConstants {
             Translation2d blueBackLeftCorner = new Translation2d(0, fieldWidth - wallToDepotY);
             Translation2d blueFrontRightCorner = blueBackLeftCorner.plus(new Translation2d(depotLength, -depotWidth));
 
-            blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
+            blue = new Zone(blueBackLeftCorner, blueFrontRightCorner);
         }
 
         private static Translation2d getLobShotPose() {
@@ -123,7 +123,7 @@ public class FieldConstants {
      * <b> All corners must be viewed from the blue alliance. </b>
      */
     public static class NeutralZone {
-        public static final Rectangle2d zone;
+        public static final Zone zone;
 
         static {
             final double boundingBoxWidth = Units.inchesToMeters(206.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
@@ -133,12 +133,12 @@ public class FieldConstants {
             Translation2d frontLeftCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, boundingBoxWidth / 2));
             Translation2d backRightCorner = fieldCenter.plus(new Translation2d(-boundingBoxDepth / 2, -boundingBoxWidth / 2));
 
-            zone = new Rectangle2d(backRightCorner, frontLeftCorner);
+            zone = new Zone(backRightCorner, frontLeftCorner);
         }
     }
 
     public static class Tower {
-        public static final Rectangle2d blue;
+        public static final Zone blue;
 
         static {
             final double rungLength = Units.inchesToMeters(41.1); // from field CAD
@@ -148,16 +148,16 @@ public class FieldConstants {
             Translation2d blueBackLeftCorner = blueTowerTag.getTranslation().plus(new Translation2d(0, rungLength / 2));
             Translation2d blueFrontRightCorner = blueTowerTag.getTranslation().plus(new Translation2d(centerTagToTowerX, -rungLength / 2));
 
-            blue = new Rectangle2d(blueBackLeftCorner, blueFrontRightCorner);
+            blue = new Zone(blueBackLeftCorner, blueFrontRightCorner);
         }
     }
 
     public static class Trench {
-        public static final Rectangle2d blueLeft;
-        public static final Rectangle2d blueRight;
+        public static final Zone blueLeft;
+        public static final Zone blueRight;
 
-        public static final Rectangle2d redLeft;
-        public static final Rectangle2d redRight;
+        public static final Zone redLeft;
+        public static final Zone redRight;
 
         static {
             final double trenchLength = Units.inchesToMeters(49.0);
@@ -167,13 +167,13 @@ public class FieldConstants {
             Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth);
             Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(trenchLength, -trenchWidth));
 
-            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
+            blueLeft = new Zone(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
 
             // Blue Right Trench
             Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, 0.0);
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(trenchLength, trenchWidth));
 
-            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
+            blueRight = new Zone(blueRightBackRightCorner, blueRightFrontLeftCorner);
 
             // Red Left Trench
             redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);
@@ -182,7 +182,7 @@ public class FieldConstants {
             redRight = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueRight);
         }
 
-        private static boolean contains(Rectangle2d trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
+        private static boolean contains(Zone trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
             return
                 trench.contains(robotPose.getTranslation()) ||
                 trench.contains(robotPose.exp(fieldRelativeVelocity.toTwist2d(lookaheadSec)).getTranslation());
@@ -198,11 +198,11 @@ public class FieldConstants {
     }
 
     public static class Bump {
-        public static final Rectangle2d blueLeft;
-        public static final Rectangle2d blueRight;
+        public static final Zone blueLeft;
+        public static final Zone blueRight;
 
-        public static final Rectangle2d redLeft;
-        public static final Rectangle2d redRight;
+        public static final Zone redLeft;
+        public static final Zone redRight;
 
         static {
             final double bumpLength = Units.inchesToMeters(49.0);
@@ -213,13 +213,13 @@ public class FieldConstants {
             Translation2d blueLeftBackLeftCorner = new Translation2d(Lines.blueInitLineX, fieldWidth - trenchWidth);
             Translation2d blueLeftFrontRightCorner = blueLeftBackLeftCorner.plus(new Translation2d(bumpLength, -bumpWidth));
 
-            blueLeft = new Rectangle2d(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
+            blueLeft = new Zone(blueLeftBackLeftCorner, blueLeftFrontRightCorner);
 
             // Blue Right Bump
             Translation2d blueRightBackRightCorner = new Translation2d(Lines.blueInitLineX, trenchWidth);
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(bumpLength, bumpWidth));
 
-            blueRight = new Rectangle2d(blueRightBackRightCorner, blueRightFrontLeftCorner);
+            blueRight = new Zone(blueRightBackRightCorner, blueRightFrontLeftCorner);
 
             // Red Left Bump
             redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);

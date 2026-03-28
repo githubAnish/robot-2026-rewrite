@@ -1,12 +1,8 @@
 package org.frogforce503.robot;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.frogforce503.lib.io.TriggerUtil;
-import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.math.AllianceFlipUtil;
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -21,7 +17,6 @@ import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
@@ -84,13 +79,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.lib.BLine.FollowPath;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * Main container for robot subsystems, commands, and controller bindings.
  * Use https://www.padcrafter.com to visualize the controller bindings.
  */
-@ExtensionMethod(TriggerUtil.class)
 public class RobotContainer {
     // Subsystems
     private Drive drive;
@@ -143,7 +136,6 @@ public class RobotContainer {
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
-    private final LoggedJVM loggedJVM = new LoggedJVM();
     
     public RobotContainer() {
         // Initialize subsystems based on robot type
@@ -271,7 +263,13 @@ public class RobotContainer {
         // Initialize triggers
         isShotFeasible = new Trigger(ShotCalculator.getInstance()::isShotFeasible);
 
-        // Configure default commands
+        // Configure default commands, autos, and button bindings
+        configureDefaultCommands();
+        configureAutos();
+        configureButtonBindings();
+    }
+
+    private void configureDefaultCommands() {
         drive.setDefaultCommand(teleopDriveCommand);
         
         indexer.setDefaultCommand(
@@ -291,10 +289,6 @@ public class RobotContainer {
                 Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
                 isShotFeasible)
             .withName("Leds Default Command"));
-
-        // Configure autos & button bindings
-        configureAutos();
-        configureButtonBindings();
     }
 
     private void configureAutos() {
@@ -306,49 +300,53 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        // Create bind functions
-        final BiConsumer<Trigger, ShotPreset> bindShotPreset =
-            (trigger, shotPreset) ->
-                trigger
-                    .onTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
-                    .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
-
         // Bind main controls
-        intakeGround
-            .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
+        intakeGround.whileTrue(
+            new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
             .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz, driverXbox))
             .and(intakeGround.negate())
-            .whileTrue(
-                Commands.repeatingSequence(
-                    new ShakeIntake(intakePivot, intakeRoller).withTimeout(0.5),
-                    Commands.waitSeconds(0.5)
-                ));
+            .whileTrue(new ShakeIntake(intakePivot, intakeRoller));
 
-        ejectIntake.whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
-        ejectFlywheels.whileTrue(new EjectFuelFromShooter(feeder, flywheels));
+        ejectIntake.whileTrue(
+            new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
+            
+        ejectFlywheels.whileTrue(
+            new EjectFuelFromShooter(feeder, flywheels));
 
-        bindShotPreset.accept(setBatterPreset, ShotPreset.BATTER);
-        bindShotPreset.accept(setTrenchPreset, ShotPreset.TRENCH);
-        bindShotPreset.accept(setDepotPreset, ShotPreset.DEPOT);
+        bindShotPreset(setBatterPreset, ShotPreset.BATTER);
+        bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
+        bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
 
         climb.onTrue(
             new ClimbSequence(climber, gameViz, climb)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other commands from interrupting (including itself re-scheduling)
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other cmds from interrupting (including itself re-scheduling)
 
         // Bind override controls
-        toggleSlowMode.onTrue(Commands.runOnce(teleopDriveCommand::toggleSlowMode));
-        toggleRobotRelative.onTrue(Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
-        resetRobotRotation.onTrue(Commands.runOnce(drive::resetRotation));
-        xWheels.onTrue(Commands.runOnce(drive::stopWithX));
-        alignToTower.onTrue(new DriveToPose(drive, () -> AllianceFlipUtil.apply(new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78)))));
+        toggleSlowMode.onTrue(
+            Commands.runOnce(teleopDriveCommand::toggleSlowMode));
+
+        toggleRobotRelative.onTrue(
+            Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
+
+        resetRobotRotation.onTrue(
+            Commands.runOnce(drive::resetRotation));
+
+        xWheels.onTrue(
+            Commands.runOnce(drive::stopWithX));
+
+        alignToTower.onTrue(
+            new DriveToPose(drive, () -> AllianceFlipUtil.apply(new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78)))));
+    }
+
+    private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
+        trigger
+            .onTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
+            .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
     }
 
     public void robotPeriodic() {
-        loggedJVM.update();
-        Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
-
         // Calculate latest shot info
         ShotInfo shotInfo =
             ShotCalculator.getInstance().calculateShotInfo(
@@ -384,27 +382,15 @@ public class RobotContainer {
 
     public void autonomousInit() {
         autoChooser.startAuto();
-
-        if (RobotBase.isSimulation()) {
-            HubShiftUtil.initialize();
-        }
     }
 
     public void teleopInit() {
         autoChooser.close();
-
-        if (RobotBase.isSimulation()) {
-            HubShiftUtil.initialize();
-        }
     }
 
     public void disabledInit() {
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
-        }
-        
-        if (RobotBase.isSimulation()) {
-            HubShiftUtil.initialize();
         }
     }
 

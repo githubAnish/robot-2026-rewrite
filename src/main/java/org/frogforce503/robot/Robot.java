@@ -13,10 +13,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import java.lang.reflect.Field;
 
+import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
+import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.lib.util.Elastic;
+import org.frogforce503.robot.constants.field.FieldConstants;
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +33,7 @@ import com.revrobotics.util.StatusLogger;
 
 public class Robot extends LoggedRobot {
     private final RobotContainer robotContainer;
+    private final LoggedJVM loggedJVM = new LoggedJVM();
     
     public Robot() {
         Logger.recordMetadata("ProjectName", "FF2026_" + Constants.getRobot().name().toUpperCase()); // Set a metadata value
@@ -108,6 +113,12 @@ public class Robot extends LoggedRobot {
 
         // Log NT client list
         NTClientLogger.log();
+
+        // Log JVM info
+        loggedJVM.update();
+
+        // Put alliance color on dashboard
+        Logger.recordOutput("Alliance Color", FieldConstants.getAlliance());
         
         robotContainer.robotPeriodic();
 
@@ -117,6 +128,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        if (RobotBase.isSimulation()) {
+            HubShiftUtil.initialize();
+        }
+
         robotContainer.autonomousInit();
     }
 
@@ -125,6 +140,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        if (RobotBase.isSimulation()) {
+            HubShiftUtil.initialize();
+        }
+
         robotContainer.teleopInit();
 
         // Select Teleop Tab on Elastic
@@ -138,7 +157,8 @@ public class Robot extends LoggedRobot {
     public void disabledInit() {
         // Reset MapleSim field
         if (RobotBase.isSimulation()) {
-            MapleSimUtil.resetArena();
+            SimulatedArena.getInstance().resetFieldForAuto();
+            HubShiftUtil.initialize();
         }
 
         robotContainer.disabledInit();
