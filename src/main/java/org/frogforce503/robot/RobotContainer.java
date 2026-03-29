@@ -307,7 +307,7 @@ public class RobotContainer {
         shootHubOrLob
             .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz, driverXbox))
             .and(intakeGround.negate())
-            .whileTrue(new ShakeIntake(intakePivot, intakeRoller));
+            .whileTrue(new ShakeIntake(intakePivot, intakeRoller).withName("ShakeIntake"));
 
         ejectIntake.whileTrue(
             new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));

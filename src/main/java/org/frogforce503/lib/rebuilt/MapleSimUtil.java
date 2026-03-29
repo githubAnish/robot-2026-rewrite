@@ -60,10 +60,6 @@ public class MapleSimUtil {
         SimulatedArena.overrideInstance(arena); // Allow MapleSim to cross over bump
     }
 
-    public static void dumpFromOutpost() {
-        arena.outpostDump(!FieldConstants.isRed());
-    }
-
     public static void hpThrowFromOutpost() {
         arena.outpostThrowForGoal(!FieldConstants.isRed());
     }

@@ -2,11 +2,9 @@ package org.frogforce503.robot;
 
 import java.util.Arrays;
 
-import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
@@ -18,12 +16,10 @@ import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -42,7 +38,6 @@ public class GameViz {
     private IntakeSimulation intakeSimulation;
 
     // Arena Constants
-    private final double outpostDumpThresholdDist = Units.inchesToMeters(6);
     private double robotClimbHeightMeters = 0.0;
     private int fuelShotInMatch = 0;
 
@@ -79,26 +74,15 @@ public class GameViz {
     }
 
     public void update() {
-        // Get inputs
-        Pose2d drivePose = drive.getPose();
-        double distanceToOutpost =
-            drivePose
-                .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(FieldConstants.Outpost.blue).getTranslation());
-
-        if (distanceToOutpost < outpostDumpThresholdDist) {
-            MapleSimUtil.dumpFromOutpost();
-        }
-
         // Apply bump physics
         Pose3d drivePose3d =
-            bumpSim.update(drivePose, drive.getFieldVelocity(), Constants.loopPeriodSecs);
+            bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
 
         // Add robot climb height
         drivePose3d = drivePose3d.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
 
         // Update visualizers
-        visionViz.update(drivePose);
+        visionViz.update(drive.getPose());
         superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad());
 
         // Visualize fuel
