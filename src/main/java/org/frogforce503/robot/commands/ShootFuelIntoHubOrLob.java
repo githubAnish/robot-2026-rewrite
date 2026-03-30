@@ -63,19 +63,16 @@ public class ShootFuelIntoHubOrLob extends Command {
 
             case BATTER:
                 hoodAngleRad = HoodConstants.BATTER;
-                hoodVelocityRadPerSec = 0.0;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
                 break;
 
             case TRENCH:
                 hoodAngleRad = HoodConstants.TRENCH;
-                hoodVelocityRadPerSec = 0.0;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
                 break;
 
             case DEPOT:
                 hoodAngleRad = HoodConstants.DEPOT;
-                hoodVelocityRadPerSec = 0.0;
                 flywheelsVelocityRadPerSec = FlywheelsConstants.DEPOT;
                 break;   
         }
