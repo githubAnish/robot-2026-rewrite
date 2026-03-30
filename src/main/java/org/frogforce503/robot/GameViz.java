@@ -124,7 +124,7 @@ public class GameViz {
             drive.getPose(),
             drive.getFieldVelocity(),
             hood.getAngleRad(),
-            flywheels.getVelocityRadPerSec(), 
+            flywheels.getVelocityRadPerSec(),
             intakeSimulation,
             shotTimer,
             needFuelFromIntakeForShoot,

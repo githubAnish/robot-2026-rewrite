@@ -3,6 +3,7 @@ package org.frogforce503.lib.auto.bline;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
@@ -37,6 +38,12 @@ public class BLineUtil {
         List<Pose2d> poses = new ArrayList<>();
 
         for (Path path : paths) {
+            // Flip poses if on red alliance
+            if (FieldConstants.isRed()) {
+                path.flip();
+            }
+
+            // Add pose based on element type
             for (PathElement element : path.getPathElements()) {
                 if (element instanceof Waypoint w) {
                     poses.add(new Pose2d(w.translationTarget().translation(), w.rotationTarget().rotation()));
@@ -45,7 +52,7 @@ public class BLineUtil {
                     poses.add(new Pose2d(t.translation(), Rotation2d.kZero));
                     
                 } else if (element instanceof RotationTarget r) {
-                    poses.add(new Pose2d(Translation2d.kZero, r.rotation()));   
+                    poses.add(new Pose2d(Translation2d.kZero, r.rotation()));
                 }
             }
         }

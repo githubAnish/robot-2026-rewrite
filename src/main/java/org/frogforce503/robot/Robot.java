@@ -41,7 +41,7 @@ public class Robot extends LoggedRobot {
         // Set up data receivers & replay source
         switch (Constants.getMode()) {
             case REAL:
-                // Running on real robot, log to USB stick ("/U/logs")
+                // Running on real robot, log to USB stick
                 Logger.addDataReceiver(new WPILOGWriter("/media/sda1/logs"));
                 Logger.addDataReceiver(new NT4Publisher());
                 break;

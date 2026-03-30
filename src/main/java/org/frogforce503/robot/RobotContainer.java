@@ -7,11 +7,11 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.auto.autos.NZTwice1678;
-import org.frogforce503.robot.commands.ClimbSequence;
+import org.frogforce503.robot.commands.AimAtHubOrLob;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
-import org.frogforce503.robot.commands.EjectFuelFromShooter;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
+import org.frogforce503.robot.commands.LowerClimber;
+import org.frogforce503.robot.commands.RaiseClimber;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
@@ -74,11 +74,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.lib.BLine.FollowPath;
 
 /**
  * Main container for robot subsystems, commands, and controller bindings.
@@ -113,7 +111,7 @@ public class RobotContainer {
     final Trigger ejectIntake = driverXbox.leftBumper();
     
     final Trigger shootHubOrLob = driverXbox.rightTrigger();
-    final Trigger ejectFlywheels = driverXbox.rightBumper();
+    final Trigger aimHubOrLob = driverXbox.rightBumper();
 
     final Trigger setBatterPreset = driverXbox.y();
     final Trigger setTrenchPreset = driverXbox.x();
@@ -254,7 +252,7 @@ public class RobotContainer {
         gameViz = new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
-        autoChooser = new AutoChooser(drive);
+        autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz);
         warmupExecutor = new WarmupExecutor(drive);
 
         // Initialize commands
@@ -263,13 +261,7 @@ public class RobotContainer {
         // Initialize triggers
         isShotFeasible = new Trigger(ShotCalculator.getInstance()::isShotFeasible);
 
-        // Configure default commands, autos, and button bindings
-        configureDefaultCommands();
-        configureAutos();
-        configureButtonBindings();
-    }
-
-    private void configureDefaultCommands() {
+        // Configure default commands
         drive.setDefaultCommand(teleopDriveCommand);
         
         indexer.setDefaultCommand(
@@ -289,14 +281,9 @@ public class RobotContainer {
                 Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
                 isShotFeasible)
             .withName("Leds Default Command"));
-    }
 
-    private void configureAutos() {
-        final FollowPath.Builder bLineAutoBuilder = autoChooser.getBlineAutoBuilder();
-
-        autoChooser.addAuto(
-            "NZ Twice 1678",
-            new NZTwice1678(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, bLineAutoBuilder));
+        // Configure button bindings
+        configureButtonBindings();
     }
 
     private void configureButtonBindings() {
@@ -305,23 +292,23 @@ public class RobotContainer {
             new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
-            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz, driverXbox))
+            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz))
             .and(intakeGround.negate())
             .whileTrue(new ShakeIntake(intakePivot, intakeRoller).withName("ShakeIntake"));
 
+        aimHubOrLob.whileTrue(
+            new AimAtHubOrLob(drive, driverXbox));
+
         ejectIntake.whileTrue(
             new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
-            
-        ejectFlywheels.whileTrue(
-            new EjectFuelFromShooter(feeder, flywheels));
 
         bindShotPreset(setBatterPreset, ShotPreset.BATTER);
         bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
         bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
 
-        climb.onTrue(
-            new ClimbSequence(climber, gameViz, climb)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); // Prevent other cmds from interrupting (including itself re-scheduling)
+        climb
+            .onTrue(new RaiseClimber(climber))
+            .onFalse(new LowerClimber(climber, gameViz));
 
         // Bind override controls
         toggleSlowMode.onTrue(
@@ -355,18 +342,20 @@ public class RobotContainer {
                 drive.getFieldVelocity());
 
         // Check if shot feasible
-        boolean isShotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
+        boolean shotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
         boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getAngle().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
 
         boolean isCalculatedShotFeasible =
-            isShotDistanceValid && driveAtGoal && hoodAtGoal && flywheelsAtGoal;
+            shotDistanceValid && driveAtGoal && hoodAtGoal && flywheelsAtGoal;
 
         ShotCalculator.getInstance().setShotFeasible(
             isCalculatedShotFeasible ||
-            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // true if calculated shot feasible or using preset
+            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // shot feasible = true (if using preset)
 
+        // Log data
+        Logger.recordOutput("ShotCalculator/Shot Distance Valid?", shotDistanceValid);
         Logger.recordOutput("ShotCalculator/Drive At Goal?", driveAtGoal);
         Logger.recordOutput("ShotCalculator/Hood At Goal?", hoodAtGoal);
         Logger.recordOutput("ShotCalculator/Flywheels At Goal?", flywheelsAtGoal);

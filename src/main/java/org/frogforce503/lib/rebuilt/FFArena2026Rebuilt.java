@@ -38,8 +38,8 @@ public class FFArena2026Rebuilt extends Arena2026Rebuilt {
         }
 
         // Add NZ fuel
-        for (int x = 0; x < 12; x++) {
-            for (int y = 0; y < 30; y += 2) {
+        for (double x = 0; x < 12; x += 1) {
+            for (double y = 0; y < 30; y += 2) {
                 addGamePiece(
                     new RebuiltFuelOnField(
                         centerPieceBottomRightCorner

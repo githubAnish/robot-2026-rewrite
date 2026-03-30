@@ -1,13 +1,7 @@
 package org.frogforce503.robot.commands;
 
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import org.frogforce503.lib.io.JoystickUtil;
 import org.frogforce503.robot.GameViz;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -17,38 +11,15 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConst
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod(JoystickUtil.class)
 public class ShootFuelIntoHubOrLob extends Command {
     private final Drive drive;
     private final Feeder feeder;
     private final Hood hood;
     private final Flywheels flywheels;
     private final GameViz gameViz;
-    
-    private Supplier<Translation2d> linearVelocitySupplier = Translation2d::new;
-    private DoubleSupplier omegaSupplier = () -> 0.0;
-
-    private final ProfiledPIDController thetaController =
-        new ProfiledPIDController(
-            15.0,
-            0.0,
-            0.5,
-            new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));
-
-    private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
-    private final double translationScalarShootOnMove = 0.25;
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
@@ -63,32 +34,11 @@ public class ShootFuelIntoHubOrLob extends Command {
         this.flywheels = flywheels;
         this.gameViz = gameViz;
 
-        // Enable continuous input for theta controller
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        addRequirements(drive, feeder, hood, flywheels);
-    }
-
-    public ShootFuelIntoHubOrLob(
-        Drive drive,
-        Feeder feeder,
-        Hood hood,
-        Flywheels flywheels,
-        GameViz gameViz,
-        CommandXboxController xboxController
-    ) {
-        this(drive, feeder, hood, flywheels, gameViz);
-        
-        this.linearVelocitySupplier = () -> xboxController.getLinearVelocityFromJoysticks();
-        this.omegaSupplier = () -> xboxController.getOmegaFromJoysticks();
+        addRequirements(feeder, hood, flywheels);
     }
 
     @Override
-    public void initialize() {
-        thetaController.reset(
-            drive.getAngle().getRadians(),
-            drive.getFieldVelocity().omegaRadiansPerSecond);
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
@@ -130,9 +80,6 @@ public class ShootFuelIntoHubOrLob extends Command {
                 break;   
         }
 
-        // Aim at target
-        aimAtTarget(shotInfo.driveAngle(), shotInfo.driveVelocity());
-
         // Run subsystems
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
@@ -161,34 +108,5 @@ public class ShootFuelIntoHubOrLob extends Command {
         feeder.stop();
         hood.stop();
         flywheels.stop();
-    }
-
-    private void aimAtTarget(Rotation2d driveAngle, double driveVelocity) {
-        // Get driver input velocities
-        Translation2d driverLinearVelocity = linearVelocitySupplier.get();
-        double driverOmega = omegaSupplier.getAsDouble();
-
-        // Calculate speeds
-        double xVelocity = driverLinearVelocity.getX() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
-        double yVelocity = driverLinearVelocity.getY() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
-        double omega =
-            thetaController.calculate(
-                drive.getAngle().getRadians(),
-                new State(driveAngle.getRadians(), driveVelocity));
-
-        // Fuse driver omega with calculated output
-        final double thetaS = Math.abs(driverOmega) * 3.0;
-        omega = MathUtil.interpolate(omega, driverOmega * maxDriverOmega, thetaS);
-
-        // Calculate speeds
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
-
-        // Apply speeds
-        drive.runVelocity(
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                FieldConstants.isRed()
-                    ? drive.getAngle().plus(Rotation2d.kPi)
-                    : drive.getAngle()));
     }
 }

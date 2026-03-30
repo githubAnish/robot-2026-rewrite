@@ -3,9 +3,9 @@ package org.frogforce503.robot.auto.autos;
 import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.AutoMode;
+import org.frogforce503.robot.commands.AimAtHubOrLob;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
@@ -60,23 +60,30 @@ public class NZTwice1678 implements AutoMode {
         return Commands.sequence(
             Commands.deadline(
                 autoBuilder.build(firstTimeToNZAndBack),
-                new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz)
+                intake()
             ),
-            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz).withTimeout(3.5),
+            shoot().withTimeout(3.5),
             Commands.deadline(
                 autoBuilder.build(secondTimeToNZAndBack),
-                Commands.waitSeconds(1.5).andThen(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz))
+                Commands.waitSeconds(1.5).andThen(intake())
             ),
-            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
+            shoot()
         );
     }
 
     @Override
     public Pose2d[] getPoses() {
-        if (FieldConstants.isRed()) {
-            firstTimeToNZAndBack.flip();
-            secondTimeToNZAndBack.flip();
-        }
         return BLineUtil.getPoses(firstTimeToNZAndBack, secondTimeToNZAndBack);
+    }
+
+    private Command intake() {
+        return new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz);
+    }
+
+    private Command shoot() {
+        return Commands.parallel(
+            new AimAtHubOrLob(drive),
+            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
+        );
     }
 }

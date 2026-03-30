@@ -96,7 +96,7 @@ public class MapleSimUtil {
         return balls;
     }
 
-    public static int computeFuelToShoot(int available) {
+    private static int computeFuelToShoot(int available) {
         if (available <= 0) {
             return 0;
         }
@@ -136,7 +136,7 @@ public class MapleSimUtil {
     }
 
     private static void createFuelProjectile(
-        Pose2d pose,
+        Pose2d robotPose,
         ChassisSpeeds robotFieldRelativeVelocity,
         double hoodAngleRad,
         double flywheelsSpeedRadPerSec,
@@ -145,14 +145,14 @@ public class MapleSimUtil {
     ) {
         GamePieceProjectile fuel =
             new RebuiltFuelOnFly(
-                pose
+                robotPose
                     .plus(GeomUtil.toTransform2d(HoodConstants.robotToHood))
                     .plus(initialFuelPositionOffset)
                     .plus(fuelLaunchPositionOffset)
                     .getTranslation(),
                 Translation2d.kZero,
                 robotFieldRelativeVelocity,
-                pose
+                robotPose
                     .getRotation()
                     .plus(Rotation2d.kPi), // launcher is on opposite side of front
                 Pose3d.kZero
@@ -163,7 +163,7 @@ public class MapleSimUtil {
                 Radians.of(Units.degreesToRadians(90) - hoodAngleRad)); // 0 deg hood = 90 deg shot angle (since shots have to go up) & vice versa
 
         fuel
-            .withTargetPosition(() -> FieldConstants.getShotTarget(pose))
+            .withTargetPosition(() -> FieldConstants.getShotTarget(robotPose))
             .withTargetTolerance(shotTolerance)
             .withProjectileTrajectoryDisplayCallBack(
                 pose3ds -> Logger.recordOutput("GameViz/SuccessfulFuelShot", pose3ds.toArray(Pose3d[]::new)),

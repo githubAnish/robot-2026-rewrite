@@ -3,8 +3,15 @@ package org.frogforce503.robot.auto;
 import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
+import org.frogforce503.robot.GameViz;
+import org.frogforce503.robot.auto.autos.NZTwice1678;
 import org.frogforce503.robot.auto.test.PutRobotInsideMapleSimField;
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -15,11 +22,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.BLine.FollowPath;
-import lombok.Getter;
 
 public class AutoChooser {
     private final Drive drive;
-    @Getter private final FollowPath.Builder blineAutoBuilder;
+    private final FollowPath.Builder blineAutoBuilder;
 
     private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
 
@@ -28,7 +34,15 @@ public class AutoChooser {
 
     private final double simAutoTimeSec = 20;
 
-    public AutoChooser(Drive drive) {
+    public AutoChooser(
+        Drive drive,
+        IntakePivot intakePivot,
+        IntakeRoller intakeRoller,
+        Feeder feeder,
+        Hood hood,
+        Flywheels flywheels,
+        GameViz gameViz
+    ) {
         this.drive = drive;
 
         // Configure PathPlanner
@@ -42,10 +56,10 @@ public class AutoChooser {
         if (RobotBase.isSimulation()) {
             routineChooser.addDefaultOption("Put Robot Inside MapleSim Field", new PutRobotInsideMapleSimField(drive));
         }
-    }
 
-    public void addAuto(String name, AutoMode autoMode) {
-        routineChooser.addOption(name, autoMode);
+        routineChooser.addOption(
+            "NZ Twice 1678",
+            new NZTwice1678(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, blineAutoBuilder));
     }
 
     public void startAuto() {

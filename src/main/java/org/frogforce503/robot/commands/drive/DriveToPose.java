@@ -3,8 +3,8 @@ package org.frogforce503.robot.commands.drive;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.frogforce503.lib.io.JoystickUtil;
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.motorcontrol.PIDConfig;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;
@@ -18,50 +18,43 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod(JoystickUtil.class)
 public class DriveToPose extends Command {
-    private final PIDConfig drivePID = new PIDConfig(4.0, 0.0, 0.0);
-    private final PIDConfig thetaPID = new PIDConfig(4.0, 0.0, 0.0);
-    private final Constraints driveConstraints = new Constraints(3.8, 3.0);
-    private final Constraints thetaConstraints = new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega * 0.7);
+    private final Drive drive;
+    private final Supplier<Pose2d> target;
+
+    private final ProfiledPIDController driveController =
+        new ProfiledPIDController(
+            4.0,
+            0.0,
+            0.0,
+            new Constraints(3.8, 3.0));
+            
+    private final ProfiledPIDController thetaController =
+        new ProfiledPIDController(
+            4.0,
+            0.0,
+            0.0,
+            new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega * 0.7));
+
+    private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
+    private DoubleSupplier omegaFF = () -> 0.0;
+
     private final double driveTolerance = 0.01;
     private final double thetaTolerance = Units.degreesToRadians(1.0);
     private final double ffMinRadius = 0.01;
     private final double ffMaxRadius = 0.4;
 
-    private final Drive drive;
-
-    private final Supplier<Pose2d> target;
-
-    private final ProfiledPIDController driveController =
-        new ProfiledPIDController(
-            0.0,
-            0.0,
-            0.0,
-            new Constraints(0.0, 0.0));
-            
-    private final ProfiledPIDController thetaController =
-        new ProfiledPIDController(
-            0.0,
-            0.0,
-            0.0,
-            new Constraints(0.0, 0.0));
-
     private Translation2d lastSetpointTranslation;
-
-    private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
-    private DoubleSupplier omegaFF = () -> 0.0;
 
     public DriveToPose(Drive drive, Supplier<Pose2d> target) {
         this.drive = drive;
         this.target = target;
 
-        driveController.setPID(drivePID.kP(), drivePID.kI(), drivePID.kD());
-        driveController.setConstraints(driveConstraints);
         driveController.setTolerance(driveTolerance);
-        
-        thetaController.setPID(thetaPID.kP(), thetaPID.kI(), thetaPID.kD());
-        thetaController.setConstraints(thetaConstraints);
         thetaController.setTolerance(thetaTolerance);
 
         // Enable continuous input for theta controller
@@ -77,8 +70,17 @@ public class DriveToPose extends Command {
         DoubleSupplier omegaFF
     ) {
         this(drive, target);
+
         this.linearFF = linearFF;
         this.omegaFF = omegaFF;
+    }
+
+    public DriveToPose(Drive drive, Supplier<Pose2d> target, CommandXboxController xboxController) {
+        this(
+            drive,
+            target,
+            () -> xboxController.getLinearVelocityFromJoysticks(),
+            () -> xboxController.getOmegaFromJoysticks());
     }
 
     @Override
@@ -166,7 +168,7 @@ public class DriveToPose extends Command {
             thetaVelocity = 0.0;
         }
 
-        // Command speeds
+        // Create desired speeds
         var driveVelocity =
             GeomUtil
                 .toPose2d(currentPose.getTranslation().minus(targetPose.getTranslation()).getAngle())
