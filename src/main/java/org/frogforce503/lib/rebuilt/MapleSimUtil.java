@@ -46,7 +46,7 @@ public class MapleSimUtil {
     private static final Transform3d robotToHopperOffset = new Transform3d(Units.inchesToMeters(3), Units.inchesToMeters(2), Units.inchesToMeters(9), Rotation3d.kZero);
 
     // Shoot Constants
-    private static final Translation3d shotTolerance = new Translation3d(0.25, 0.25, 0.25);
+    private static final Translation3d shotTolerance = new Translation3d(0.2, 0.2, 0.2);
     private static final Transform2d initialFuelPositionOffset = new Transform2d(Units.inchesToMeters(3), 0, Rotation2d.kZero);
     private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
     private static final double fuelReleasedPerShot = 4; // How many balls are fired at once?

@@ -125,10 +125,6 @@ public class ShotCalculator {
         return hubTimeOfFlightMap.get(maxDistanceHubShoot);
     }
 
-    public double getNaiveTOF(double distance) {
-        return hubTimeOfFlightMap.get(distance);
-    }
-
     public boolean isShotDistanceValid(Pose2d robotPose) {
         return
             FieldConstants.inAllianceZone(robotPose)

@@ -81,9 +81,9 @@ public class NZTwice1678 implements AutoMode {
     }
 
     private Command shoot() {
-        return Commands.parallel(
-            new AimAtHubOrLob(drive),
-            new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz)
-        );
+        return
+            Commands.parallel(
+                new AimAtHubOrLob(drive),
+                new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz));
     }
 }

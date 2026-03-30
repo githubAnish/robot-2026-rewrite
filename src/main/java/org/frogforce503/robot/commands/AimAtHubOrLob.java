@@ -30,7 +30,7 @@ public class AimAtHubOrLob extends Command {
 
     private final ProfiledPIDController thetaController =
         new ProfiledPIDController(
-            15.0,
+            10.0,
             0.0,
             0.5,
             new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));
