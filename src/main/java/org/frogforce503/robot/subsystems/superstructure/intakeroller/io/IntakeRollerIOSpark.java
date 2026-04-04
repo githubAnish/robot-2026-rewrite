@@ -48,7 +48,7 @@ public class IntakeRollerIOSpark implements IntakeRollerIO {
                 .positionConversionFactor((1 / IntakeRollerConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
                 .velocityConversionFactor((1 / IntakeRollerConstants.motorMechanismRatio) * (2 * Math.PI) / 60); // convert RPM to rad/sec
                 
-        SparkUtil.optimizeRelativeEncoderFilter(config, false);
+        SparkUtil.optimizeRelativeEncoderFilter(config);
 
         config
             .closedLoop

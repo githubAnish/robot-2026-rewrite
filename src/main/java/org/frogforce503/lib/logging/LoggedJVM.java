@@ -8,52 +8,50 @@ import java.util.function.LongSupplier;
 
 import org.littletonrobotics.junction.Logger;
 
-public class LoggedJVM {
-    private List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
-    private final String ntroot;
+public final class LoggedJVM {
+    private final String rootKey = "LoggedJVM";
 
-    private class LoggedFunction {
-        private final String name;
-        private final LongSupplier fcn;
-
-        public LoggedFunction(String name, LongSupplier fcn) {
-            this.name = ntroot + "/" + name;
-            this.fcn = fcn;
-        }
-
-        public void run() {
-            Logger.recordOutput(name, fcn.getAsLong());
-        }
-    }
-
-    private List<LoggedFunction> loggedFunctions = new ArrayList<>();
+    private final List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
+    private final List<LoggedFunction> loggedFunctions = new ArrayList<>();
 
     public LoggedJVM() {
-        this.ntroot = "LoggedJVM";
-
         Runtime runtime = Runtime.getRuntime();
-        System.out.println("JVM Runtime Version: " + Runtime.version().toString());
 
-        if (runtime == null) {
-            System.out.println("LoggedJVM Runtime is NULL");
-            return;
-        }
-
+        System.out.println("JVM Runtime Version: " + Runtime.version());
         System.out.println("Available Processors: " + runtime.availableProcessors());
 
-        loggedFunctions.add(new LoggedFunction("Free Memory", runtime::freeMemory));
-        loggedFunctions.add(new LoggedFunction("Max Memory", runtime::maxMemory));
-        loggedFunctions.add(new LoggedFunction("Total Memory", runtime::totalMemory));
+        // Memory stats
+        add("Free Memory", runtime::freeMemory);
+        add("Max Memory", runtime::maxMemory);
+        add("Total Memory", runtime::totalMemory);
 
-        for (var bean : gcBeans) {
-            loggedFunctions.add(new LoggedFunction("GC: " + bean.getName() + " Count", bean::getCollectionCount));
-            loggedFunctions.add(new LoggedFunction("GC: " + bean.getName() + " Time", bean::getCollectionTime));
+        // GC stats
+        for (var gc : gcBeans) {
+            String base = "GC/" + gc.getName();
+            add(base + "/Count", gc::getCollectionCount);
+            add(base + "/Time", gc::getCollectionTime);
         }
     }
 
     public void update() {
-        for (var f : loggedFunctions) {
-            f.run();
+        loggedFunctions.forEach(LoggedFunction::log);
+    }
+
+    private void add(String name, LongSupplier supplier) {
+        loggedFunctions.add(new LoggedFunction(rootKey + "/" + name, supplier));
+    }
+
+    private static class LoggedFunction {
+        private final String key;
+        private final LongSupplier supplier;
+
+        private LoggedFunction(String key, LongSupplier supplier) {
+            this.key = key;
+            this.supplier = supplier;
+        }
+
+        private void log() {
+            Logger.recordOutput(key, supplier.getAsLong());
         }
     }
 }

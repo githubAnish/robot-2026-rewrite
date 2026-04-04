@@ -182,7 +182,7 @@ public class MapleSimUtil {
         IntakeSimulation intakeSimulation,
         Timer shotTimer,
         boolean needFuelFromIntakeForShoot,
-        Runnable addFuelShotInMatch
+        Runnable onScore
     ) {
         if (needFuelFromIntakeForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
             return; // Don't shoot balls if there are none
@@ -217,7 +217,7 @@ public class MapleSimUtil {
                 hoodAngleRad,
                 flywheelsSpeedRadPerSec,
                 new Transform2d(0.0, offset, Rotation2d.kZero),
-                addFuelShotInMatch);
+                onScore);
         }
 
         // Restart cooldown timer after firing

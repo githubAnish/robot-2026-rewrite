@@ -1,8 +1,6 @@
 package org.frogforce503.robot.auto;
 
 import org.frogforce503.lib.auto.bline.BLineUtil;
-import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
-import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.autos.NZTwice1678;
 import org.frogforce503.robot.auto.test.PutRobotInsideMapleSimField;
@@ -15,17 +13,16 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRolle
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.pathplanner.lib.pathfinding.Pathfinding;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.lib.BLine.FollowPath;
+import lombok.Getter;
 
 public class AutoChooser {
     private final Drive drive;
-    private final FollowPath.Builder blineAutoBuilder;
+    @Getter private final FollowPath.Builder blineAutoBuilder;
 
     private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
 
@@ -45,10 +42,6 @@ public class AutoChooser {
     ) {
         this.drive = drive;
 
-        // Configure PathPlanner
-        PathPlannerUtil.configureAutoBuilder(drive);
-        Pathfinding.setPathfinder(new LocalADStarAK());
-
         // Configure BLine
         blineAutoBuilder = BLineUtil.configureAutoBuilder(drive);
 
@@ -63,7 +56,7 @@ public class AutoChooser {
     }
 
     public void startAuto() {
-        final AutoMode selectedAuto = routineChooser.get();
+        AutoMode selectedAuto = routineChooser.get();
 
         if (selectedAuto == null) {
             return;
@@ -78,12 +71,10 @@ public class AutoChooser {
             autoCommand = autoCommand.withTimeout(simAutoTimeSec);
         }
 
-        if (autoCommand != null) {
-            CommandScheduler.getInstance().schedule(autoCommand);
-        }
+        CommandScheduler.getInstance().schedule(autoCommand);
     }
 
-    public void periodic() {
+    public void updateAutoSelection() {
         final AutoMode selectedAuto = routineChooser.get();
 
         if (selectedAuto == null) {
@@ -99,7 +90,7 @@ public class AutoChooser {
         lastSelectedAuto = selectedAuto;
     }
 
-    public void close() {
+    public void cancelAuto() {
         logTrajectory(); // Clear poses
 
         if (autoCommand != null) {

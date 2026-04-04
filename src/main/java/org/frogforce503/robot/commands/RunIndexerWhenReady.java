@@ -31,7 +31,7 @@ public class RunIndexerWhenReady extends Command {
         } else if (isIntakingSupplier.getAsBoolean()) {
             indexer.setVelocity(IndexerConstants.INTAKE);
         } else {
-            indexer.setVelocity(0.0);
+            indexer.stop();
         }
     }
 

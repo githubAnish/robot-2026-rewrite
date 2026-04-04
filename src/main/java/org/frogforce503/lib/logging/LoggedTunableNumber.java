@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import lombok.Setter;
@@ -13,12 +14,13 @@ import lombok.Setter;
  * Class for a tunable number. Gets value from dashboard in tuning mode, returns default if not or
  * value not in dashboard.
  */
-public class LoggedTunableNumber implements DoubleSupplier {
+public final class LoggedTunableNumber implements DoubleSupplier {
     private final String tableKey = "/Tuning";
-
     private final String key;
+
     private boolean hasDefault = false;
     private double defaultValue;
+
     private LoggedNetworkNumber dashboardNumber;
     private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
 

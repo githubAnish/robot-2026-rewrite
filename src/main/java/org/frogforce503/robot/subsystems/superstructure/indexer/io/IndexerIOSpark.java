@@ -48,7 +48,7 @@ public class IndexerIOSpark implements IndexerIO {
                 .positionConversionFactor((1 / IndexerConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
                 .velocityConversionFactor((1 / IndexerConstants.motorMechanismRatio) * (2 * Math.PI) / 60); // convert RPM to rad/sec
                 
-        SparkUtil.optimizeRelativeEncoderFilter(config, false);
+        SparkUtil.optimizeRelativeEncoderFilter(config);
 
         config
             .closedLoop

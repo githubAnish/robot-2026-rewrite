@@ -2,6 +2,8 @@ package org.frogforce503.robot;
 
 import java.util.function.Consumer;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -67,6 +69,7 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -231,11 +234,14 @@ public class RobotContainer {
         }
 
         // Create sim requirements
-        gameViz = new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
+        gameViz =
+            Constants.isPracticeMatch
+                ? new PracticeMatchViz(drive, intakePivot, hood, flywheels, climber, visionViz)
+                : new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz);
-        warmupExecutor = new WarmupExecutor(drive);
+        warmupExecutor = new WarmupExecutor(drive, autoChooser.getBlineAutoBuilder());
 
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
@@ -260,19 +266,19 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         // Bind main controls
-        intakeGround.whileTrue(
-            new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
+        intakeGround
+            .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
             .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz))
             .and(intakeGround.negate())
             .whileTrue(new ShakeIntake(intakePivot, intakeRoller).withName("ShakeIntake"));
 
-        aimHubOrLob.whileTrue(
-            new AimAtHubOrLob(drive, driverXbox));
+        aimHubOrLob
+            .whileTrue(new AimAtHubOrLob(drive, driverXbox));
 
-        ejectIntake.whileTrue(
-            new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
+        ejectIntake
+            .whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
 
         bindShotPreset(setBatterPreset, ShotPreset.BATTER);
         bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
@@ -283,26 +289,30 @@ public class RobotContainer {
             .onFalse(new LowerClimber(climber, gameViz));
 
         // Bind override controls
-        toggleSlowMode.onTrue(
-            Commands.runOnce(teleopDriveCommand::toggleSlowMode));
+        toggleSlowMode
+            .onTrue(
+                Commands.runOnce(teleopDriveCommand::toggleSlowMode)
+                    .withName("Toggling Slow Mode"));
 
-        toggleRobotRelative.onTrue(
-            Commands.runOnce(teleopDriveCommand::toggleRobotRelative));
+        toggleRobotRelative
+            .onTrue(
+                Commands.runOnce(teleopDriveCommand::toggleRobotRelative)
+                    .withName("Toggling Robot Relative Mode"));
 
-        resetRobotRotation.onTrue(
-            Commands.runOnce(drive::resetRotation));
+        resetRobotRotation
+            .onTrue(
+                Commands.runOnce(() -> drive.setAngle(AllianceFlipUtil.apply(Rotation2d.kZero)))
+                    .withName("Reset Robot Rotation"));
 
-        xWheels.onTrue(
-            Commands.runOnce(drive::stopWithX));
+        xWheels
+            .onTrue(
+                Commands.runOnce(drive::stopWithX)
+                    .withName("Stop With X"));
 
         alignToTower
             .onTrue(
-                new DriveToPose(
-                    drive,
-                    () -> FieldConstants.Tower.getClimbPose(drive.getPose()),
-                    driverXbox
-                )
-                .withName("Drive To Tower"));
+                new DriveToPose(drive, () -> FieldConstants.Tower.getClimbPose(drive.getPose()), driverXbox)
+                    .withName("Drive To Tower"));
     }
 
     private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
@@ -348,21 +358,33 @@ public class RobotContainer {
     }
 
     public void autonomousInit() {
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
+        }
+        
         autoChooser.startAuto();
     }
 
     public void teleopInit() {
-        autoChooser.close();
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
+        }
+
+        autoChooser.cancelAuto();
     }
 
     public void disabledInit() {
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
+        }
+
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
         }
     }
 
     public void disabledPeriodic() {
-        autoChooser.periodic();
+        autoChooser.updateAutoSelection();
         warmupExecutor.periodic();
     }
 

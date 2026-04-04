@@ -60,7 +60,7 @@ public class ClimberIOSpark implements ClimberIO {
                 .positionConversionFactor((1 / ClimberConstants.mechanismRatio) * (ClimberConstants.sprocketPitchDiameter * Math.PI)) // convert rotations to meters
                 .velocityConversionFactor((1 / ClimberConstants.mechanismRatio) * (ClimberConstants.sprocketPitchDiameter * Math.PI) / 60); // convert RPM to meters/sec
                 
-        SparkUtil.optimizeRelativeEncoderFilter(config, false);
+        SparkUtil.optimizeRelativeEncoderFilter(config);
 
         config
             .closedLoop

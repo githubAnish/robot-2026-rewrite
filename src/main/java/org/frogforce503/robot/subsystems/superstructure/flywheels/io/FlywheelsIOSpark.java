@@ -56,7 +56,7 @@ public class FlywheelsIOSpark implements FlywheelsIO {
                 .positionConversionFactor((1 / FlywheelsConstants.motorMechanismRatio) * (2 * Math.PI)) // convert rotations to radians
                 .velocityConversionFactor((1 / FlywheelsConstants.motorMechanismRatio) * (2 * Math.PI) / 60); // convert RPM to rad/sec
                 
-        SparkUtil.optimizeRelativeEncoderFilter(leaderConfig, true);
+        SparkUtil.optimizeRelativeEncoderFilter(leaderConfig);
 
         leaderConfig
             .closedLoop

@@ -1,6 +1,6 @@
 package org.frogforce503.robot.constants.field;
 
-import java.util.List;
+import java.util.Set;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
@@ -58,7 +58,7 @@ public class FieldConstants {
         return
             inAllianceZone(robotPose)
                 ? Hub.getHubShotPose()
-                : new Translation3d(robotPose.getTranslation().nearest(List.of(Depot.getLobShotPose(), Outpost.getLobShotPose())));
+                : new Translation3d(robotPose.getTranslation().nearest(Set.of(Depot.getLobShotPose(), Outpost.getLobShotPose())));
     }
 
     public static class Lines {
@@ -165,7 +165,7 @@ public class FieldConstants {
         public static Pose2d getClimbPose(Pose2d robotPose) {
             return
                 AllianceFlipUtil.apply(
-                    robotPose.nearest(List.of(blueLeftClimbPose, blueRightClimbPose)));
+                    robotPose.nearest(Set.of(blueLeftClimbPose, blueRightClimbPose)));
         }
     }
 

@@ -16,7 +16,6 @@ import java.lang.reflect.Field;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.lib.util.Elastic;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -128,10 +127,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        if (RobotBase.isSimulation()) {
-            HubShiftUtil.initialize();
-        }
-
         robotContainer.autonomousInit();
     }
 
@@ -140,10 +135,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        if (RobotBase.isSimulation()) {
-            HubShiftUtil.initialize();
-        }
-
         robotContainer.teleopInit();
 
         // Select Teleop Tab on Elastic
@@ -158,7 +149,6 @@ public class Robot extends LoggedRobot {
         // Reset MapleSim field
         if (RobotBase.isSimulation()) {
             SimulatedArena.getInstance().resetFieldForAuto();
-            HubShiftUtil.initialize();
         }
 
         robotContainer.disabledInit();

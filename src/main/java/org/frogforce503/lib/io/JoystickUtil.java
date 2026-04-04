@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-public class JoystickUtil {
+public final class JoystickUtil {
     private static final double deadband = 0.2;
 
     private JoystickUtil() {}
@@ -28,7 +28,7 @@ public class JoystickUtil {
         return
             GeomUtil
                 .toPose2d(linearDirection)
-                .transformBy(GeomUtil.toTransform2d(linearMagnitude, 0.0))
+                .plus(GeomUtil.toTransform2d(linearMagnitude, 0.0))
                 .getTranslation();
     }
 

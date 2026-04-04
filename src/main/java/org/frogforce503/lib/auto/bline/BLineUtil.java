@@ -17,7 +17,7 @@ import frc.robot.lib.BLine.Path.RotationTarget;
 import frc.robot.lib.BLine.Path.TranslationTarget;
 import frc.robot.lib.BLine.Path.Waypoint;
 
-public class BLineUtil {
+public final class BLineUtil {
     private BLineUtil() {}
 
     public static FollowPath.Builder configureAutoBuilder(Drive drive) {

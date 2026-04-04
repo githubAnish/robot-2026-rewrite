@@ -1,13 +1,14 @@
 package org.frogforce503.lib.logging;
 
-import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
-/** Utility class for logging code execution times. */
-public class LoggedTracer {
-    private LoggedTracer() {}
+import edu.wpi.first.wpilibj.Timer;
 
+/** Utility class for logging code execution times. */
+public final class LoggedTracer {
     private static double startTime = -1.0;
+
+    private LoggedTracer() {}
 
     /** Reset the clock. */
     public static void reset() {

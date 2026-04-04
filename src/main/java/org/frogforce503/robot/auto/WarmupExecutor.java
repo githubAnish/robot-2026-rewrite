@@ -1,60 +1,32 @@
 package org.frogforce503.robot.auto;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.io.File;
 
-import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 
-import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.commands.PathfindingCommand;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
 
 @SuppressWarnings("unused")
 public class WarmupExecutor {
     private final Drive drive;
-    
-    private final String pathPlannerPathSuffix = ".path";
+    private final FollowPath.Builder blineAutoBuilder;
 
-    public WarmupExecutor(Drive drive) {
+    private final String blinePathSuffix = ".json";
+
+    public WarmupExecutor(Drive drive, FollowPath.Builder blineAutoBuilder) {
         this.drive = drive;
-
-        // Warmup PathPlanner cmds on robot init
-        CommandScheduler.getInstance().schedule(
-            FollowPathCommand
-                .warmupCommand()
-                .withName("FollowPathCommand Warmup")
-                .ignoringDisable(true),
-                
-            PathfindingCommand
-                .warmupCommand()
-                .withName("PathfindingCommand Warmup")
-                .ignoringDisable(true));
+        this.blineAutoBuilder = blineAutoBuilder;
     }
 
     public void periodic() {
-        warmupPathPlannerPaths();
-        warmupDrive();
         warmupShotCalculator();
+        warmupBLinePaths();
     }
 
     // Main methods
-    private void warmupDrive() {
-        DriveConstants.pathFollower.calculate(
-            drive.getPose(),
-            Pose2d.kZero,
-            0.1,
-            0.1,
-            0.1);
-    }
-
     private void warmupShotCalculator() {
         ShotCalculator.getInstance().calculateShotInfo(
             drive.getPose(),
@@ -63,23 +35,17 @@ public class WarmupExecutor {
         );
     }
 
-    private void warmupPathPlannerPaths() {
-        Path pathPlannerPathsDir =
-            Path.of(
-                Filesystem.getDeployDirectory().getAbsolutePath(),
-                "pathplanner",
-                "paths");
+    private void warmupBLinePaths() {
+        String blineDir = Filesystem.getDeployDirectory().getAbsolutePath() + "/autos/paths";
+        File[] files = new File(blineDir).listFiles((dir, name) -> name.endsWith(blinePathSuffix));
 
-        try (Stream<Path> paths = Files.list(pathPlannerPathsDir)) {
-            paths
-                .filter(path -> path.getFileName().toString().endsWith(pathPlannerPathSuffix))
-                .map(path -> stripExtension(path, pathPlannerPathSuffix))
-                .forEach(name -> {
-                    PathPlannerUtil.loadTrajectory(name);
-                });
+        if (files == null) {
+            throw new RuntimeException("Failed to warmup BLine paths");
+        }
 
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to warmup PathPlanner paths", e);
+        for (File file : files) {
+            Path traj = new Path(stripExtension(file.getName(), blinePathSuffix));
+            blineAutoBuilder.build(traj);
         }
     }
     
@@ -91,8 +57,7 @@ public class WarmupExecutor {
         System.out.println("Warmup took " + (endTime - startTime) / 1e9 + " s");
     }
 
-    private String stripExtension(Path path, String extension) {
-        String fileName = path.getFileName().toString();
+    private String stripExtension(String fileName, String extension) {
         return fileName.substring(0, fileName.length() - extension.length());
     }
 }

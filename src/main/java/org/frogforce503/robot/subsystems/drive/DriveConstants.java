@@ -2,7 +2,6 @@ package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.lib.swerve.SwervePathController;
 import org.frogforce503.robot.constants.tuner.TunerConstants;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -38,8 +37,6 @@ public class DriveConstants {
     public static final Translation2d[] moduleTranslations;
 
     // Swerve Control
-    public static final SwervePathController pathFollower;
-
     public static final PIDConfig pathplannerLinearPID = new PIDConfig(0.25, 0, 0.1);
     public static final PIDConfig pathplannerThetaPID = new PIDConfig(3, 0, 0);
 
@@ -74,11 +71,5 @@ public class DriveConstants {
                 frontRightModuleTranslation,
                 backLeftModuleTranslation,
                 backRightModuleTranslation};
-
-        pathFollower =
-            new SwervePathController(
-                pathplannerLinearPID.toPIDController(),
-                pathplannerLinearPID.toPIDController(),
-                pathplannerThetaPID.toPIDController());
     }
 }

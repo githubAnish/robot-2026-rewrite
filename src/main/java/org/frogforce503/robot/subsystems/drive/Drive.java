@@ -4,7 +4,6 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.LoggerUtil;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOInputsAutoLogged;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
@@ -43,31 +42,6 @@ public class Drive extends SubsystemBase {
         LoggedTracer.record("Drive");
     }
 
-    // Setters
-    public void setPose(Pose2d pose) {
-        io.setPose(pose);
-    }
-
-    public void setAngle(Rotation2d rotation) {
-        io.setAngle(rotation);
-    }
-
-    public void resetRotation() {
-        setAngle(
-            FieldConstants.isRed()
-                ? Rotation2d.kZero
-                : Rotation2d.kPi);
-    }
-    
-    // Adding vision measurements
-    public void acceptVisionMeasurement(VisionMeasurement measurement) {
-        io.acceptVisionMeasurement(
-            measurement.pose(),
-            measurement.timestamp(),
-            measurement.standardDeviations());
-    }
-
-    // Getters
     public Pose2d getPose() {
         return inputs.Pose;
     }
@@ -82,6 +56,56 @@ public class Drive extends SubsystemBase {
 
     public ChassisSpeeds getFieldVelocity() {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getAngle());
+    }
+
+    public Rotation2d getGyroRotation() {
+        return inputs.gyroAngle;
+    }
+
+    public void setPose(Pose2d pose) {
+        io.setPose(pose);
+    }
+
+    public void setAngle(Rotation2d rotation) {
+        io.setAngle(rotation);
+    }
+
+    /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
+    public void runVelocity(ChassisSpeeds speeds) {
+        io.runVelocity(speeds);
+    }
+
+    /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
+    public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
+        io.runVelocity(speeds, moduleForcesX, moduleForcesY);
+    }
+
+    /** Runs the drive in a straight line with the specified drive output. */
+    public void runCharacterization(double output) {
+        io.runCharacterization(output);
+    }
+
+    public void stop() {
+        runVelocity(new ChassisSpeeds());
+    }
+
+    /**
+     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
+     * return to their normal orientations the next time a nonzero velocity is requested.
+     */
+    public void stopWithX() {
+        io.stopWithX();
+        stop();
+    }
+
+    /** Stops the drive and turns the modules to an O arrangement to resist movement. */
+    public void stopWithO() {
+        io.stopWithO();
+        stop();
+    }
+
+    public void coast() {
+        io.coast();
     }
 
     /** Returns the position of each module in radians. */
@@ -102,47 +126,11 @@ public class Drive extends SubsystemBase {
         return output;
     }
 
-    public Rotation2d getGyroRotation() {
-        return inputs.gyroAngle;
-    }
-
-    // Actions
-    public void coast() {
-        io.coast();
-    }
-
-    /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-     * return to their normal orientations the next time a nonzero velocity is requested.
-     */
-    public void stopWithX() {
-        io.stopWithX();
-        stop();
-    }
-
-    /** Stops the drive and turns the modules to an O arrangement to resist movement. */
-    public void stopWithO() {
-        io.stopWithO();
-        stop();
-    }
-
-    public void stop() {
-        runVelocity(new ChassisSpeeds());
-    }
-
-    /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
-    public void runVelocity(ChassisSpeeds speeds) {
-        io.runVelocity(speeds);
-    }
-
-    /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
-    public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
-        io.runVelocity(speeds, moduleForcesX, moduleForcesY);
-    }
-
-    /** Runs the drive in a straight line with the specified drive output. */
-    public void runCharacterization(double output) {
-        io.runCharacterization(output);
+    public void acceptVisionMeasurement(VisionMeasurement measurement) {
+        io.acceptVisionMeasurement(
+            measurement.pose(),
+            measurement.timestamp(),
+            measurement.standardDeviations());
     }
 
     public MapleSimSwerveDrivetrain getMapleSimDrive() {

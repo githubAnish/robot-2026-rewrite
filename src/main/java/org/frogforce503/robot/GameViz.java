@@ -3,7 +3,6 @@ package org.frogforce503.robot;
 import java.util.Arrays;
 
 import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
@@ -39,7 +38,6 @@ public class GameViz {
 
     // Arena Constants
     private double robotClimbHeightMeters = 0.0;
-    private int fuelShotInMatch = 0;
 
     // Shoot Sim Constants
     private final Timer shotTimer = new Timer();
@@ -100,19 +98,6 @@ public class GameViz {
         Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
         Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
-        Logger.recordOutput("GameViz/Fuel Shot In Match", fuelShotInMatch);
-
-        Logger.recordOutput(
-            "GameViz/Remaining Shift Time",
-            String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
-
-        Logger.recordOutput(
-            "GameViz/Shift Active?",
-            HubShiftUtil.getShiftedShiftInfo().active());
-
-        Logger.recordOutput(
-            "GameViz/Current Shift",
-            HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
     }
 
     public void startIntake() {
@@ -123,13 +108,7 @@ public class GameViz {
         intakeSimulation.stopIntake();
     }
 
-    public void shootFuel(boolean needFuelFromIntakeForShoot) {
-        boolean matchEnded = HubShiftUtil.getShiftedShiftInfo().remainingTime() <= 0;
-
-        if (matchEnded) {
-            return;
-        }
-        
+    public void shootFuel(boolean needFuelFromIntakeForShoot, Runnable onScore) {
         MapleSimUtil.shootFuel(
             drive.getPose(),
             drive.getFieldVelocity(),
@@ -138,11 +117,11 @@ public class GameViz {
             intakeSimulation,
             shotTimer,
             needFuelFromIntakeForShoot,
-            () -> {
-                if (HubShiftUtil.getShiftedShiftInfo().active() && !matchEnded) {
-                    fuelShotInMatch++;
-                }
-            });
+            onScore);
+    }
+
+    public void shootFuel(boolean needFuelFromIntakeForShoot) {
+        shootFuel(needFuelFromIntakeForShoot, () -> {});
     }
 
     public void startClimb() {

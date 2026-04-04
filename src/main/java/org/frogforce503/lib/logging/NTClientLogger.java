@@ -1,14 +1,16 @@
 package org.frogforce503.lib.logging;
 
-import edu.wpi.first.networktables.ConnectionInfo;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.networktables.ConnectionInfo;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 /** Utility class to log the list of NetworkTables clients. */
-public class NTClientLogger {
+public final class NTClientLogger {
     private static final String tableName = "NTClients/";
     private static Set<String> lastRemoteIds = new HashSet<>();
     private static ByteBuffer intBuffer = ByteBuffer.allocate(4);
@@ -20,19 +22,23 @@ public class NTClientLogger {
         Set<String> remoteIds = new HashSet<>();
 
         // Log data for connected clients
-        for (int i = 0; i < connections.length; i++) {
-            lastRemoteIds.remove(connections[i].remote_id);
-            remoteIds.add(connections[i].remote_id);
+        for (ConnectionInfo conn : connections) {
+            String id = conn.remote_id;
+            String key = tableName + id + "/";
 
-            Logger.recordOutput(tableName + connections[i].remote_id + "/Connected", true);
-            Logger.recordOutput(tableName + connections[i].remote_id + "/IPAddress", connections[i].remote_ip);
-            Logger.recordOutput(tableName + connections[i].remote_id + "/RemotePort", connections[i].remote_port);
-            Logger.recordOutput(tableName + connections[i].remote_id + "/LastUpdate", connections[i].last_update);
+            lastRemoteIds.remove(id);
+            remoteIds.add(id);
+
+            Logger.recordOutput(key + "Connected", true);
+            Logger.recordOutput(key + "IPAddress", conn.remote_ip);
+            Logger.recordOutput(key + "RemotePort", conn.remote_port);
+            Logger.recordOutput(key + "LastUpdate", conn.last_update);
             
             intBuffer.rewind();
+
             Logger.recordOutput(
-                tableName + connections[i].remote_id + "/ProtocolVersion",
-                intBuffer.putInt(connections[i].protocol_version).array());
+                key + "ProtocolVersion",
+                intBuffer.putInt(conn.protocol_version).array());
         }
 
         // Mark disconnected clients

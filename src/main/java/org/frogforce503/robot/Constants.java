@@ -14,6 +14,8 @@ public class Constants {
     public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
     public static final double loopPeriodWatchdogSecs = 0.2;
 
+    public static final boolean isPracticeMatch = true;
+
     public static Mode getMode() {
         return switch (robot) {
             case ProgrammingBot, PracticeBot, CompBot -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;

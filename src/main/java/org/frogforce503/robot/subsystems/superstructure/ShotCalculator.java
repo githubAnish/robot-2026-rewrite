@@ -181,6 +181,7 @@ public class ShotCalculator {
                 new Pose2d(
                     launcherPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
                     launcherPosition.getRotation());
+
             lookaheadLauncherToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
         }
 

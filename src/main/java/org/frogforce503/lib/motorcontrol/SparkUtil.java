@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 /** Helper class for Spark IO implementations. */
 public class SparkUtil {
@@ -19,8 +20,8 @@ public class SparkUtil {
     /** <p> Changes the filtering for an internal encoder for a Spark Max or Spark Flex (depends on {@code isSparkFlex}). </p>
      *  <p> See https://www.chiefdelphi.com/t/psa-rev-spark-default-velocity-filtering-is-still-really-bad-for-flywheels/514567. </p>
      */
-    public static <C extends SparkBaseConfig> void optimizeRelativeEncoderFilter(C config, boolean isSparkFlex) {
-        if (isSparkFlex) { // Spark Flex uses quadrature internal encoder
+    public static <C extends SparkBaseConfig> void optimizeRelativeEncoderFilter(C config) {
+        if (config instanceof SparkFlexConfig) { // Spark Flex uses quadrature internal encoder
             config
                 .encoder
                     .quadratureMeasurementPeriod(5)
@@ -45,13 +46,13 @@ public class SparkUtil {
                 .externalOrAltEncoderPositionAlwaysOn(hasExternalOrAlternateEncoder)
                 .externalOrAltEncoderVelocityAlwaysOn(hasExternalOrAlternateEncoder)
                 .faultsAlwaysOn(true)
-                .faultsPeriodMs(1000) // Updates once a second (faults don't need high update rate)
+                .faultsPeriodMs(1000) // faults don't need high update rate
                 .iAccumulationAlwaysOn(true)
-                .limitsPeriodMs(250) // Updates 4 times a second (Uncomment if limit switches attached to motor controller)
-                .motorTemperaturePeriodMs(1000) // Updates once a second (temperature doesn't need high update rate)
+                .limitsPeriodMs(250) // Uncomment if limit switches attached to motor controller
+                .motorTemperaturePeriodMs(1000) // temp doesn't need high update rate
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderVelocityAlwaysOn(true)
                 .warningsAlwaysOn(true)
-                .warningsPeriodMs(1000); // Updates once a second (warnings don't need high update rate)
+                .warningsPeriodMs(1000); // warnings don't need high update rate
     }
 }

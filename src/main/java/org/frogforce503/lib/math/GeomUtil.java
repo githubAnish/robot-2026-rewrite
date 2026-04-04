@@ -10,7 +10,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Geometry utilities for working with translations, rotations, transforms, and poses. */
-public class GeomUtil {
+public final class GeomUtil {
+    private GeomUtil() {}
+    
     /**
      * Creates a pure translating transform
      *
@@ -54,8 +56,14 @@ public class GeomUtil {
 
     public static Pose2d inverse(Pose2d pose) {
         Rotation2d rotationInverse = pose.getRotation().unaryMinus();
-        return new Pose2d(
-            pose.getTranslation().unaryMinus().rotateBy(rotationInverse), rotationInverse);
+        
+        return
+            new Pose2d(
+                pose
+                    .getTranslation()
+                    .unaryMinus()
+                    .rotateBy(rotationInverse),
+                rotationInverse);
     }
 
     /**
@@ -117,8 +125,10 @@ public class GeomUtil {
      * @return The resulting transform
      */
     public static Transform2d toTransform2d(Transform3d transform) {
-        return new Transform2d(
-            transform.getTranslation().toTranslation2d(), transform.getRotation().toRotation2d());
+        return
+            new Transform2d(
+                transform.getTranslation().toTranslation2d(),
+                transform.getRotation().toRotation2d());
     }
 
     /**
@@ -139,8 +149,11 @@ public class GeomUtil {
      * @return The resulting translation
      */
     public static Twist2d toTwist2d(ChassisSpeeds speeds) {
-        return new Twist2d(
-            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+        return
+            new Twist2d(
+                speeds.vxMetersPerSecond,
+                speeds.vyMetersPerSecond,
+                speeds.omegaRadiansPerSecond);
     }
 
     /**
@@ -176,15 +189,15 @@ public class GeomUtil {
     public static ChassisSpeeds transformVelocity(ChassisSpeeds velocity, Translation2d transform, Rotation2d currentRotation) {
         return
             new ChassisSpeeds(
-                velocity.vxMetersPerSecond
-                    - velocity.omegaRadiansPerSecond
-                        * (transform.getX() * currentRotation.getSin()
-                            + transform.getY() * currentRotation.getCos()),
+                velocity.vxMetersPerSecond -
+                    velocity.omegaRadiansPerSecond *
+                        (transform.getX() * currentRotation.getSin() +
+                        transform.getY() * currentRotation.getCos()),
 
-                velocity.vyMetersPerSecond
-                    + velocity.omegaRadiansPerSecond
-                        * (transform.getX() * currentRotation.getCos()
-                            - transform.getY() * currentRotation.getSin()),
+                velocity.vyMetersPerSecond +
+                    velocity.omegaRadiansPerSecond *
+                        (transform.getX() * currentRotation.getCos() -
+                        transform.getY() * currentRotation.getSin()),
 
                 velocity.omegaRadiansPerSecond);
     }

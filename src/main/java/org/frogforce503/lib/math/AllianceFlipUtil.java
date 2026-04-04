@@ -48,18 +48,25 @@ public class AllianceFlipUtil {
     }
 
     public static Pose2d apply(Pose2d pose) {
-        return shouldFlip()
-            ? new Pose2d(apply(pose.getTranslation()), apply(pose.getRotation()))
-            : pose;
+        return
+            shouldFlip()
+                ? new Pose2d(apply(pose.getTranslation()), apply(pose.getRotation()))
+                : pose;
     }
 
     public static Translation3d apply(Translation3d translation) {
-        return new Translation3d(
-            applyX(translation.getX()), applyY(translation.getY()), translation.getZ());
+        return
+            new Translation3d(
+                applyX(translation.getX()),
+                applyY(translation.getY()),
+                translation.getZ());
     }
 
     public static Rotation3d apply(Rotation3d rotation) {
-        return shouldFlip() ? rotation.rotateBy(new Rotation3d(0.0, 0.0, Math.PI)) : rotation;
+        return
+            shouldFlip()
+                ? rotation.rotateBy(new Rotation3d(0.0, 0.0, Math.PI))
+                : rotation;
     }
 
     public static Pose3d apply(Pose3d pose) {
@@ -67,7 +74,10 @@ public class AllianceFlipUtil {
     }
 
     public static Zone apply(Zone zone) {
-        return new Zone(
-            apply(zone.getCenter()), zone.getXWidth(), zone.getYWidth());
+        return
+            new Zone(
+                apply(zone.getCenter()),
+                zone.getXWidth(),
+                zone.getYWidth());
     }
 }
