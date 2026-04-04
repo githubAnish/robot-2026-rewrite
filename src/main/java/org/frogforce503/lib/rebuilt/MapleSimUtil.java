@@ -198,7 +198,7 @@ public class MapleSimUtil {
 
         // Check fuel amount
         int available = intakeSimulation.getGamePiecesAmount();
-        int fuelToShoot = MapleSimUtil.computeFuelToShoot(available);
+        int fuelToShoot = computeFuelToShoot(available);
 
         // Index fuel
         for (int i = 0; i < fuelToShoot; i++) {

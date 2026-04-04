@@ -37,7 +37,7 @@ public class FFArena2026Rebuilt extends Arena2026Rebuilt {
             }
         }
 
-        // Add NZ fuel
+        // Add neutral zone fuel
         for (double x = 0; x < 12; x += 1) {
             for (double y = 0; y < 30; y += 2) {
                 addGamePiece(

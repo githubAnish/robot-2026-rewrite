@@ -12,11 +12,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
 public class BumpPhysicsSim {
-    private final double GRAVITY = 9.81;
-    private final double BUMP_KICK_SCALAR = 0.2; // Tune this (1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp)
+    private final double gravity = 9.81;
+    private final double bumpKickScalar = 0.2; // Tune this (1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp)
 
-    private final double halfLength = DriveConstants.bumperLength / 2.0; 
-    private final double halfWidth = DriveConstants.bumperWidth / 2.0;
+    private final double robotHalfLength = DriveConstants.bumperLength / 2.0; 
+    private final double robotHalfWidth = DriveConstants.bumperWidth / 2.0;
 
     private double currentZ = 0.0;
     private double velocityZ = 0.0;
@@ -27,10 +27,10 @@ public class BumpPhysicsSim {
         // 1. Sample 4 corners AND the center point
         Translation2d pos = robotPose.getTranslation();
         TerrainState center = getTerrainState(pos);
-        TerrainState fl = getTerrainState(pos.plus(new Translation2d(halfLength, halfWidth).rotateBy(yaw)));
-        TerrainState fr = getTerrainState(pos.plus(new Translation2d(halfLength, -halfWidth).rotateBy(yaw)));
-        TerrainState bl = getTerrainState(pos.plus(new Translation2d(-halfLength, halfWidth).rotateBy(yaw)));
-        TerrainState br = getTerrainState(pos.plus(new Translation2d(-halfLength, -halfWidth).rotateBy(yaw)));
+        TerrainState fl = getTerrainState(pos.plus(new Translation2d(robotHalfLength, robotHalfWidth).rotateBy(yaw)));
+        TerrainState fr = getTerrainState(pos.plus(new Translation2d(robotHalfLength, -robotHalfWidth).rotateBy(yaw)));
+        TerrainState bl = getTerrainState(pos.plus(new Translation2d(-robotHalfLength, robotHalfWidth).rotateBy(yaw)));
+        TerrainState br = getTerrainState(pos.plus(new Translation2d(-robotHalfLength, -robotHalfWidth).rotateBy(yaw)));
 
         // 2. Natural Tilting (Pitch/Roll)
         double front_h = (fl.height() + fr.height()) / 2.0;
@@ -38,12 +38,12 @@ public class BumpPhysicsSim {
         double left_h = (fl.height() + bl.height()) / 2.0;
         double right_h = (fr.height() + br.height()) / 2.0;
 
-        double pitch = Math.atan2(back_h - front_h, halfLength * 2.0);
-        double roll = Math.atan2(left_h - right_h, halfWidth * 2.0);
+        double pitch = Math.atan2(back_h - front_h, robotHalfLength * 2.0);
+        double roll = Math.atan2(left_h - right_h, robotHalfWidth * 2.0);
 
         // 3. Rigid Body Target Z
-        double dz_pitch = Math.sin(pitch) * halfLength;
-        double dz_roll = Math.sin(roll) * halfWidth;
+        double dz_pitch = Math.sin(pitch) * robotHalfLength;
+        double dz_roll = Math.sin(roll) * robotHalfWidth;
 
         double fl_z_offset = -dz_pitch + dz_roll;
         double fr_z_offset = -dz_pitch - dz_roll;
@@ -64,10 +64,10 @@ public class BumpPhysicsSim {
             (fieldRelativeVelocity.vyMetersPerSecond * center.slopeY());
         
         // Apply the dampener to simulate tire squish and energy loss
-        neededVelocityZ *= BUMP_KICK_SCALAR;
+        neededVelocityZ *= bumpKickScalar;
 
         // 5. Ballistic Physics (Flight Logic)
-        velocityZ -= GRAVITY * dt;
+        velocityZ -= gravity * dt;
         currentZ += velocityZ * dt;
 
         // Ground Collision 

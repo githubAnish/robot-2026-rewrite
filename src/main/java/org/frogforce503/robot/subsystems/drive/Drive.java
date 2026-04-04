@@ -42,6 +42,7 @@ public class Drive extends SubsystemBase {
         LoggedTracer.record("Drive");
     }
 
+    // Getters
     public Pose2d getPose() {
         return inputs.Pose;
     }
@@ -62,68 +63,13 @@ public class Drive extends SubsystemBase {
         return inputs.gyroAngle;
     }
 
+    // Setters
     public void setPose(Pose2d pose) {
         io.setPose(pose);
     }
 
     public void setAngle(Rotation2d rotation) {
         io.setAngle(rotation);
-    }
-
-    /** Runs a robot-relative ChassisSpeeds to the drivetrain. */
-    public void runVelocity(ChassisSpeeds speeds) {
-        io.runVelocity(speeds);
-    }
-
-    /** Runs a robot-relative ChassisSpeeds to the drivetrain with wheel force feedforwards in the X & Y direction. */
-    public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
-        io.runVelocity(speeds, moduleForcesX, moduleForcesY);
-    }
-
-    /** Runs the drive in a straight line with the specified drive output. */
-    public void runCharacterization(double output) {
-        io.runCharacterization(output);
-    }
-
-    public void stop() {
-        runVelocity(new ChassisSpeeds());
-    }
-
-    /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-     * return to their normal orientations the next time a nonzero velocity is requested.
-     */
-    public void stopWithX() {
-        io.stopWithX();
-        stop();
-    }
-
-    /** Stops the drive and turns the modules to an O arrangement to resist movement. */
-    public void stopWithO() {
-        io.stopWithO();
-        stop();
-    }
-
-    public void coast() {
-        io.coast();
-    }
-
-    /** Returns the position of each module in radians. */
-    public double[] getWheelRadiusCharacterizationPositions() {
-        double[] values = new double[4];
-        for (int i = 0; i < 4; i++) {
-            values[i] = inputs.drivePositionsRad[i];
-        }
-        return values;
-    }
-
-    /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
-    public double getFFCharacterizationVelocity() {
-        double output = 0.0;
-        for (int i = 0; i < 4; i++) {
-            output += Units.radiansToRotations(inputs.driveVelocitiesRadPerSec[i]) / 4.0;
-        }
-        return output;
     }
 
     public void acceptVisionMeasurement(VisionMeasurement measurement) {
@@ -133,6 +79,56 @@ public class Drive extends SubsystemBase {
             measurement.standardDeviations());
     }
 
+    // Control Methods
+    public void runVelocity(ChassisSpeeds speeds) {
+        io.runVelocity(speeds);
+    }
+
+    public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
+        io.runVelocity(speeds, moduleForcesX, moduleForcesY);
+    }
+
+    public void runCharacterization(double output) {
+        io.runCharacterization(output);
+    }
+
+    // Stop Methods
+    public void stop() {
+        runVelocity(new ChassisSpeeds());
+    }
+
+    public void stopWithX() {
+        io.stopWithX();
+        stop();
+    }
+
+    public void stopWithO() {
+        io.stopWithO();
+        stop();
+    }
+
+    public void coast() {
+        io.coast();
+    }
+
+    // Characterization
+    public double[] getWheelRadiusCharacterizationPositionsRad() {
+        double[] values = new double[4];
+        for (int i = 0; i < 4; i++) {
+            values[i] = inputs.drivePositionsRad[i];
+        }
+        return values;
+    }
+
+    public double getFFCharacterizationVelocityRotPerSec() {
+        double output = 0.0;
+        for (int i = 0; i < 4; i++) {
+            output += Units.radiansToRotations(inputs.driveVelocitiesRadPerSec[i]) / 4.0;
+        }
+        return output;
+    }
+
+    // Simulation
     public MapleSimSwerveDrivetrain getMapleSimDrive() {
         if (io instanceof DriveIOMapleSim) {
             return ((DriveIOMapleSim) io).getDrivetrain();

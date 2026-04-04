@@ -10,7 +10,7 @@ import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 
 import lombok.Setter;
 
-public class HubShiftUtil {
+public final class HubShiftUtil {
     private static Timer shiftTimer = new Timer();
     private static final ShiftEnum[] shiftsEnums = ShiftEnum.values();
 
@@ -30,8 +30,11 @@ public class HubShiftUtil {
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
     private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
     private static final double timeResetThreshold = 3.0;
+
     private static double shiftTimerOffset = 0.0;
     @Setter private static Supplier<Optional<Boolean>> allianceWinOverride = () -> Optional.of(true);
+
+    private HubShiftUtil() {}
 
     public static Optional<Boolean> getAllianceWinOverride() {
         return allianceWinOverride.get();

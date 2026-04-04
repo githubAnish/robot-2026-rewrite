@@ -25,6 +25,8 @@ public class PracticeMatchViz extends GameViz {
     }
 
     public void update() {
+        super.update();
+        
         // Log score
         Logger.recordOutput("PracticeMatchViz/Score", fuelScoredInMatch);
 

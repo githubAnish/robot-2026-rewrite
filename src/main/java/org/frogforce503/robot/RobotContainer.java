@@ -381,11 +381,13 @@ public class RobotContainer {
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
         }
+
+        warmupExecutor.initialize();
     }
 
     public void disabledPeriodic() {
         autoChooser.updateAutoSelection();
-        warmupExecutor.periodic();
+        warmupExecutor.update();
     }
 
     public void test() {

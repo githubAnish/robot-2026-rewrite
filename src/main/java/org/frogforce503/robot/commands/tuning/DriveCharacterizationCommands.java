@@ -57,7 +57,7 @@ public class DriveCharacterizationCommands {
                 () -> {
                     double voltage = timer.get() * ffRampRate;
                     drive.runCharacterization(voltage);
-                    velocitySamples.add(drive.getFFCharacterizationVelocity());
+                    velocitySamples.add(drive.getFFCharacterizationVelocityRotPerSec());
                     voltageSamples.add(voltage);
                 },
                 drive)
@@ -115,7 +115,7 @@ public class DriveCharacterizationCommands {
                 // Record starting measurement
                 Commands.runOnce(
                     () -> {
-                        state.positions = drive.getWheelRadiusCharacterizationPositions();
+                        state.positions = drive.getWheelRadiusCharacterizationPositionsRad();
                         state.lastAngle = drive.getGyroRotation();
                         state.gyroDelta = 0.0;
                     }),
@@ -127,7 +127,7 @@ public class DriveCharacterizationCommands {
                         state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
                         state.lastAngle = rotation;
 
-                        double[] positions = drive.getWheelRadiusCharacterizationPositions();
+                        double[] positions = drive.getWheelRadiusCharacterizationPositionsRad();
                         double wheelDelta = 0.0;
                         for (int i = 0; i < 4; i++) {
                             wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
@@ -142,7 +142,7 @@ public class DriveCharacterizationCommands {
                 // When cancelled, calculate and print results
                 .finallyDo(
                     () -> {
-                        double[] positions = drive.getWheelRadiusCharacterizationPositions();
+                        double[] positions = drive.getWheelRadiusCharacterizationPositionsRad();
                         double wheelDelta = 0.0;
                         for (int i = 0; i < 4; i++) {
                             wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
@@ -181,7 +181,7 @@ public class DriveCharacterizationCommands {
         return Commands.sequence(
             // Record starting wheel positions
             Commands.runOnce(() -> {
-                state.positions = drive.getWheelRadiusCharacterizationPositions();
+                state.positions = drive.getWheelRadiusCharacterizationPositionsRad();
             }),
 
             // Drive straight slowly
@@ -192,7 +192,7 @@ public class DriveCharacterizationCommands {
 
             // When cancelled, calculate wheel radius
             .finallyDo(() -> {
-                double[] endPositions = drive.getWheelRadiusCharacterizationPositions();
+                double[] endPositions = drive.getWheelRadiusCharacterizationPositionsRad();
 
                 // Average wheel rotation (radians)
                 double wheelDelta = 0.0;

@@ -1,6 +1,8 @@
 package org.frogforce503.robot.auto;
 
 import org.frogforce503.lib.auto.bline.BLineUtil;
+import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
+import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.autos.NZTwice1678;
 import org.frogforce503.robot.auto.test.PutRobotInsideMapleSimField;
@@ -12,6 +14,8 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -41,6 +45,10 @@ public class AutoChooser {
         GameViz gameViz
     ) {
         this.drive = drive;
+
+        // Configure PathPlanner
+        PathPlannerUtil.configureAutoBuilder(drive);
+        Pathfinding.setPathfinder(new LocalADStarAK());
 
         // Configure BLine
         blineAutoBuilder = BLineUtil.configureAutoBuilder(drive);
