@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands;
+package org.frogforce503.robot.commands.drive;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;

@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -14,16 +13,15 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
-public class DriveViz {
-    private final Field2d fieldViz = new Field2d();
-
+public class DriveViz extends Field2d {
     private final boolean logModules = false;
+
     private final LoggedMechanism2d[] moduleMechanisms;
     private final LoggedMechanismLigament2d[] moduleSpeeds;
     private final LoggedMechanismLigament2d[] moduleDirections;
 
     public DriveViz() {
-        SmartDashboard.putData("Field", fieldViz);
+        SmartDashboard.putData("Field", this);
 
         moduleMechanisms =
             new LoggedMechanism2d[] {
@@ -47,11 +45,6 @@ public class DriveViz {
                 createModuleDirectionLigament(3)};
     }
 
-    /** Gets the field object on Field2d, creating it before if needed. */
-    public FieldObject2d getObject(String name) {
-        return fieldViz.getObject(name);
-    }
-
     public void update(SwerveDriveState state) {
         if (state == null || state.Pose == null || state.ModuleStates == null) {
             return;
@@ -64,7 +57,7 @@ public class DriveViz {
 
         // Log robot pose
         Logger.recordOutput("Drive/Pose", pose);
-        fieldViz.setRobotPose(pose);
+        setRobotPose(pose);
 
         // Log robot velocities
         Translation2d robotRelativeVelocity = new Translation2d(robotRelativeSpeeds.vxMetersPerSecond, robotRelativeSpeeds.vyMetersPerSecond);

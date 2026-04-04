@@ -1,11 +1,11 @@
 package org.frogforce503.lib.util;
 
-import org.frogforce503.robot.subsystems.drive.DriveViz;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class Zone extends Rectangle2d {
     private final Pose2d[] corners =
@@ -52,8 +52,8 @@ public class Zone extends Rectangle2d {
         return corner(-1, -1);
     }
 
-    public void log(String keyName, DriveViz driveViz) {
-        driveViz.getObject(keyName).setPoses(corners);
+    public void log(String keyName, Field2d field2d) {
+        field2d.getObject(keyName).setPoses(corners);
         Logger.recordOutput(keyName, corners);
     }
 }

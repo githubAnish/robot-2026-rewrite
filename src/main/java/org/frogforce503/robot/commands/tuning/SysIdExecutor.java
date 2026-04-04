@@ -40,7 +40,7 @@ public class SysIdExecutor {
                     state -> Logger.recordOutput(subsystem.getName() + "/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism(
                     consumer,
-                    null, // No log consumer, since data is recorded by AdvantageKit
+                    null, // No log consumer, since data recorded by AdvantageKit
                     subsystem));
     }
 

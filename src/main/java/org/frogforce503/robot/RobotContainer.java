@@ -2,12 +2,10 @@ package org.frogforce503.robot;
 
 import java.util.function.Consumer;
 
-import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.commands.AimAtHubOrLob;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
@@ -15,8 +13,10 @@ import org.frogforce503.robot.commands.RaiseClimber;
 import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.commands.drive.AimAtHubOrLob;
 import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
@@ -26,10 +26,6 @@ import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
-import org.frogforce503.robot.subsystems.leds.Leds;
-import org.frogforce503.robot.subsystems.leds.LedsConstants;
-import org.frogforce503.robot.subsystems.leds.io.LedsIO;
-import org.frogforce503.robot.subsystems.leds.io.LedsIOCANdle;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
@@ -71,8 +67,6 @@ import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetecti
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -93,7 +87,6 @@ public class RobotContainer {
     private Hood hood;
     private Flywheels flywheels;
     private Climber climber;
-    private Leds leds;
 
     // Sim
     private final GameViz gameViz;
@@ -129,9 +122,6 @@ public class RobotContainer {
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
 
-    // Triggers
-    private final Trigger isShotFeasible;
-
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
     
@@ -150,8 +140,6 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIOSpark());
 
                     climber = new Climber(new ClimberIOSpark());
-
-                    leds = new Leds(new LedsIOCANdle());
 
                     vision =
                         new Vision(
@@ -183,8 +171,6 @@ public class RobotContainer {
                     flywheels = new Flywheels(new FlywheelsIOSim());
 
                     climber = new Climber(new ClimberIOSim());
-                    
-                    leds = new Leds(new LedsIO() {});
 
                     vision =
                         new Vision(
@@ -235,10 +221,6 @@ public class RobotContainer {
             climber = new Climber(new ClimberIO() {});
         }
 
-        if (leds == null) {
-            leds = new Leds(new LedsIO() {});
-        }
-
         if (vision == null) {
             vision =
                 new Vision(
@@ -258,14 +240,11 @@ public class RobotContainer {
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
 
-        // Initialize triggers
-        isShotFeasible = new Trigger(ShotCalculator.getInstance()::isShotFeasible);
-
         // Configure default commands
         drive.setDefaultCommand(teleopDriveCommand);
         
         indexer.setDefaultCommand(
-            new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob, isShotFeasible));
+            new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob));
 
         hood.setDefaultCommand(
             Commands.runOnce(() -> hood.setAngle(HoodConstants.DUCK_UNDER_TRENCH, 0.0), hood)
@@ -274,13 +253,6 @@ public class RobotContainer {
         flywheels.setDefaultCommand(
             Commands.runOnce((() -> flywheels.setVelocity(FlywheelsConstants.IDLE)), flywheels)
                 .withName("Flywheels Default Command"));
-
-        leds.setDefaultCommand(
-            Commands.either(
-                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_FEASIBLE), leds),
-                Commands.runOnce(() -> leds.runPattern(LedsConstants.SHOT_NOT_FEASIBLE), leds),
-                isShotFeasible)
-            .withName("Leds Default Command"));
 
         // Configure button bindings
         configureButtonBindings();
@@ -323,8 +295,14 @@ public class RobotContainer {
         xWheels.onTrue(
             Commands.runOnce(drive::stopWithX));
 
-        alignToTower.onTrue(
-            new DriveToPose(drive, () -> AllianceFlipUtil.apply(new Pose2d(1.118, 2.753, Rotation2d.fromDegrees(-178.78)))));
+        alignToTower
+            .onTrue(
+                new DriveToPose(
+                    drive,
+                    () -> FieldConstants.Tower.getClimbPose(drive.getPose()),
+                    driverXbox
+                )
+                .withName("Drive To Tower"));
     }
 
     private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {

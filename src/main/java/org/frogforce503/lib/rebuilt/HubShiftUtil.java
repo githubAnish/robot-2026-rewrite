@@ -11,20 +11,6 @@ import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import lombok.Setter;
 
 public class HubShiftUtil {
-    public enum ShiftEnum {
-        TRANSITION,
-        SHIFT1,
-        SHIFT2,
-        SHIFT3,
-        SHIFT4,
-        ENDGAME,
-        AUTO,
-        DISABLED;
-    }
-
-    public record ShiftInfo(
-        ShiftEnum currentShift, double elapsedTime, double remainingTime, boolean active) {}
-
     private static Timer shiftTimer = new Timer();
     private static final ShiftEnum[] shiftsEnums = ShiftEnum.values();
 
@@ -37,8 +23,7 @@ public class HubShiftUtil {
     private static final double minTimeOfFlight = ShotCalculator.getInstance().getMinTimeOfFlight();
     private static final double maxTimeOfFlight = ShotCalculator.getInstance().getMaxTimeOfFlight();
     private static final double approachingActiveFudge = -1 * (minTimeOfFlight + minFuelCountDelay);
-    private static final double endingActiveFudge =
-        shiftEndFuelCountExtension + -1 * (maxTimeOfFlight + maxFuelCountDelay);
+    private static final double endingActiveFudge = shiftEndFuelCountExtension + -1 * (maxTimeOfFlight + maxFuelCountDelay);
 
     public static final double autoEndTime = 20.0;
     public static final double teleopDuration = 140.0;
@@ -112,6 +97,7 @@ public class HubShiftUtil {
             stateTimeRemaining = autoEndTime - currentTime;
             active = true;
             currentShift = ShiftEnum.AUTO;
+
         } else if (DriverStation.isEnabled()) {
             // Adjust the current offset if the time difference above the theshold
             if (Math.abs(fieldTeleopTime - currentTime) >= timeResetThreshold
@@ -157,8 +143,7 @@ public class HubShiftUtil {
             currentShift = shiftsEnums[currentShiftIndex];
         }
 
-        ShiftInfo shiftInfo = new ShiftInfo(currentShift, stateTimeElapsed, stateTimeRemaining, active);
-        return shiftInfo;
+        return new ShiftInfo(currentShift, stateTimeElapsed, stateTimeRemaining, active);
     }
 
     public static ShiftInfo getOfficialShiftInfo() {
@@ -167,6 +152,7 @@ public class HubShiftUtil {
 
     public static ShiftInfo getShiftedShiftInfo() {
         boolean[] shiftSchedule = getSchedule();
+
         // Starting active
         if (shiftSchedule[1] == true) {
             double[] shiftedShiftStartTimes = {
@@ -186,6 +172,7 @@ public class HubShiftUtil {
                 110.0 + approachingActiveFudge,
                 140.0
             };
+
             return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
         }
 
@@ -209,4 +196,21 @@ public class HubShiftUtil {
 
         return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
     }
+
+    public enum ShiftEnum {
+        TRANSITION,
+        SHIFT1,
+        SHIFT2,
+        SHIFT3,
+        SHIFT4,
+        ENDGAME,
+        AUTO,
+        DISABLED;
+    }
+
+    public record ShiftInfo(
+        ShiftEnum currentShift,
+        double elapsedTime,
+        double remainingTime,
+        boolean active) {}
 }

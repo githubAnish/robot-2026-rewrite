@@ -107,6 +107,10 @@ public class GameViz {
             String.format("%.1f", Math.max(HubShiftUtil.getShiftedShiftInfo().remainingTime(), 0.0)));
 
         Logger.recordOutput(
+            "GameViz/Shift Active?",
+            HubShiftUtil.getShiftedShiftInfo().active());
+
+        Logger.recordOutput(
             "GameViz/Current Shift",
             HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
     }
@@ -120,6 +124,12 @@ public class GameViz {
     }
 
     public void shootFuel(boolean needFuelFromIntakeForShoot) {
+        boolean matchEnded = HubShiftUtil.getShiftedShiftInfo().remainingTime() <= 0;
+
+        if (matchEnded) {
+            return;
+        }
+        
         MapleSimUtil.shootFuel(
             drive.getPose(),
             drive.getFieldVelocity(),
@@ -128,7 +138,11 @@ public class GameViz {
             intakeSimulation,
             shotTimer,
             needFuelFromIntakeForShoot,
-            () -> fuelShotInMatch++);
+            () -> {
+                if (HubShiftUtil.getShiftedShiftInfo().active() && !matchEnded) {
+                    fuelShotInMatch++;
+                }
+            });
     }
 
     public void startClimb() {

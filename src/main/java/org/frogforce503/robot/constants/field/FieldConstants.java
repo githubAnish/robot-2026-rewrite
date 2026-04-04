@@ -10,6 +10,7 @@ import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -126,8 +127,8 @@ public class FieldConstants {
         public static final Zone zone;
 
         static {
-            final double boundingBoxWidth = Units.inchesToMeters(206.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
-            final double boundingBoxDepth = Units.inchesToMeters(72.0); // See https://www.frcmanual.com/2026/game-details#_6341-neutral-zone-fuel-arrangement
+            final double boundingBoxWidth = Units.inchesToMeters(206.0); // See frcmanual.com
+            final double boundingBoxDepth = Units.inchesToMeters(72.0); // See frcmanual.com
             final Translation2d fieldCenter = new Translation2d(fieldLength / 2, fieldWidth / 2);
             
             Translation2d frontLeftCorner = fieldCenter.plus(new Translation2d(boundingBoxDepth / 2, boundingBoxWidth / 2));
@@ -140,15 +141,31 @@ public class FieldConstants {
     public static class Tower {
         public static final Zone blue;
 
-        static {
-            final double rungLength = Units.inchesToMeters(41.1); // from field CAD
-            final double centerTagToTowerX = Units.inchesToMeters(41.86); // from field CAD
+        private static final Pose2d blueLeftClimbPose;
+        private static final Pose2d blueRightClimbPose;
 
+        static {
+            final double rungLength = Units.inchesToMeters(45); // See frcmanual.com
+            final double centerTagToTowerX = Units.inchesToMeters(41.86); // See field CAD
+
+            // Tower
             Pose2d blueTowerTag = getTagPose2d(31);
             Translation2d blueBackLeftCorner = blueTowerTag.getTranslation().plus(new Translation2d(0, rungLength / 2));
             Translation2d blueFrontRightCorner = blueTowerTag.getTranslation().plus(new Translation2d(centerTagToTowerX, -rungLength / 2));
 
             blue = new Zone(blueBackLeftCorner, blueFrontRightCorner);
+
+            // Climb Poses
+            final double towerCornerToRobotClimbPoseOffset = Units.inchesToMeters(15);
+
+            blueLeftClimbPose = new Pose2d(blue.getFrontLeftCorner().plus(new Translation2d(0, towerCornerToRobotClimbPoseOffset)), Rotation2d.kZero);
+            blueRightClimbPose = new Pose2d(blue.getFrontRightCorner().minus(new Translation2d(0, towerCornerToRobotClimbPoseOffset)), Rotation2d.k180deg);
+        }
+
+        public static Pose2d getClimbPose(Pose2d robotPose) {
+            return
+                AllianceFlipUtil.apply(
+                    robotPose.nearest(List.of(blueLeftClimbPose, blueRightClimbPose)));
         }
     }
 
