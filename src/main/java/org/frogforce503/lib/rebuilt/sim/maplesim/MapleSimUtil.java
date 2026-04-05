@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt;
+package org.frogforce503.lib.rebuilt.sim.maplesim;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -38,13 +38,6 @@ public class MapleSimUtil {
     private static final Distance intakeLengthExtended = Inches.of(9.5);
     private static final int fuelCapacity = 40;
 
-    // Hopper Constants
-    private static final int cols = 3;
-    private static final int rows = 5;
-    private static final int perLayer = cols * rows;
-    private static final double fuelToFuelOffset = Units.inchesToMeters(4);
-    private static final Transform3d robotToHopperOffset = new Transform3d(Units.inchesToMeters(3), Units.inchesToMeters(2), Units.inchesToMeters(9), Rotation3d.kZero);
-
     // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.2, 0.2, 0.2);
     private static final Transform2d initialFuelPositionOffset = new Transform2d(Units.inchesToMeters(3), 0, Rotation2d.kZero);
@@ -73,27 +66,6 @@ public class MapleSimUtil {
                 intakeLengthExtended,
                 IntakeSimulation.IntakeSide.FRONT,
                 fuelCapacity);
-    }
-
-    public static Translation3d[] visualizeFuelInHopper(Pose3d robotPose, int numFuelInRobot) {
-        Translation3d[] balls = new Translation3d[numFuelInRobot];
-
-        for (int i = 0; i < numFuelInRobot; i++) {
-            int layer = i / perLayer;
-            int grid = i % perLayer;
-
-            double x = (grid % cols - (cols - 1) / 2.0) * fuelToFuelOffset;
-            double y = (grid / cols - (rows - 1) / 2.0) * fuelToFuelOffset;
-            double z = layer * fuelToFuelOffset * 1.25; // slightly taller spacing for visibility
-
-            balls[i] =
-                robotPose
-                    .plus(robotToHopperOffset)
-                    .plus(new Transform3d(new Translation3d(x, y, z), Rotation3d.kZero))
-                    .getTranslation();
-        }
-
-        return balls;
     }
 
     private static int computeFuelToShoot(int available) {
@@ -184,12 +156,13 @@ public class MapleSimUtil {
         boolean needFuelFromIntakeForShoot,
         Runnable onScore
     ) {
-        if (needFuelFromIntakeForShoot && intakeSimulation.getGamePiecesAmount() <= 0) {
+        int available = intakeSimulation.getGamePiecesAmount();
+
+        if (needFuelFromIntakeForShoot && available <= 0) {
             return; // Don't shoot balls if there are none
         }
 
-        double shotRateBallsPerSec = shooterFireRateBallsPerSec;
-        double shotDelaySec = 1.0 / shotRateBallsPerSec;
+        double shotDelaySec = 1.0 / shooterFireRateBallsPerSec;
 
         // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
         if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {
@@ -197,7 +170,6 @@ public class MapleSimUtil {
         }
 
         // Check fuel amount
-        int available = intakeSimulation.getGamePiecesAmount();
         int fuelToShoot = computeFuelToShoot(available);
 
         // Index fuel

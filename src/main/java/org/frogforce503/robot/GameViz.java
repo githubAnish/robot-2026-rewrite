@@ -2,8 +2,9 @@ package org.frogforce503.robot;
 
 import java.util.Arrays;
 
-import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
-import org.frogforce503.lib.rebuilt.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.sim.BumpPhysicsSim;
+import org.frogforce503.lib.rebuilt.sim.FuelVisualizer;
+import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
@@ -85,7 +86,7 @@ public class GameViz {
 
         // Visualize fuel
         Translation3d[] fuelInHopper =
-            MapleSimUtil.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
+            FuelVisualizer.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
         Translation3d[] fuelTranslations = // Convert fuel poses to translations to lower data processed by NT
             Arrays

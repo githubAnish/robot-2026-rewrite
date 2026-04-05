@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Simulates the field, including interaction with & movement of game elements. Uses physics simulation. */
 public class PracticeMatchViz extends GameViz {
-    private int fuelScoredInMatch = 0;
+    private int score = 0;
     
     public PracticeMatchViz(
         Drive drive,
@@ -24,11 +24,12 @@ public class PracticeMatchViz extends GameViz {
         super(drive, intakePivot, hood, flywheels, climber, visionViz);
     }
 
+    @Override
     public void update() {
         super.update();
         
         // Log score
-        Logger.recordOutput("PracticeMatchViz/Score", fuelScoredInMatch);
+        Logger.recordOutput("PracticeMatchViz/Score", score);
 
         // Log hub shifts
         Logger.recordOutput(
@@ -44,19 +45,36 @@ public class PracticeMatchViz extends GameViz {
             HubShiftUtil.getShiftedShiftInfo().currentShift().toString());
     }
 
-    public void shootFuel(boolean needFuelFromIntakeForShoot) {
-        boolean matchEnded = HubShiftUtil.getShiftedShiftInfo().remainingTime() <= 0;
+    @Override
+    public void startIntake() {
+        if (isMatchEnded()) {
+            return;
+        }
+        
+        super.startIntake();
+    }
 
-        if (matchEnded) {
+    @Override
+    public void shootFuel(boolean needFuelFromIntakeForShoot) {
+        if (isMatchEnded()) {
             return;
         }
 
         super.shootFuel(
             needFuelFromIntakeForShoot,
             () -> {
-                if (HubShiftUtil.getShiftedShiftInfo().active() && !matchEnded) {
-                    fuelScoredInMatch++;
+                if (HubShiftUtil.getShiftedShiftInfo().active() && !isMatchEnded()) {
+                    score++;
                 }
             });
+    }
+
+    @Override
+    public void stopClimb() {
+        super.stopClimb();
+    }
+
+    private boolean isMatchEnded() {
+        return HubShiftUtil.getShiftedShiftInfo().remainingTime() <= 0;
     }
 }
