@@ -1,21 +1,11 @@
 package org.frogforce503.robot;
 
-import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.IterativeRobotBase;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Watchdog;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
 import java.lang.reflect.Field;
 
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
+import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
 import org.frogforce503.lib.util.Elastic;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -29,6 +19,17 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
+
+import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.IterativeRobotBase;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Watchdog;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
     private final RobotContainer robotContainer;
@@ -127,6 +128,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
+        }
+
         robotContainer.autonomousInit();
     }
 
@@ -135,6 +140,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
+        }
+
         robotContainer.teleopInit();
 
         // Select Teleop Tab on Elastic
@@ -146,9 +155,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void disabledInit() {
-        // Reset MapleSim field
-        if (RobotBase.isSimulation()) {
-            SimulatedArena.getInstance().resetFieldForAuto();
+        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
+            HubShiftUtil.initialize();
         }
 
         robotContainer.disabledInit();
@@ -171,8 +179,14 @@ public class Robot extends LoggedRobot {
     public void testPeriodic() {}
 
     @Override
-    public void simulationInit() {}
+    public void simulationInit() {
+        SimulatedArena.getInstance().resetFieldForAuto(); // Reset MapleSim field
+
+        robotContainer.simulationInit();
+    }
 
     @Override
-    public void simulationPeriodic() {}
+    public void simulationPeriodic() {
+        robotContainer.simulationPeriodic();
+    }
 }

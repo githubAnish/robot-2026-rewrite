@@ -10,12 +10,15 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootFuelIntoHubOrLob extends Command {
     private final Drive drive;
+    private final Indexer indexer;
     private final Feeder feeder;
     private final Hood hood;
     private final Flywheels flywheels;
@@ -23,12 +26,14 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     public ShootFuelIntoHubOrLob(
         Drive drive,
+        Indexer indexer,
         Feeder feeder,
         Hood hood,
         Flywheels flywheels,
         GameViz gameViz
     ) {
         this.drive = drive;
+        this.indexer = indexer;
         this.feeder = feeder;
         this.hood = hood;
         this.flywheels = flywheels;
@@ -80,13 +85,14 @@ public class ShootFuelIntoHubOrLob extends Command {
         // Run subsystems
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
+        feeder.setVelocity(FeederConstants.SHOOT);
 
         // Check if shot feasible
         boolean isShotFeasible = ShotCalculator.getInstance().isShotFeasible();
 
-        // Run feeder if shot feasible
+        // Run indexer if shot feasible
         if (isShotFeasible) {
-            feeder.setVelocity(FeederConstants.SHOOT);
+            indexer.setVelocity(IndexerConstants.SHOOT);
         }
 
         // Simulate shooting
@@ -102,6 +108,7 @@ public class ShootFuelIntoHubOrLob extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        indexer.stop();
         feeder.stop();
         hood.stop();
         flywheels.stop();

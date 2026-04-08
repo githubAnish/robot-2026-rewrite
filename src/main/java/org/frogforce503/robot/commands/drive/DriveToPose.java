@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import lombok.experimental.ExtensionMethod;
 
 @ExtensionMethod(JoystickUtil.class)
@@ -45,6 +44,7 @@ public class DriveToPose extends Command {
 
     private final double driveTolerance = 0.01;
     private final double thetaTolerance = Units.degreesToRadians(1.0);
+    
     private final double ffMinRadius = 0.01;
     private final double ffMaxRadius = 0.4;
 
@@ -73,14 +73,6 @@ public class DriveToPose extends Command {
 
         this.linearFF = linearFF;
         this.omegaFF = omegaFF;
-    }
-
-    public DriveToPose(Drive drive, Supplier<Pose2d> target, CommandXboxController xboxController) {
-        this(
-            drive,
-            target,
-            () -> xboxController.getLinearVelocityFromJoysticks(),
-            () -> xboxController.getOmegaFromJoysticks());
     }
 
     @Override

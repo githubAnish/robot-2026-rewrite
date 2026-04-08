@@ -141,6 +141,9 @@ public class FieldConstants {
     public static class Tower {
         public static final Zone blue;
 
+        private static final Pose2d blueLeftPreClimbPose;
+        private static final Pose2d blueRightPreClimbPose;
+
         private static final Pose2d blueLeftClimbPose;
         private static final Pose2d blueRightClimbPose;
 
@@ -156,10 +159,30 @@ public class FieldConstants {
             blue = new Zone(blueBackLeftCorner, blueFrontRightCorner);
 
             // Climb Poses
-            final double towerCornerToRobotClimbPoseOffset = Units.inchesToMeters(15);
+            final double towerCornerToRobotClimbPoseOffset = Units.inchesToMeters(12);
+            final double preClimbtoClimbPoseOffset = Units.inchesToMeters(3);
 
-            blueLeftClimbPose = new Pose2d(blue.getFrontLeftCorner().plus(new Translation2d(0, towerCornerToRobotClimbPoseOffset)), Rotation2d.kZero);
-            blueRightClimbPose = new Pose2d(blue.getFrontRightCorner().minus(new Translation2d(0, towerCornerToRobotClimbPoseOffset)), Rotation2d.k180deg);
+            blueLeftClimbPose =
+                new Pose2d(blue.getFrontLeftCorner(), Rotation2d.kZero)
+                    .plus(GeomUtil.toTransform2d(0, towerCornerToRobotClimbPoseOffset));
+                    
+            blueRightClimbPose =
+                new Pose2d(blue.getFrontRightCorner(), Rotation2d.k180deg)
+                    .plus(GeomUtil.toTransform2d(0, -towerCornerToRobotClimbPoseOffset));
+
+            blueLeftPreClimbPose =
+                blueLeftClimbPose
+                    .plus(GeomUtil.toTransform2d(0, preClimbtoClimbPoseOffset));
+
+            blueRightPreClimbPose =
+                blueRightClimbPose
+                    .plus(GeomUtil.toTransform2d(0, -preClimbtoClimbPoseOffset));
+        }
+
+        public static Pose2d getPreClimbPose(Pose2d robotPose) {
+            return
+                AllianceFlipUtil.apply(
+                    robotPose.nearest(Set.of(blueLeftPreClimbPose, blueRightPreClimbPose)));
         }
 
         public static Pose2d getClimbPose(Pose2d robotPose) {

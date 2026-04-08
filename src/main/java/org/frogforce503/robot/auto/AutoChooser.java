@@ -4,12 +4,14 @@ import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.GameViz;
-import org.frogforce503.robot.auto.autos.NZTwice1678;
-import org.frogforce503.robot.auto.test.PutRobotInsideMapleSimField;
+import org.frogforce503.robot.auto.autos.Left2NZ1678;
+import org.frogforce503.robot.auto.autos.PreloadDepotClimb;
+import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.littletonrobotics.junction.Logger;
@@ -39,9 +41,11 @@ public class AutoChooser {
         Drive drive,
         IntakePivot intakePivot,
         IntakeRoller intakeRoller,
+        Indexer indexer,
         Feeder feeder,
         Hood hood,
         Flywheels flywheels,
+        Climber climber,
         GameViz gameViz
     ) {
         this.drive = drive;
@@ -54,13 +58,13 @@ public class AutoChooser {
         blineAutoBuilder = BLineUtil.configureAutoBuilder(drive);
 
         // Configure autos
-        if (RobotBase.isSimulation()) {
-            routineChooser.addDefaultOption("Put Robot Inside MapleSim Field", new PutRobotInsideMapleSimField(drive));
-        }
+        routineChooser.addDefaultOption(
+            "Left 2 NZ 1678",
+            new Left2NZ1678(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz, blineAutoBuilder));
 
         routineChooser.addOption(
-            "NZ Twice 1678",
-            new NZTwice1678(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz, blineAutoBuilder));
+            "Preload + Depot + Climb",
+            new PreloadDepotClimb(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz, blineAutoBuilder));
     }
 
     public void startAuto() {

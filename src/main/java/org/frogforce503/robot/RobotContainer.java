@@ -3,74 +3,60 @@ package org.frogforce503.robot;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
+import org.frogforce503.robot.commands.AutoClimb;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
-import org.frogforce503.robot.commands.LowerClimber;
-import org.frogforce503.robot.commands.RaiseClimber;
-import org.frogforce503.robot.commands.RunIndexerWhenReady;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.drive.AimAtHubOrLob;
-import org.frogforce503.robot.commands.drive.DriveToPose;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
-import org.frogforce503.robot.subsystems.climber.io.ClimberIOSpark;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
-import org.frogforce503.robot.subsystems.drive.io.DriveIOPhoenix;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
 import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSim;
-import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
 import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSim;
-import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIO;
 import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOSim;
-import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIO;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOSim;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOSpark;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSpark;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
-import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonVision;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
-import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonVision;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -120,10 +106,11 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-    final Trigger alignToTower = driverXbox.povRight();
+    final Trigger disableAutoClimb = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
+    private final AutoClimb autoClimbCommand;
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -133,29 +120,7 @@ public class RobotContainer {
         if (Constants.getMode() != Mode.REPLAY) {
             switch (Constants.getRobot()) {
                 case CompBot -> {
-                    drive = new Drive(new DriveIOPhoenix());
-                            
-                    intakePivot = new IntakePivot(new IntakePivotIOSpark());
-                    intakeRoller = new IntakeRoller(new IntakeRollerIOSpark());
-                    indexer = new Indexer(new IndexerIOSpark());
-                    feeder = new Feeder(new FeederIOSpark());
-                    hood = new Hood(new HoodIOSpark());
-                    flywheels = new Flywheels(new FlywheelsIOSpark());
-
-                    climber = new Climber(new ClimberIOSpark());
-
-                    vision =
-                        new Vision(
-                            visionEstimateConsumer,
-                            drive::getPose,
-                            new AprilTagIO[] {
-                                new AprilTagIOPhotonVision(CameraName.LEFT_CAMERA),
-                                new AprilTagIOPhotonVision(CameraName.RIGHT_CAMERA),
-                                new AprilTagIOPhotonVision(CameraName.BACK_CAMERA),
-                            },
-                            new ObjectDetectionIO[] {
-                                new ObjectDetectionIOPhotonVision(CameraName.FUEL_CAMERA)
-                            });
+                    
                 }
                 case PracticeBot -> {
                     
@@ -240,17 +205,19 @@ public class RobotContainer {
                 : new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
-        autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, feeder, hood, flywheels, gameViz);
+        autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz);
         warmupExecutor = new WarmupExecutor(drive, autoChooser.getBlineAutoBuilder());
 
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
+        autoClimbCommand = new AutoClimb(drive, climber, gameViz, driverXbox);
 
         // Configure default commands
         drive.setDefaultCommand(teleopDriveCommand);
         
-        indexer.setDefaultCommand(
-            new RunIndexerWhenReady(indexer, intakeGround, shootHubOrLob));
+        feeder.setDefaultCommand(
+            Commands.runOnce((() -> feeder.setVelocity(FeederConstants.IDLE)), feeder)
+                .withName("Feeder Default Command"));
 
         hood.setDefaultCommand(
             Commands.runOnce(() -> hood.setAngle(HoodConstants.DUCK_UNDER_TRENCH, 0.0), hood)
@@ -270,7 +237,7 @@ public class RobotContainer {
             .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
-            .whileTrue(new ShootFuelIntoHubOrLob(drive, feeder, hood, flywheels, gameViz))
+            .whileTrue(new ShootFuelIntoHubOrLob(drive, indexer, feeder, hood, flywheels, gameViz))
             .and(intakeGround.negate())
             .whileTrue(new ShakeIntake(intakePivot, intakeRoller).withName("ShakeIntake"));
 
@@ -284,9 +251,7 @@ public class RobotContainer {
         bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
         bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
 
-        climb
-            .onTrue(new RaiseClimber(climber))
-            .onFalse(new LowerClimber(climber, gameViz));
+        climb.whileTrue(autoClimbCommand);
 
         // Bind override controls
         toggleSlowMode
@@ -309,10 +274,10 @@ public class RobotContainer {
                 Commands.runOnce(drive::stopWithX)
                     .withName("Stop With X"));
 
-        alignToTower
+        disableAutoClimb
             .onTrue(
-                new DriveToPose(drive, () -> FieldConstants.Tower.getClimbPose(drive.getPose()), driverXbox)
-                    .withName("Drive To Tower"));
+                Commands.runOnce(() -> autoClimbCommand.setDisableAutoDrive(true))
+                    .withName("Disabe Auto Cilmb"));
     }
 
     private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
@@ -350,34 +315,17 @@ public class RobotContainer {
 
         // Clear latest shot info
         ShotCalculator.getInstance().clearLatestShotInfo();
-
-        // Update sim
-        if (RobotBase.isSimulation()) {
-            gameViz.update();
-        }
     }
 
-    public void autonomousInit() {
-        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
-            HubShiftUtil.initialize();
-        }
-        
+    public void autonomousInit() {        
         autoChooser.startAuto();
     }
 
     public void teleopInit() {
-        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
-            HubShiftUtil.initialize();
-        }
-
         autoChooser.cancelAuto();
     }
 
     public void disabledInit() {
-        if (RobotBase.isSimulation() && Constants.isPracticeMatch) {
-            HubShiftUtil.initialize();
-        }
-
         if (drive.isCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
         }
@@ -388,6 +336,16 @@ public class RobotContainer {
     public void disabledPeriodic() {
         autoChooser.updateAutoSelection();
         warmupExecutor.update();
+    }
+
+    public void simulationInit() {
+        for (int i = 0; i < 2; i++) { // Do twice to counteract MapleSim arena initialization effects
+            drive.setPose(AllianceFlipUtil.apply(new Pose2d(1.889, 4.002, Rotation2d.kZero)));
+        }
+    }
+
+    public void simulationPeriodic() {
+        gameViz.update();
     }
 
     public void test() {

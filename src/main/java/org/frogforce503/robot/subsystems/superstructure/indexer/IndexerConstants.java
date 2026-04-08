@@ -22,7 +22,6 @@ public class IndexerConstants {
     public static final double tolerance = Units.rotationsPerMinuteToRadiansPerSecond(25.0);
 
     public static final double START = Units.rotationsPerMinuteToRadiansPerSecond(0);
-    public static final double INTAKE = Units.rotationsPerMinuteToRadiansPerSecond(2000);
     public static final double SHOOT = Units.rotationsPerMinuteToRadiansPerSecond(4000);
     public static final double EJECT = Units.rotationsPerMinuteToRadiansPerSecond(-2000);
 }
