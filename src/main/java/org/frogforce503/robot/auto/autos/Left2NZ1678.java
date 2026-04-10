@@ -19,8 +19,8 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
 public class Left2NZ1678 extends AutoMode {
-    private final Path firstTimeToNZAndBack;
-    private final Path secondTimeToNZAndBack;
+    protected final Path firstTimeToNZAndBack;
+    protected final Path secondTimeToNZAndBack;
 
     public Left2NZ1678(
         Drive drive,

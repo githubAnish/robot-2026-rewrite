@@ -6,6 +6,7 @@ import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.autos.Left2NZ1678;
 import org.frogforce503.robot.auto.autos.PreloadDepotClimb;
+import org.frogforce503.robot.auto.autos.Right2NZ1678;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -58,9 +59,13 @@ public class AutoChooser {
         blineAutoBuilder = BLineUtil.configureAutoBuilder(drive);
 
         // Configure autos
-        routineChooser.addDefaultOption(
+        routineChooser.addOption(
             "Left 2 NZ 1678",
             new Left2NZ1678(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz, blineAutoBuilder));
+
+        routineChooser.addOption(
+            "Right 2 NZ 1678",
+            new Right2NZ1678(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz, blineAutoBuilder));
 
         routineChooser.addOption(
             "Preload + Depot + Climb",

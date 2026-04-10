@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -39,6 +40,7 @@ public class DriveConstants {
     // Swerve Control
     public static final PIDConfig pathplannerLinearPID = new PIDConfig(0.25, 0, 0.1);
     public static final PIDConfig pathplannerThetaPID = new PIDConfig(3, 0, 0);
+    public static final PathConstraints pathplannerConstraints;
 
     public static final PIDConfig blineLinearPID = new PIDConfig(5, 0, 0.5);
     public static final PIDConfig blineThetaPID = new PIDConfig(3, 0, 0);
@@ -47,6 +49,7 @@ public class DriveConstants {
     public static final double aimTolerance = Units.degreesToRadians(2.5);
 
     static {
+        // Hardware / Configuration
         Translation2d frontLeftModuleTranslation = new Translation2d(frontLeft.LocationX, frontLeft.LocationY);
         Translation2d frontRightModuleTranslation = new Translation2d(frontRight.LocationX, frontRight.LocationY);
         Translation2d backLeftModuleTranslation = new Translation2d(backLeft.LocationX, backLeft.LocationY);
@@ -71,5 +74,8 @@ public class DriveConstants {
                 frontRightModuleTranslation,
                 backLeftModuleTranslation,
                 backRightModuleTranslation};
+
+        // Swerve Control
+        pathplannerConstraints = new PathConstraints(maxLinearSpeed, maxLinearSpeed * 0.7, maxOmega, maxOmega * 0.7);
     }
 }
