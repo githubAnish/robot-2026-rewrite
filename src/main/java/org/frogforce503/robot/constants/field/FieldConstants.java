@@ -6,14 +6,13 @@ import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.GeomUtil;
 import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.lib.util.Zone;
-import org.frogforce503.robot.Constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -23,7 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * have a blue alliance origin.
  */
 public class FieldConstants {
-    public static final AprilTagFieldLayout aprilTagFieldLayout = Constants.fieldVenue.getAprilTagFieldLayout();
+    public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
     public static final double fieldLength = aprilTagFieldLayout.getFieldLength();
     public static final double fieldWidth = aprilTagFieldLayout.getFieldWidth();
@@ -139,7 +138,7 @@ public class FieldConstants {
     }
 
     public static class Tower {
-        public static final Zone blue;
+        private static final Zone blue;
 
         private static final Pose2d blueLeftPreClimbPose;
         private static final Pose2d blueRightPreClimbPose;
@@ -196,9 +195,6 @@ public class FieldConstants {
         public static final Zone blueLeft;
         public static final Zone blueRight;
 
-        public static final Zone redLeft;
-        public static final Zone redRight;
-
         static {
             final double trenchLength = Units.inchesToMeters(49.0);
             final double trenchWidth = Units.inchesToMeters(63.0);
@@ -214,35 +210,12 @@ public class FieldConstants {
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(trenchLength, trenchWidth));
 
             blueRight = new Zone(blueRightBackRightCorner, blueRightFrontLeftCorner);
-
-            // Red Left Trench
-            redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);
-
-            // Red Right Trench
-            redRight = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueRight);
-        }
-
-        private static boolean contains(Zone trench, Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
-            return
-                trench.contains(robotPose.getTranslation()) ||
-                trench.contains(robotPose.exp(fieldRelativeVelocity.toTwist2d(lookaheadSec)).getTranslation());
-        }
-
-        public static boolean contains(Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double lookaheadSec) {
-            return
-                contains(blueLeft, robotPose, fieldRelativeVelocity, lookaheadSec) ||
-                contains(blueRight, robotPose, fieldRelativeVelocity, lookaheadSec) ||
-                contains(redLeft, robotPose, fieldRelativeVelocity, lookaheadSec) ||
-                contains(redRight, robotPose, fieldRelativeVelocity, lookaheadSec);
         }
     }
 
     public static class Bump {
         public static final Zone blueLeft;
         public static final Zone blueRight;
-
-        public static final Zone redLeft;
-        public static final Zone redRight;
 
         static {
             final double bumpLength = Units.inchesToMeters(49.0);
@@ -260,20 +233,6 @@ public class FieldConstants {
             Translation2d blueRightFrontLeftCorner = blueRightBackRightCorner.plus(new Translation2d(bumpLength, bumpWidth));
 
             blueRight = new Zone(blueRightBackRightCorner, blueRightFrontLeftCorner);
-
-            // Red Left Bump
-            redLeft = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueLeft);
-
-            // Red Right Bump
-            redRight = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueRight);
-        }
-
-        public static boolean contains(Translation2d translation) {
-            return
-                blueLeft.contains(translation) ||
-                blueRight.contains(translation) ||
-                redLeft.contains(translation) ||
-                redRight.contains(translation);
         }
     }
 }

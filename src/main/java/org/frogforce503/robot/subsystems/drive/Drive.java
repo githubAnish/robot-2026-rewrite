@@ -16,6 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 public class Drive extends SubsystemBase {
     private final DriveIO io;
@@ -23,7 +24,7 @@ public class Drive extends SubsystemBase {
 
     @Getter private final DriveViz viz = new DriveViz();
 
-    @Setter @Getter private boolean coastAfterAutoEnd = false;
+    @Accessors(fluent = true) @Setter @Getter private boolean shouldCoastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {
         this.io = io;
@@ -47,16 +48,12 @@ public class Drive extends SubsystemBase {
         return inputs.Pose;
     }
 
-    public Rotation2d getAngle() {
-        return getPose().getRotation();
-    }
-
     public ChassisSpeeds getRobotVelocity() {
         return inputs.Speeds;
     }
 
     public ChassisSpeeds getFieldVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getAngle());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getPose().getRotation());
     }
 
     public Rotation2d getGyroRotation() {

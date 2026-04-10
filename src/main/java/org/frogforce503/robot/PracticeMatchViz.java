@@ -9,7 +9,7 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.littletonrobotics.junction.Logger;
 
-/** Simulates the field, including interaction with & movement of game elements. Uses physics simulation. */
+/** Adds practice match elements, including score tracking and Hub shifts, to GameViz. */
 public class PracticeMatchViz extends GameViz {
     private int score = 0;
     
@@ -67,11 +67,6 @@ public class PracticeMatchViz extends GameViz {
                     score++;
                 }
             });
-    }
-
-    @Override
-    public void stopClimb() {
-        super.stopClimb();
     }
 
     private boolean isMatchEnded() {

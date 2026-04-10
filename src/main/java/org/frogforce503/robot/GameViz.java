@@ -33,7 +33,7 @@ public class GameViz {
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
-    private final BumpPhysicsSim bumpSim = new BumpPhysicsSim();
+    private final BumpPhysicsSim bumpSim;
 
     private IntakeSimulation intakeSimulation;
 
@@ -62,6 +62,8 @@ public class GameViz {
         this.climber = climber;
         this.visionViz = visionViz;
 
+        this.bumpSim = new BumpPhysicsSim(drive);
+
         if (RobotBase.isSimulation()) {
             intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
             
@@ -74,8 +76,7 @@ public class GameViz {
 
     public void update() {
         // Apply bump physics
-        Pose3d drivePose3d =
-            bumpSim.update(drive.getPose(), drive.getFieldVelocity(), Constants.loopPeriodSecs);
+        Pose3d drivePose3d = bumpSim.update();
 
         // Add robot climb height
         drivePose3d = drivePose3d.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));

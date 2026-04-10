@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
-// path 1: collect depot fuel, go away from depot to shoot
-// path 2: raise climber & auto climb to tower (use the )
 public class PreloadDepotClimb extends AutoMode {
     private final Path initToDepotShotPose;
 
@@ -47,7 +45,7 @@ public class PreloadDepotClimb extends AutoMode {
                 drive(initToDepotShotPose),
                 intake()
             ),
-            shoot().withTimeout(3.5),
+            shoot().withTimeout(5),
             autoClimb()
         );
     }

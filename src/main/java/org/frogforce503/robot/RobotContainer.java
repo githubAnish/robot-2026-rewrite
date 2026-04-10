@@ -7,12 +7,14 @@ import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.commands.AutoClimb;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
+import org.frogforce503.robot.commands.LowerClimber;
+import org.frogforce503.robot.commands.RaiseClimber;
 import org.frogforce503.robot.commands.ShakeIntake;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.drive.AimAtHubOrLob;
+import org.frogforce503.robot.commands.drive.AlignToClimb;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
@@ -106,11 +108,10 @@ public class RobotContainer {
     final Trigger toggleRobotRelative = driverXbox.start();
     final Trigger resetRobotRotation = driverXbox.povUp();
     final Trigger xWheels = driverXbox.povDown();
-    final Trigger disableAutoClimb = driverXbox.povRight();
+    final Trigger alignToClimb = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
-    private final AutoClimb autoClimbCommand;
 
     // Other
     private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
@@ -120,13 +121,13 @@ public class RobotContainer {
         if (Constants.getMode() != Mode.REPLAY) {
             switch (Constants.getRobot()) {
                 case CompBot -> {
-                    
+                    // Not implemented
                 }
                 case PracticeBot -> {
-                    
+                    // Not implemented
                 }
                 case ProgrammingBot -> {
-                    
+                    // Not implemented
                 }
                 case SimBot -> {
                     drive = new Drive(new DriveIOMapleSim());
@@ -210,7 +211,6 @@ public class RobotContainer {
 
         // Initialize commands
         teleopDriveCommand = new TeleopDriveCommand(drive, driverXbox);
-        autoClimbCommand = new AutoClimb(drive, climber, gameViz, driverXbox);
 
         // Configure default commands
         drive.setDefaultCommand(teleopDriveCommand);
@@ -251,7 +251,9 @@ public class RobotContainer {
         bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
         bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
 
-        climb.whileTrue(autoClimbCommand);
+        climb
+            .onTrue(new RaiseClimber(climber))
+            .onFalse(new LowerClimber(climber, gameViz));
 
         // Bind override controls
         toggleSlowMode
@@ -274,10 +276,8 @@ public class RobotContainer {
                 Commands.runOnce(drive::stopWithX)
                     .withName("Stop With X"));
 
-        disableAutoClimb
-            .onTrue(
-                Commands.runOnce(() -> autoClimbCommand.setDisableAutoDrive(true))
-                    .withName("Disabe Auto Cilmb"));
+        alignToClimb
+            .whileTrue(new AlignToClimb(drive));
     }
 
     private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
@@ -296,7 +296,7 @@ public class RobotContainer {
 
         // Check if shot feasible
         boolean shotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
-        boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getAngle().getRadians(), DriveConstants.aimTolerance);
+        boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getPose().getRotation().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
 
@@ -326,7 +326,7 @@ public class RobotContainer {
     }
 
     public void disabledInit() {
-        if (drive.isCoastAfterAutoEnd()) {
+        if (drive.shouldCoastAfterAutoEnd()) {
             drive.coast(); // Coasts drivetrain in disabled mode if post-auto coasting is enabled
         }
 

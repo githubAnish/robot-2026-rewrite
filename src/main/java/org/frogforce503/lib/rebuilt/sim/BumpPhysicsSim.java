@@ -1,17 +1,24 @@
 package org.frogforce503.lib.rebuilt.sim;
 
+import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.util.Zone;
+import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
 public class BumpPhysicsSim {
+    private final Drive drive;
+
+    private final Zone redLeftBump = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Bump.blueLeft);
+    private final Zone redRightBump = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Bump.blueRight);
+
     private final double gravity = 9.81;
     private final double bumpKickScalar = 0.2; // Tune this (1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp)
 
@@ -21,11 +28,15 @@ public class BumpPhysicsSim {
     private double currentZ = 0.0;
     private double velocityZ = 0.0;
 
-    public Pose3d update(Pose2d robotPose, ChassisSpeeds fieldRelativeVelocity, double dt) {
-        Rotation2d yaw = robotPose.getRotation();
+    public BumpPhysicsSim(Drive drive) {
+        this.drive = drive;
+    }
+
+    public Pose3d update() {
+        Rotation2d yaw = drive.getPose().getRotation();
 
         // 1. Sample 4 corners AND the center point
-        Translation2d pos = robotPose.getTranslation();
+        Translation2d pos = drive.getPose().getTranslation();
         TerrainState center = getTerrainState(pos);
         TerrainState fl = getTerrainState(pos.plus(new Translation2d(robotHalfLength, robotHalfWidth).rotateBy(yaw)));
         TerrainState fr = getTerrainState(pos.plus(new Translation2d(robotHalfLength, -robotHalfWidth).rotateBy(yaw)));
@@ -60,15 +71,15 @@ public class BumpPhysicsSim {
 
         // 4. Needed Vertical Velocity for "Kick" (Now with dampening!)
         double neededVelocityZ =
-            (fieldRelativeVelocity.vxMetersPerSecond * center.slopeX()) + 
-            (fieldRelativeVelocity.vyMetersPerSecond * center.slopeY());
+            (drive.getFieldVelocity().vxMetersPerSecond * center.slopeX()) + 
+            (drive.getFieldVelocity().vyMetersPerSecond * center.slopeY());
         
         // Apply the dampener to simulate tire squish and energy loss
         neededVelocityZ *= bumpKickScalar;
 
         // 5. Ballistic Physics (Flight Logic)
-        velocityZ -= gravity * dt;
-        currentZ += velocityZ * dt;
+        velocityZ -= gravity * Constants.loopPeriodSecs;
+        currentZ += velocityZ * Constants.loopPeriodSecs;
 
         // Ground Collision 
         if (currentZ <= targetZ) {
@@ -77,14 +88,14 @@ public class BumpPhysicsSim {
         }
 
         return new Pose3d(
-            robotPose.getX(),
-            robotPose.getY(),
+            drive.getPose().getX(),
+            drive.getPose().getY(),
             currentZ, 
             new Rotation3d(roll, pitch, yaw.getRadians()));
     }
 
     private TerrainState getTerrainState(Translation2d pos) {
-        if (!FieldConstants.Bump.contains(pos)) {
+        if (!onBump(pos)) {
             return new TerrainState(0, 0, 0);
         }
 
@@ -114,5 +125,16 @@ public class BumpPhysicsSim {
         }
     }
 
-    private record TerrainState(double height, double slopeX, double slopeY) {}
+    private boolean onBump(Translation2d pos) {
+        return
+            FieldConstants.Bump.blueLeft.contains(pos) ||
+            FieldConstants.Bump.blueRight.contains(pos) ||
+            redLeftBump.contains(pos) ||
+            redRightBump.contains(pos);
+    }
+
+    private record TerrainState(
+        double height,
+        double slopeX,
+        double slopeY) {}
 }
