@@ -72,7 +72,7 @@ public class DriveViz extends Field2d {
         if (logModules) {
             Logger.recordOutput("Drive/Modules/ModuleStates", state.ModuleStates);
 
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 4; i++) {
                 moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
                 moduleDirections[i].setAngle(state.ModuleStates[i].angle);
                 moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * DriveConstants.maxLinearSpeed));

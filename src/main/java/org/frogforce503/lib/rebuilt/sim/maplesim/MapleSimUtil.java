@@ -28,6 +28,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class MapleSimUtil {
     // Arena Constants
@@ -51,6 +52,10 @@ public class MapleSimUtil {
     
     public static void initializeArena() {
         SimulatedArena.overrideInstance(arena); // Allow MapleSim to cross over bump
+    }
+
+    public static void logArena(Field2d field2d) {
+        arena.logObstacles(field2d);
     }
 
     public static void hpThrowFromOutpost() {

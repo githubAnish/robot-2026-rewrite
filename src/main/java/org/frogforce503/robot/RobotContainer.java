@@ -3,6 +3,7 @@ package org.frogforce503.robot;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -61,6 +62,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -349,6 +351,8 @@ public class RobotContainer {
     }
 
     public void test() {
-        
+        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> {
+            MapleSimUtil.logArena(drive.getViz());
+        }));
     }
 }

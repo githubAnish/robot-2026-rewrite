@@ -17,11 +17,14 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.lib.BLine.FlippingUtil;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.dyn4j.dynamics.Settings;
 import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.util.Zone;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
@@ -53,8 +56,12 @@ public class FFArena2026Rebuilt extends SimulatedArena {
     protected static Translation2d redDepotBottomRightCorner = new Translation2d(0.02, 5.53);
     protected static Translation2d blueDepotBottomRightCorner = new Translation2d(16.0274, 1.646936);
 
+    private final RebuiltFieldObstaclesMap obstaclesMap;
+
     /** the obstacles on the 2026 competition field */
     public static final class RebuiltFieldObstaclesMap extends FieldMap {
+        private final List<Zone> trackedObstacles = new ArrayList<>();
+
         public RebuiltFieldObstaclesMap(boolean AddRampCollider) {
             super.addBorderLine(new Translation2d(0, 0), new Translation2d(0, 8.052));
 
@@ -75,42 +82,42 @@ public class FFArena2026Rebuilt extends SimulatedArena {
                     + Inches.of(47.0 / 2).in(Meters)
                     + Inches.of(6).in(Meters);
 
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(53).in(Meters),
                     Inches.of(12).in(Meters),
                     new Pose2d(8.27 - trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(53).in(Meters),
                     Inches.of(12).in(Meters),
                     new Pose2d(8.27 + trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(53).in(Meters),
                     Inches.of(12).in(Meters),
                     new Pose2d(8.27 - trenchWallDistX, 4.035 + trenchWallDistY, Rotation2d.kZero));
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(53).in(Meters),
                     Inches.of(12).in(Meters),
                     new Pose2d(8.27 - trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
 
             // poles of the tower
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(2).in(Meters),
                     Inches.of(47).in(Meters),
                     new Pose2d(new Translation2d(Inches.of(42), Inches.of(159)), new Rotation2d()));
 
-            super.addRectangularObstacle(
+            addTrackedObstacle(
                     Inches.of(2).in(Meters),
                     Inches.of(47).in(Meters),
                     new Pose2d(new Translation2d(Inches.of(651 - 42), Inches.of(170)), new Rotation2d()));
 
             // Colliders to describe the hub plus ramps
             if (AddRampCollider) {
-                super.addRectangularObstacle(
+                addTrackedObstacle(
                         Inches.of(47).in(Meters),
                         Inches.of(217).in(Meters),
                         new Pose2d(FFRebuiltHub.blueHubPose.toTranslation2d(), new Rotation2d()));
 
-                super.addRectangularObstacle(
+                addTrackedObstacle(
                         Inches.of(47).in(Meters),
                         Inches.of(217).in(Meters),
                         new Pose2d(FFRebuiltHub.redHubPose.toTranslation2d(), new Rotation2d()));
@@ -118,45 +125,35 @@ public class FFArena2026Rebuilt extends SimulatedArena {
 
             // Colliders to describe just the hub
             else {
-                super.addRectangularObstacle(
+                addTrackedObstacle(
                         Inches.of(47).in(Meters),
                         Inches.of(47).in(Meters),
                         new Pose2d(FFRebuiltHub.blueHubPose.toTranslation2d(), new Rotation2d()));
 
-                super.addRectangularObstacle(
+                addTrackedObstacle(
                         Inches.of(47).in(Meters),
                         Inches.of(47).in(Meters),
                         new Pose2d(FFRebuiltHub.redHubPose.toTranslation2d(), new Rotation2d()));
             }
         }
+
+        private void addTrackedObstacle(double widthMeters, double heightMeters, Pose2d centerPose) {
+            super.addRectangularObstacle(widthMeters, heightMeters, centerPose);
+            trackedObstacles.add(new Zone(centerPose, widthMeters, heightMeters));
+        }
+
+        public List<Zone> getTrackedObstacles() {
+            return Collections.unmodifiableList(trackedObstacles);
+        }
     }
-    /**
-     *
-     *
-     * <h2>Creates an Arena for the 2026 FRC game rebuilt </h2>
-     *
-     * <p>This will create an Arena with the ramp areas marked as inaccessible. If you would like to change that use
-     * {@link #FFArena2026Rebuilt(boolean)}. Additionally due to performance issues the arena will not spawn all fuel by
-     * default. If you would like to change this use {@link #setEfficiencyMode(boolean)}
-     */
-    public FFArena2026Rebuilt() {
-        this(true);
+    
+    public FFArena2026Rebuilt(boolean AddRampCollider) {
+        this(new RebuiltFieldObstaclesMap(AddRampCollider));
     }
 
-    /**
-     *
-     *
-     * <h2>Creates an Arena for the 2026 FRC game rebuilt </h2>
-     *
-     * <p>Due to the nature of maple sim they can not be fully simulated and so either must be non existent or treated
-     * as full colliders. This behavior can be changed with the AddRampCollider variable. Additionally due to
-     * performance issues the arena will not spawn all fuel by default. If you would like to change this use
-     * {@link #setEfficiencyMode(boolean)}
-     *
-     * @param AddRampCollider Whether or not the ramps should be added as colliders.
-     */
-    public FFArena2026Rebuilt(boolean AddRampCollider) {
-        super(new RebuiltFieldObstaclesMap(AddRampCollider));
+    public FFArena2026Rebuilt(RebuiltFieldObstaclesMap map) {
+        super(map);
+        this.obstaclesMap = map;
 
         Settings settings = physicsWorld.getSettings();
 
@@ -177,6 +174,13 @@ public class FFArena2026Rebuilt extends SimulatedArena {
 
         redOutpost = new FFRebuiltOutpost(this, false);
         super.addCustomSimulation(redOutpost);
+    }
+
+    public void logObstacles(Field2d field2d) {
+        List<Zone> obstacles = obstaclesMap.getTrackedObstacles();
+        for (int i = 0; i < obstacles.size(); i++) {
+            obstacles.get(i).log("Field/Obstacles/obstacle_" + i, field2d);
+        }
     }
 
     /**

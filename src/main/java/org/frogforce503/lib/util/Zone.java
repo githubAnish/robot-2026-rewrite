@@ -13,7 +13,8 @@ public class Zone extends Rectangle2d {
             new Pose2d(getFrontLeftCorner(), getRotation()),
             new Pose2d(getFrontRightCorner(), getRotation()),
             new Pose2d(getBackRightCorner(), getRotation()),
-            new Pose2d(getBackLeftCorner(), getRotation())
+            new Pose2d(getBackLeftCorner(), getRotation()),
+            new Pose2d(getFrontLeftCorner(), getRotation()) // circle around to visualize as a full rectangle
         };
 
     public Zone(Pose2d center, double xWidth, double yWidth) {
