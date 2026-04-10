@@ -1,52 +1,38 @@
-package org.frogforce503.robot;
+package org.frogforce503.robot.viz;
 
-import java.util.Arrays;
-
-import org.frogforce503.lib.rebuilt.sim.BumpPhysicsSim;
-import org.frogforce503.lib.rebuilt.sim.FuelVisualizer;
-import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
+import org.frogforce503.lib.rebuilt.ClimbPhysicsSim;
+import org.frogforce503.lib.rebuilt.FuelVisualizer;
+import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.SuperstructureViz;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.ironmaple.simulation.IntakeSimulation;
-import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 
-/** Simulates the field, including interaction with & movement of game elements. Uses physics simulation. */
 public class GameViz {
     private final Drive drive;
     private final IntakePivot intakePivot;
     private final Hood hood;
     private final Flywheels flywheels;
-    private final Climber climber;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
     private final BumpPhysicsSim bumpSim;
+    private final ClimbPhysicsSim climbSim;
 
     private IntakeSimulation intakeSimulation;
-
-    // Arena Constants
-    private double robotClimbHeightMeters = 0.0;
 
     // Shoot Sim Constants
     private final Timer shotTimer = new Timer();
 
-    // Climb Sim Constants
-    private final double climbRateScalarMetersPerSec = 1.0 / 200.0;
-    private final Timer climbTimer = new Timer();
-    
     public GameViz(
         Drive drive,
         IntakePivot intakePivot,
@@ -59,15 +45,14 @@ public class GameViz {
         this.intakePivot = intakePivot;
         this.hood = hood;
         this.flywheels = flywheels;
-        this.climber = climber;
         this.visionViz = visionViz;
 
         this.bumpSim = new BumpPhysicsSim(drive);
+        this.climbSim = new ClimbPhysicsSim(drive, climber);  // ADD
 
         if (RobotBase.isSimulation()) {
             intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
             
-            // Fill preload fuel
             for (int i = 0; i < 8; i++) {
                 intakeSimulation.addGamePieceToIntake();
             }
@@ -78,8 +63,8 @@ public class GameViz {
         // Apply bump physics
         Pose3d drivePose3d = bumpSim.update();
 
-        // Add robot climb height
-        drivePose3d = drivePose3d.plus(new Transform3d(0, 0, robotClimbHeightMeters, Rotation3d.kZero));
+        // Apply climb physics
+        drivePose3d = climbSim.update(drivePose3d);
 
         // Update visualizers
         visionViz.update(drive.getPose());
@@ -89,11 +74,8 @@ public class GameViz {
         Translation3d[] fuelInHopper =
             FuelVisualizer.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
-        Translation3d[] fuelTranslations = // Convert fuel poses to translations to lower data processed by NT
-            Arrays
-                .stream(SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")) // Get all fuel from MapleSim arena
-                .map(Pose3d::getTranslation)
-                .toArray(Translation3d[]::new);
+        Translation3d[] fuelTranslations =
+            FuelVisualizer.visualizeFuelInField();
 
         // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
@@ -127,16 +109,14 @@ public class GameViz {
     }
 
     public void startClimb() {
-        climbTimer.restart();
+        climbSim.startClimb();
     }
 
     public void climb() {
-        // Scale climber velocity to restrict robot height & climbing speed to tower
-        robotClimbHeightMeters += -climber.getVelocityMetersPerSec() * climbRateScalarMetersPerSec * climbTimer.get();
+        climbSim.climb();
     }
 
     public void stopClimb() {
-        climbTimer.stop();
-        climbTimer.reset();
+        climbSim.stopClimb();
     }
 }

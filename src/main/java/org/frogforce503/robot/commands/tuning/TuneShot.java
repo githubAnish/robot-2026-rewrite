@@ -1,7 +1,6 @@
 package org.frogforce503.robot.commands.tuning;
 
 import org.frogforce503.lib.logging.LoggedTunableNumber;
-import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
@@ -10,6 +9,7 @@ import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.viz.GameViz;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 

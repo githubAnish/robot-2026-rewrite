@@ -3,7 +3,6 @@ package org.frogforce503.robot.auto;
 import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.lib.auto.pathplanner.LocalADStarAK;
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
-import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.auto.autos.Left2NZ1678;
 import org.frogforce503.robot.auto.autos.PreloadDepotClimb;
 import org.frogforce503.robot.auto.autos.Right2NZ1678;
@@ -15,6 +14,7 @@ import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.viz.GameViz;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 

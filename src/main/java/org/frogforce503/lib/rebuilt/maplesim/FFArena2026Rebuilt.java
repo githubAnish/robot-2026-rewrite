@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt.sim.maplesim;
+package org.frogforce503.lib.rebuilt.maplesim;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
@@ -97,17 +97,17 @@ public class FFArena2026Rebuilt extends SimulatedArena {
             addTrackedObstacle(
                     Inches.of(53).in(Meters),
                     Inches.of(12).in(Meters),
-                    new Pose2d(8.27 - trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
+                    new Pose2d(8.27 + trenchWallDistX, 4.035 + trenchWallDistY, Rotation2d.kZero));
 
             // poles of the tower
             addTrackedObstacle(
                     Inches.of(2).in(Meters),
-                    Inches.of(47).in(Meters),
-                    new Pose2d(new Translation2d(Inches.of(42), Inches.of(159)), new Rotation2d()));
+                    Inches.of(35).in(Meters),
+                    new Pose2d(new Translation2d(Inches.of(42), Inches.of(147.5)), new Rotation2d()));
 
             addTrackedObstacle(
                     Inches.of(2).in(Meters),
-                    Inches.of(47).in(Meters),
+                    Inches.of(35).in(Meters),
                     new Pose2d(new Translation2d(Inches.of(651 - 42), Inches.of(170)), new Rotation2d()));
 
             // Colliders to describe the hub plus ramps

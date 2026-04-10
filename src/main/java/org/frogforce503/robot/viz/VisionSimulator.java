@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.vision;
+package org.frogforce503.robot.viz;
 
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;

@@ -1,8 +1,8 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.ClimberConstants;
+import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;

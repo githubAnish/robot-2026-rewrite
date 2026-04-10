@@ -1,6 +1,5 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
@@ -12,6 +11,7 @@ import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
+import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;

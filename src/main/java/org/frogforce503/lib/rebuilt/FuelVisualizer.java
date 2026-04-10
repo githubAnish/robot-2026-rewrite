@@ -1,4 +1,8 @@
-package org.frogforce503.lib.rebuilt.sim;
+package org.frogforce503.lib.rebuilt;
+
+import java.util.Arrays;
+
+import org.ironmaple.simulation.SimulatedArena;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -39,5 +43,13 @@ public final class FuelVisualizer {
         }
 
         return balls;
+    }
+
+    public static Translation3d[] visualizeFuelInField() {
+        return
+            Arrays
+                .stream(SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"))
+                .map(Pose3d::getTranslation)
+                .toArray(Translation3d[]::new);
     }
 }

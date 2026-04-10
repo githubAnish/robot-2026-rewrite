@@ -13,6 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import lombok.Getter;
 @SuppressWarnings("unchecked")
 public class DriveIOMapleSim extends DriveIOPhoenix {
     @Getter private final MapleSimSwerveDrivetrain drivetrain;
-    private Notifier simNotifier;
+    private final Notifier simNotifier;
 
     private static final double kSimLoopPeriod = 0.002; // 2 ms
 
@@ -33,7 +34,7 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
                 Seconds.of(kSimLoopPeriod),
                 Kilograms.of(DriveConstants.mass),
                 Meters.of(DriveConstants.bumperLength),
-                Meters.of(DriveConstants.bumperWidth),
+                Meters.of(DriveConstants.bumperWidth - Units.inchesToMeters(6)),
                 DCMotor.getKrakenX60Foc(1),
                 DCMotor.getKrakenX60Foc(1),
                 DriveConstants.wheelCOF,

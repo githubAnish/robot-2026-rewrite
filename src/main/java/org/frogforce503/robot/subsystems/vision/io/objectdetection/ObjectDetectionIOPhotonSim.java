@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.frogforce503.lib.vision.objectdetection.TrackedObject;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
+import org.frogforce503.robot.viz.VisionSimulator;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;

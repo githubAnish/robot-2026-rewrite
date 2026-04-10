@@ -42,7 +42,7 @@ public class DriveToPose extends Command {
     private Supplier<Translation2d> linearFF = () -> Translation2d.kZero;
     private DoubleSupplier omegaFF = () -> 0.0;
 
-    private final double driveTolerance = 0.01;
+    private final double driveTolerance = Units.inchesToMeters(0.1);
     private final double thetaTolerance = Units.degreesToRadians(1.0);
     
     private final double ffMinRadius = 0.01;

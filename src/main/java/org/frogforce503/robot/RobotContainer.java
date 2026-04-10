@@ -3,7 +3,8 @@ package org.frogforce503.robot;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
-import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
+import org.frogforce503.lib.util.Zone;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -17,6 +18,7 @@ import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.drive.AimAtHubOrLob;
 import org.frogforce503.robot.commands.drive.AlignToClimb;
 import org.frogforce503.robot.commands.drive.TeleopDriveCommand;
+import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
@@ -26,7 +28,7 @@ import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
@@ -50,16 +52,19 @@ import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRo
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
 import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
 import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
+import org.frogforce503.robot.viz.GameViz;
+import org.frogforce503.robot.viz.PracticeMatchViz;
+import org.frogforce503.robot.viz.VisionSimulator;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -351,8 +356,18 @@ public class RobotContainer {
     }
 
     public void test() {
-        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> {
+        RobotModeTriggers.teleop().onTrue(Commands.run(() -> {
             MapleSimUtil.logArena(drive.getViz());
+
+            drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+            Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+
+            drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
+            Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
+
+            FieldConstants.Tower.blue.log("asdausd", drive.getViz());
+
+            new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
         }));
     }
 }

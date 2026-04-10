@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt.sim.maplesim;
+package org.frogforce503.lib.rebuilt.maplesim;
 
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;

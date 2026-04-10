@@ -1,10 +1,11 @@
-package org.frogforce503.lib.rebuilt.sim.maplesim;
+package org.frogforce503.lib.rebuilt.maplesim;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.lib.rebuilt.FuelShotQuantityCalculator;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
@@ -15,7 +16,6 @@ import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,7 +43,6 @@ public class MapleSimUtil {
     private static final Translation3d shotTolerance = new Translation3d(0.2, 0.2, 0.2);
     private static final Transform2d initialFuelPositionOffset = new Transform2d(Units.inchesToMeters(3), 0, Rotation2d.kZero);
     private static final Transform3d initialShotHeightOffset = new Transform3d(0, 0, Units.inchesToMeters(4), Rotation3d.kZero);
-    private static final double fuelReleasedPerShot = 4; // How many balls are fired at once?
     private static final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
     private static final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
     private static final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
@@ -71,45 +70,6 @@ public class MapleSimUtil {
                 intakeLengthExtended,
                 IntakeSimulation.IntakeSide.FRONT,
                 fuelCapacity);
-    }
-
-    private static int computeFuelToShoot(int available) {
-        if (available <= 0) {
-            return 0;
-        }
-
-        double fillRatio = (double) available / 40.0; // Normalize (0 → 1)
-        double curvedFill = Math.pow(fillRatio, 0.35); // Smooth curve
-        double scaledMax = fuelReleasedPerShot * curvedFill; // Scale burst size
-
-        // Bounds
-        int minShot = Math.max(1, (int) Math.floor(scaledMax * 0.5));
-        int maxShot = Math.max(1, (int) Math.ceil(scaledMax));
-
-        // Weighted randomness
-        double bias = curvedFill;
-        double rand = Math.random();
-        double weightedRand = (rand * (1 - bias)) + (Math.pow(rand, 0.5) * bias);
-
-        int fuelToShoot = minShot + (int) (weightedRand * (maxShot - minShot + 1));
-
-        // Simulate indexing inconsistency
-        double misfeedChance = 0.15 * (1.0 - fillRatio);
-        if (Math.random() < misfeedChance) {
-            fuelToShoot -= 1;
-        }
-
-        double doubleFeedChance = 0.08 * fillRatio;
-        if (Math.random() < doubleFeedChance) {
-            fuelToShoot += 1;
-        }
-
-        double stutterChance = 0.1;
-        if (Math.random() < stutterChance) {
-            fuelToShoot += Math.random() < 0.5 ? -1 : 1;
-        }
-
-        return MathUtil.clamp(fuelToShoot, 1, available);
     }
 
     private static void createFuelProjectile(
@@ -175,7 +135,7 @@ public class MapleSimUtil {
         }
 
         // Check fuel amount
-        int fuelToShoot = computeFuelToShoot(available);
+        int fuelToShoot = FuelShotQuantityCalculator.computeFuelToShoot(available);
 
         // Index fuel
         for (int i = 0; i < fuelToShoot; i++) {

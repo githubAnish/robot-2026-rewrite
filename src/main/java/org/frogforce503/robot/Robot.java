@@ -6,7 +6,7 @@ import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
 import org.frogforce503.lib.rebuilt.HubShiftUtil;
-import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
 import org.frogforce503.lib.util.Elastic;
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.ironmaple.simulation.SimulatedArena;

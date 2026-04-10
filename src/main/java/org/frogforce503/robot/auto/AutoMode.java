@@ -1,6 +1,5 @@
 package org.frogforce503.robot.auto;
 
-import org.frogforce503.robot.GameViz;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
 import org.frogforce503.robot.commands.RaiseClimber;
@@ -15,6 +14,7 @@ import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;

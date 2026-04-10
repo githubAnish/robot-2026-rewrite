@@ -267,4 +267,11 @@ public class ShotCalculator {
         double flywheelsVelocityRadPerSec,
         double launcherToTargetDistance,
         double launcherToTargetDistanceNoLookahead) {}
+
+    public enum ShotPreset {
+        NONE,
+        BATTER, // Up against hub
+        TRENCH, // Robot center on initiation line
+        DEPOT // From front corners of depot
+    }
 }

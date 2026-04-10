@@ -1,4 +1,4 @@
-package org.frogforce503.robot.subsystems.superstructure;
+package org.frogforce503.robot.viz;
 
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants;

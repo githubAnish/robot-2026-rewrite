@@ -1,4 +1,4 @@
-package org.frogforce503.robot;
+package org.frogforce503.robot.viz;
 
 import org.frogforce503.lib.rebuilt.HubShiftUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
@@ -6,7 +6,6 @@ import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.vision.VisionSimulator;
 import org.littletonrobotics.junction.Logger;
 
 /** Adds practice match elements, including score tracking and Hub shifts, to GameViz. */
