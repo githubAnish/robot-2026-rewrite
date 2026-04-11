@@ -3,7 +3,7 @@ package org.frogforce503.robot.viz;
 import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.ClimbPhysicsSim;
 import org.frogforce503.lib.rebuilt.FuelShotQuantityCalculator;
-import org.frogforce503.lib.rebuilt.FuelVisualizer;
+import org.frogforce503.lib.rebuilt.FuelViz;
 import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
@@ -79,10 +79,10 @@ public class GameViz {
 
         // Visualize fuel
         Translation3d[] fuelInHopper =
-            FuelVisualizer.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
+            FuelViz.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
 
         Translation3d[] fuelTranslations =
-            FuelVisualizer.visualizeFuelInField();
+            FuelViz.visualizeFuelInField();
 
         // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);

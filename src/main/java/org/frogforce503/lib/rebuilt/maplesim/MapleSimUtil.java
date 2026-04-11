@@ -50,7 +50,7 @@ public class MapleSimUtil {
         SimulatedArena.overrideInstance(arena); // Allow MapleSim to cross over bump
     }
 
-    public static void logArena(Field2d field2d) {
+    public static void logObstaclesInArena(Field2d field2d) {
         arena.logObstacles(field2d);
     }
 

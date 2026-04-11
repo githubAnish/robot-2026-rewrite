@@ -357,17 +357,17 @@ public class RobotContainer {
 
     public void test() {
         RobotModeTriggers.teleop().onTrue(Commands.run(() -> {
-            MapleSimUtil.logArena(drive.getViz());
+            // MapleSimUtil.logObstaclesInArena(drive.getViz());
 
-            drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
-            Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+            // drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+            // Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
 
-            drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
-            Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
+            // drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
+            // Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
 
-            FieldConstants.Tower.blue.log("asdausd", drive.getViz());
+            // FieldConstants.Tower.blue.log("asdausd", drive.getViz());
 
-            new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
+            // new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
         }));
     }
 }

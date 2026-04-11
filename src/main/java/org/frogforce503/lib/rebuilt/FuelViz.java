@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 
-public final class FuelVisualizer {
+public final class FuelViz {
     private static final int cols = 3;
     private static final int rows = 5;
     private static final int perLayer = cols * rows;
@@ -22,7 +22,7 @@ public final class FuelVisualizer {
             Units.inchesToMeters(9),
             Rotation3d.kZero);
 
-    private FuelVisualizer() {}
+    private FuelViz() {}
 
     public static Translation3d[] visualizeFuelInHopper(Pose3d robotPose, int numFuelInRobot) {
         Translation3d[] balls = new Translation3d[numFuelInRobot];
