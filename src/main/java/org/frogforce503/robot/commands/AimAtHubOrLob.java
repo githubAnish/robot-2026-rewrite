@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands.drive;
+package org.frogforce503.robot.commands;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -36,7 +36,7 @@ public class AimAtHubOrLob extends Command {
             new Constraints(DriveConstants.maxOmega, DriveConstants.maxOmega));
 
     private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
-    private final double translationScalarShootOnMove = 0.25;
+    private final double translationScalarShootOnMove = 0.2;
 
     public AimAtHubOrLob(Drive drive) {
         this.drive = drive;

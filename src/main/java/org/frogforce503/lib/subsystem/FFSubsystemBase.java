@@ -7,11 +7,10 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import lombok.Getter;
 
-/** A thin wrapper around WPILib's {@link SubsystemBase} class to create command-based subsystems with common FF boilerplate methods. */
+/** Wrapper class around WPILib's {@link SubsystemBase} class to create command-based subsystems with common FF boilerplate methods. */
 public abstract class FFSubsystemBase extends SubsystemBase {
-    @Getter protected LoggedNetworkBoolean coastOverride =
+    protected LoggedNetworkBoolean coastOverride =
         new LoggedNetworkBoolean("Coast Mode/" + getName(), false);
 
     private boolean inCoast = false;

@@ -1,11 +1,11 @@
 package org.frogforce503.robot.auto;
 
+import org.frogforce503.robot.commands.AimAtHubOrLob;
+import org.frogforce503.robot.commands.AlignToClimb;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
 import org.frogforce503.robot.commands.RaiseClimber;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
-import org.frogforce503.robot.commands.drive.AimAtHubOrLob;
-import org.frogforce503.robot.commands.drive.AlignToClimb;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -32,7 +32,7 @@ public abstract class AutoMode {
     private final Flywheels flywheels;
     private final Climber climber;
     private final GameViz gameViz;
-    private final FollowPath.Builder autoBuilder;
+    private final FollowPath.Builder blineAutoBuilder;
 
     public AutoMode(
         Drive drive,
@@ -44,7 +44,7 @@ public abstract class AutoMode {
         Flywheels flywheels,
         Climber climber,
         GameViz gameViz,
-        FollowPath.Builder autoBuilder
+        FollowPath.Builder blineAutoBuilder
     ) {
         this.drive = drive;
         this.intakePivot = intakePivot;
@@ -55,14 +55,14 @@ public abstract class AutoMode {
         this.flywheels = flywheels;
         this.climber = climber;
         this.gameViz = gameViz;
-        this.autoBuilder = autoBuilder;
+        this.blineAutoBuilder = blineAutoBuilder;
     }
 
     protected abstract Command getCommand();
     protected abstract Pose2d[] getPoses();
 
     protected Command drive(Path path) {
-        return autoBuilder.build(path);
+        return blineAutoBuilder.build(path);
     }
 
     protected Command intake() {

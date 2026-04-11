@@ -1,6 +1,6 @@
 package org.frogforce503.lib.util;
 
-public class ErrorUtil {
+public final class ErrorUtil {
     private ErrorUtil() {}
     
     public static String attachJavaClassName(Class<?> className) {

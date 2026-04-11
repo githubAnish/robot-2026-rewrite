@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands.drive;
+package org.frogforce503.robot.commands;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -205,7 +205,6 @@ public class DriveToPose extends Command {
                     lastSetpointTranslation,
                     new Rotation2d(thetaController.getSetpoint().position))});
         Logger.recordOutput("DriveToPose/Goal", new Pose2d[] { targetPose });
-        Logger.recordOutput("DriveToPose/Is Finished", isFinished());
     }
 
     @Override

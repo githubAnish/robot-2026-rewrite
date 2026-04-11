@@ -24,7 +24,10 @@ public class Drive extends SubsystemBase {
 
     @Getter private final DriveViz viz = new DriveViz();
 
-    @Accessors(fluent = true) @Setter @Getter private boolean shouldCoastAfterAutoEnd = false;
+    @Accessors(fluent = true)
+    @Setter
+    @Getter
+    private boolean shouldCoastAfterAutoEnd = false;
 
     public Drive(DriveIO io) {
         this.io = io;

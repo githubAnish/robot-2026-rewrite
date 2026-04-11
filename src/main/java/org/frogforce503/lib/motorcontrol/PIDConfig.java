@@ -1,5 +1,7 @@
 package org.frogforce503.lib.motorcontrol;
 
+import com.pathplanner.lib.config.PIDConstants;
+
 import edu.wpi.first.math.controller.PIDController;
 
 public record PIDConfig(
@@ -27,5 +29,9 @@ public record PIDConfig(
         controller.setIZone(kIZone);
         controller.setIntegratorRange(kMinimumIntegral, kMaximumIntegral);
         return controller;
+    }
+
+    public PIDConstants toPathPlannerConstraints() {
+        return new PIDConstants(kP, kI, kD);
     }
 }

@@ -27,7 +27,7 @@ public final class MathUtils {
      *
      * @param lowerBound The lower bound of the range.
      * @param upperBound The upper bound of the range.
-     * @param value      The value.
+     * @param value The value.
      * @return If the value is in the range.
      */
     public static boolean inRange(double value, double lowerBound, double upperBound) {

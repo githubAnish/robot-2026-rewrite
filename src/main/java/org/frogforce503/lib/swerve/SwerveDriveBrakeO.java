@@ -12,6 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
@@ -28,15 +29,18 @@ public class SwerveDriveBrakeO implements SwerveRequest {
     public StatusCode apply(SwerveControlParameters parameters, SwerveModule<?, ?, ?>... modulesToApply) {
         for (int i = 0; i < modulesToApply.length; i++) {
             modulesToApply[i].apply(
-                moduleRequest
-                    .withState(
-                        new SwerveModuleState(
-                            0,
-                            DriveConstants.moduleTranslations[i].getAngle().plus(Rotation2d.kCW_Pi_2))));
+                applyAngleToModule(DriveConstants.moduleTranslations[i]));
         }
-        for (SwerveModule<?, ?, ?> module : modulesToApply) {
-            module.apply(moduleRequest);
-        }
+
         return StatusCode.OK;
+    }
+
+    private ModuleRequest applyAngleToModule(Translation2d moduleTranslation) {
+        return
+            moduleRequest
+                .withState(
+                    new SwerveModuleState(
+                        0,
+                        moduleTranslation.getAngle().plus(Rotation2d.kCW_Pi_2)));
     }
 }

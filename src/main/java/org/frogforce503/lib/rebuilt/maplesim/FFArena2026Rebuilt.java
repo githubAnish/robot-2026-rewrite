@@ -10,8 +10,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -37,14 +35,6 @@ public class FFArena2026Rebuilt extends SimulatedArena {
 
     protected double clock = 0;
     protected boolean blueIsOnClock = Math.random() < 0.5;
-
-    protected DoublePublisher phaseClockPublisher =
-            genericInfoTable.getDoubleTopic("Time left in current phase").publish();
-
-    protected BooleanPublisher redActivePublisher =
-            redTable.getBooleanTopic("Red is active").publish();
-    protected BooleanPublisher blueActivePublisher =
-            blueTable.getBooleanTopic("Blue is active").publish();
 
     protected FFRebuiltHub blueHub;
     protected FFRebuiltHub redHub;
@@ -301,12 +291,7 @@ public class FFArena2026Rebuilt extends SimulatedArena {
             clock = 25;
         }
 
-        phaseClockPublisher.set((clock));
-
         super.simulationSubTick(tickNum);
-
-        blueActivePublisher.set(isActive(true));
-        redActivePublisher.set(isActive(false));
     }
 
     /**

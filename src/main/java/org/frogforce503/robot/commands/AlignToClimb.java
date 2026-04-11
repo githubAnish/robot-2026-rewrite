@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands.drive;
+package org.frogforce503.robot.commands;
 
 import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
