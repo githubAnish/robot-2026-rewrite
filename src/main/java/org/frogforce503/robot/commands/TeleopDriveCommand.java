@@ -100,7 +100,7 @@ public class TeleopDriveCommand extends Command {
                 break;
 
             case FIELD_RELATIVE_HEADING_HOLD:
-                double omegaCorrection = headingHoldController.calculate(drive.getPose().getRotation().getRadians(), headingSetpoint.get().getRadians());
+                double omegaCorrection = headingHoldController.calculate(drive.getRotation().getRadians(), headingSetpoint.get().getRadians());
                 speeds.omegaRadiansPerSecond = MathUtil.clamp(omegaCorrection, -DriveConstants.maxOmega, DriveConstants.maxOmega);
 
                 runFieldRelativeVelocity(speeds);
@@ -144,8 +144,8 @@ public class TeleopDriveCommand extends Command {
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds,
                 FieldConstants.isRed()
-                    ? drive.getPose().getRotation().plus(Rotation2d.kPi)
-                    : drive.getPose().getRotation()));
+                    ? drive.getRotation().plus(Rotation2d.kPi)
+                    : drive.getRotation()));
     }
 
     private void lockHeadingIfRotationStopped(boolean isRotating) {
@@ -155,7 +155,7 @@ public class TeleopDriveCommand extends Command {
         } else {
             headingHoldTimer.start();
             if (headingHoldTimer.hasElapsed(headingHoldDelay)) {
-                headingSetpoint = Optional.of(drive.getPose().getRotation());
+                headingSetpoint = Optional.of(drive.getRotation());
             }
         }
     }

@@ -15,7 +15,7 @@ import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
 import org.frogforce503.robot.commands.RaiseClimber;
-import org.frogforce503.robot.commands.ShakeIntake;
+import org.frogforce503.robot.commands.PutIntakeUpForShoot;
 import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
 import org.frogforce503.robot.commands.TeleopDriveCommand;
 import org.frogforce503.robot.constants.field.FieldConstants;
@@ -121,7 +121,7 @@ public class RobotContainer {
     private final TeleopDriveCommand teleopDriveCommand;
 
     // Other
-    private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.acceptVisionMeasurement(visionMeasurement);
+    private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.addVisionMeasurement(visionMeasurement);
     
     public RobotContainer() {
         // Initialize subsystems based on robot type
@@ -246,7 +246,7 @@ public class RobotContainer {
         shootHubOrLob
             .whileTrue(new ShootFuelIntoHubOrLob(drive, indexer, feeder, hood, flywheels, gameViz))
             .and(intakeGround.negate())
-            .whileTrue(new ShakeIntake(intakePivot, intakeRoller).withName("ShakeIntake"));
+            .whileTrue(new PutIntakeUpForShoot(intakePivot, intakeRoller));
 
         aimHubOrLob
             .whileTrue(new AimAtHubOrLob(drive, driverXbox));
@@ -303,7 +303,7 @@ public class RobotContainer {
 
         // Check if shot feasible
         boolean shotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
-        boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getPose().getRotation().getRadians(), DriveConstants.aimTolerance);
+        boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getRotation().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
 

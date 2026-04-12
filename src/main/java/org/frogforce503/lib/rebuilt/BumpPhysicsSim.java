@@ -33,7 +33,7 @@ public class BumpPhysicsSim {
     }
 
     public Pose3d update() {
-        Rotation2d yaw = drive.getPose().getRotation();
+        Rotation2d yaw = drive.getRotation();
 
         // 1. Sample 4 corners AND the center point
         Translation2d pos = drive.getPose().getTranslation();

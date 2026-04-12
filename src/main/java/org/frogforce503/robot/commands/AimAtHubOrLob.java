@@ -57,7 +57,7 @@ public class AimAtHubOrLob extends Command {
     @Override
     public void initialize() {
         thetaController.reset(
-            drive.getPose().getRotation().getRadians(),
+            drive.getRotation().getRadians(),
             drive.getFieldVelocity().omegaRadiansPerSecond);
     }
 
@@ -79,7 +79,7 @@ public class AimAtHubOrLob extends Command {
         double yVelocity = driverLinearVelocity.getY() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
         double omega =
             thetaController.calculate(
-                drive.getPose().getRotation().getRadians(),
+                drive.getRotation().getRadians(),
                 new State(shotInfo.driveAngle().getRadians(), shotInfo.driveVelocity()));
 
         // Fuse driver omega with calculated output
@@ -94,8 +94,8 @@ public class AimAtHubOrLob extends Command {
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds,
                 FieldConstants.isRed()
-                    ? drive.getPose().getRotation().plus(Rotation2d.kPi)
-                    : drive.getPose().getRotation()));
+                    ? drive.getRotation().plus(Rotation2d.kPi)
+                    : drive.getRotation()));
     }
 
     @Override

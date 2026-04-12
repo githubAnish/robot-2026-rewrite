@@ -23,6 +23,7 @@ public class IntakePivotConstants {
     public static final PIDConfig kPID = new PIDConfig(2.3, 0, 0.2);
     public static final FFConfig kFF = new FFConfig(0, 3.596915, 0.65, 0);
     public static final Constraints kConstraints = new Constraints(Units.degreesToRadians(720), Units.degreesToRadians(1440));
+    public static final Constraints kSlowConstraints = new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(180));
 
     public static final double minAngle = Units.degreesToRadians(-5.0);
     public static final double maxAngle = Units.degreesToRadians(110);
@@ -34,4 +35,5 @@ public class IntakePivotConstants {
 
     public static final double STOW = START;
     public static final double INTAKE = Units.degreesToRadians(-5);
+    public static final double SHOOT = Units.degreesToRadians(85);
 }

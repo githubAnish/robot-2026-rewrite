@@ -51,12 +51,16 @@ public class Drive extends SubsystemBase {
         return inputs.Pose;
     }
 
+    public Rotation2d getRotation() {
+        return getPose().getRotation();
+    }
+
     public ChassisSpeeds getRobotVelocity() {
         return inputs.Speeds;
     }
 
     public ChassisSpeeds getFieldVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getPose().getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotVelocity(), getRotation());
     }
 
     public Rotation2d getGyroRotation() {
@@ -72,8 +76,8 @@ public class Drive extends SubsystemBase {
         io.setAngle(rotation);
     }
 
-    public void acceptVisionMeasurement(VisionMeasurement measurement) {
-        io.acceptVisionMeasurement(
+    public void addVisionMeasurement(VisionMeasurement measurement) {
+        io.addVisionMeasurement(
             measurement.pose(),
             measurement.timestamp(),
             measurement.standardDeviations());
