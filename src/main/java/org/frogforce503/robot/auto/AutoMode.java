@@ -1,11 +1,12 @@
 package org.frogforce503.robot.auto;
 
-import org.frogforce503.robot.commands.AimAtHubOrLob;
+import org.frogforce503.robot.commands.AimAndPrepShot;
 import org.frogforce503.robot.commands.AlignToClimb;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
+import org.frogforce503.robot.commands.PutIntakeUpForShoot;
 import org.frogforce503.robot.commands.RaiseClimber;
-import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.commands.ShootFuel;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
@@ -72,8 +73,9 @@ public abstract class AutoMode {
     protected Command shoot() {
         return
             Commands.parallel(
-                new AimAtHubOrLob(drive),
-                new ShootFuelIntoHubOrLob(drive, indexer, feeder, hood, flywheels, gameViz));
+                new AimAndPrepShot(drive, feeder, hood, flywheels),
+                new ShootFuel(indexer, gameViz),
+                new PutIntakeUpForShoot(intakePivot, intakeRoller));
     }
 
     protected Command autoClimb() {

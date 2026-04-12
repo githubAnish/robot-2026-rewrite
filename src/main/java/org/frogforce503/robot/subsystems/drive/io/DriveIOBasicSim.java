@@ -66,11 +66,6 @@ public class DriveIOBasicSim implements DriveIO {
     }
 
     @Override
-    public void stopWithO() {
-        currentVelocity = new ChassisSpeeds();
-    }
-
-    @Override
     public void runVelocity(ChassisSpeeds speeds) {
         currentVelocity = speeds;
         moduleStates = kinematics.toSwerveModuleStates(currentVelocity);

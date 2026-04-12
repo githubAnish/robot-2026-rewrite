@@ -42,8 +42,6 @@ public interface DriveIO {
 
     default void stopWithX() {}
 
-    default void stopWithO() {}
-
     default void coast() {}
 
     default void runVelocity(ChassisSpeeds speeds) {}

@@ -1,6 +1,5 @@
 package org.frogforce503.robot.subsystems.drive.io;
 
-import org.frogforce503.lib.swerve.SwerveDriveBrakeO;
 import org.frogforce503.lib.swerve.SwerveDriveCoast;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 
@@ -108,11 +107,6 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     @Override
     public void stopWithX() {
         super.setControl(new SwerveDriveBrake());
-    }
-
-    @Override
-    public void stopWithO() {
-        super.setControl(new SwerveDriveBrakeO());
     }
 
     @Override

@@ -218,8 +218,7 @@ public class ShotCalculator {
                 hoodAngle,
                 hoodVelocity,
                 flywheelsSpeedMap.get(lookaheadLauncherToTargetDistance),
-                lookaheadLauncherToTargetDistance,
-                launcherToTargetDistance);
+                lookaheadLauncherToTargetDistance);
 
         // Log data
         Logger.recordOutput("ShotCalculator/Is Hub Shot?", isHubShot);
@@ -265,13 +264,12 @@ public class ShotCalculator {
         double hoodAngleRad,
         double hoodVelocityRadPerSec,
         double flywheelsVelocityRadPerSec,
-        double launcherToTargetDistance,
-        double launcherToTargetDistanceNoLookahead) {}
+        double launcherToTargetDistance) {}
 
     public enum ShotPreset {
         NONE,
         BATTER, // Up against hub
         TRENCH, // Robot center on initiation line
-        DEPOT // From front corners of depot
+        TOWER // Near climb positions
     }
 }

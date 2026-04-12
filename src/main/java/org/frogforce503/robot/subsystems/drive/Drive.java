@@ -106,11 +106,6 @@ public class Drive extends SubsystemBase {
         stop();
     }
 
-    public void stopWithO() {
-        io.stopWithO();
-        stop();
-    }
-
     public void coast() {
         io.coast();
     }

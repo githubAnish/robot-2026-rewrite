@@ -1,0 +1,49 @@
+package org.frogforce503.robot.commands;
+
+import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
+import org.frogforce503.robot.viz.GameViz;
+
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Command;
+
+public class ShootFuel extends Command {
+    private final Indexer indexer;
+    private final GameViz gameViz;
+
+    public ShootFuel(Indexer indexer, GameViz gameViz) {
+        this.indexer = indexer;
+        this.gameViz = gameViz;
+
+        addRequirements(indexer);
+    }
+
+    @Override
+    public void initialize() {}
+
+    @Override
+    public void execute() {
+        boolean isShotFeasible = ShotCalculator.getInstance().isShotFeasible();
+
+        // Run indexer if shot feasible
+        if (isShotFeasible) {
+            indexer.setVelocity(IndexerConstants.SHOOT);
+        }
+
+        // Simulate shooting
+        if (RobotBase.isSimulation() && isShotFeasible) {
+            gameViz.shootFuel(true);
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        indexer.stop();
+    }
+}

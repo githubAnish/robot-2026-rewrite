@@ -9,6 +9,12 @@ import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -22,8 +28,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import lombok.experimental.ExtensionMethod;
 
 @ExtensionMethod(JoystickUtil.class)
-public class AimAtHubOrLob extends Command {
+public class AimAndPrepShot extends Command {
     private final Drive drive;
+    private final Feeder feeder;
+    private final Hood hood;
+    private final Flywheels flywheels;
     
     private Supplier<Translation2d> linearVelocitySupplier = Translation2d::new;
     private DoubleSupplier omegaSupplier = () -> 0.0;
@@ -38,17 +47,31 @@ public class AimAtHubOrLob extends Command {
     private final double maxDriverOmega = DriveConstants.maxOmega * 0.15;
     private final double translationScalarShootOnMove = 0.2;
 
-    public AimAtHubOrLob(Drive drive) {
+    public AimAndPrepShot(
+        Drive drive,
+        Feeder feeder,
+        Hood hood,
+        Flywheels flywheels
+    ) {
         this.drive = drive;
+        this.feeder = feeder;
+        this.hood = hood;
+        this.flywheels = flywheels;
 
         // Enable continuous input for theta controller
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-        addRequirements(drive);
+        addRequirements(drive, feeder, hood, flywheels);
     }
 
-    public AimAtHubOrLob(Drive drive, CommandXboxController xboxController) {
-        this(drive);
+    public AimAndPrepShot(
+        Drive drive,
+        Feeder feeder,
+        Hood hood,
+        Flywheels flywheels,
+        CommandXboxController xboxController
+    ) {
+        this(drive, feeder, hood, flywheels);
         
         this.linearVelocitySupplier = () -> xboxController.getLinearVelocityFromJoysticks();
         this.omegaSupplier = () -> xboxController.getOmegaFromJoysticks();
@@ -69,7 +92,61 @@ public class AimAtHubOrLob extends Command {
                 drive.getPose(),
                 drive.getRobotVelocity(),
                 drive.getFieldVelocity());
+        
+        // Prep & aim for shot
+        prepShot(shotInfo);
+        aimAtTarget(shotInfo);
+    }
 
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        drive.stop();
+        feeder.stop();
+        hood.stop();
+        flywheels.stop();
+    }
+
+    private void prepShot(ShotInfo shotInfo) {
+        // Define shot parameters
+        double hoodAngleRad = 0.0;
+        double hoodVelocityRadPerSec = 0.0;
+        double flywheelsVelocityRadPerSec = 0.0;
+
+        switch (ShotCalculator.getInstance().getShotPreset()) {
+            case NONE:
+                hoodAngleRad = shotInfo.hoodAngleRad();
+                hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();
+                flywheelsVelocityRadPerSec = shotInfo.flywheelsVelocityRadPerSec();
+                break;
+
+            case BATTER:
+                hoodAngleRad = HoodConstants.BATTER;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.BATTER;
+                break;
+
+            case TRENCH:
+                hoodAngleRad = HoodConstants.TRENCH;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.TRENCH;
+                break;
+
+            case TOWER:
+                hoodAngleRad = HoodConstants.TOWER;
+                flywheelsVelocityRadPerSec = FlywheelsConstants.TOWER;
+                break;   
+        }
+
+        // Run subsystems
+        hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
+        flywheels.setVelocity(flywheelsVelocityRadPerSec);
+        feeder.setVelocity(FeederConstants.SHOOT);
+    }
+
+    private void aimAtTarget(ShotInfo shotInfo) {
         // Get driver input velocities
         Translation2d driverLinearVelocity = linearVelocitySupplier.get();
         double driverOmega = omegaSupplier.getAsDouble();
@@ -96,15 +173,5 @@ public class AimAtHubOrLob extends Command {
                 FieldConstants.isRed()
                     ? drive.getRotation().plus(Rotation2d.kPi)
                     : drive.getRotation()));
-    }
-
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        drive.stop();
     }
 }

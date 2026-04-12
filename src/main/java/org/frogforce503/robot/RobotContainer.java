@@ -3,22 +3,19 @@ package org.frogforce503.robot;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
-import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
-import org.frogforce503.lib.util.Zone;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
-import org.frogforce503.robot.commands.AimAtHubOrLob;
+import org.frogforce503.robot.commands.AimAndPrepShot;
 import org.frogforce503.robot.commands.AlignToClimb;
 import org.frogforce503.robot.commands.EjectFuelFromIntake;
 import org.frogforce503.robot.commands.IntakeFuelFromGround;
 import org.frogforce503.robot.commands.LowerClimber;
 import org.frogforce503.robot.commands.RaiseClimber;
 import org.frogforce503.robot.commands.PutIntakeUpForShoot;
-import org.frogforce503.robot.commands.ShootFuelIntoHubOrLob;
+import org.frogforce503.robot.commands.ShootFuel;
 import org.frogforce503.robot.commands.TeleopDriveCommand;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIO;
 import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
@@ -64,7 +61,6 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -244,19 +240,19 @@ public class RobotContainer {
             .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
         shootHubOrLob
-            .whileTrue(new ShootFuelIntoHubOrLob(drive, indexer, feeder, hood, flywheels, gameViz))
+            .whileTrue(new ShootFuel(indexer, gameViz))
             .and(intakeGround.negate())
             .whileTrue(new PutIntakeUpForShoot(intakePivot, intakeRoller));
 
         aimHubOrLob
-            .whileTrue(new AimAtHubOrLob(drive, driverXbox));
+            .whileTrue(new AimAndPrepShot(drive, feeder, hood, flywheels, driverXbox));
 
         ejectIntake
             .whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
 
         bindShotPreset(setBatterPreset, ShotPreset.BATTER);
         bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
-        bindShotPreset(setDepotPreset, ShotPreset.DEPOT);
+        bindShotPreset(setDepotPreset, ShotPreset.TOWER);
 
         climb
             .onTrue(new RaiseClimber(climber))
