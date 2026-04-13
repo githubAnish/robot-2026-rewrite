@@ -47,21 +47,21 @@ public class ClimbPhysicsSim {
      * Maximum height the robot CG rises during a full climb (meters).
      * Tune to match the real robot's lift distance.
      */
-    private static final double MAX_CLIMB_HEIGHT_METERS = Units.inchesToMeters(24.0);
+    private static final double MAX_CLIMB_HEIGHT_METERS = Units.inchesToMeters(10);
 
     /**
      * How fast the robot rises visually (meters per second of real time).
      * The real climber speed is used to gate this — the robot only rises while
      * the climber is actively retracting.
      */
-    private static final double CLIMB_VISUAL_RATE = Units.inchesToMeters(2.0);
+    private static final double CLIMB_VISUAL_RATE = Units.inchesToMeters(3);
 
     /**
      * Tilt (roll) applied to the robot while hanging, in radians.
      * Positive = tilt toward the right side (toward the pole).
      * Zero = perfectly level.
      */
-    private static final double HANG_ROLL_RAD = Units.degreesToRadians(3.0);
+    private static final double HANG_ROLL_RAD = Units.degreesToRadians(1.5);
 
     // -------------------------------------------------------------------------
     // State
@@ -230,5 +230,9 @@ public class ClimbPhysicsSim {
 
         // Clamp to max
         currentHeightMeters = Math.min(currentHeightMeters, MAX_CLIMB_HEIGHT_METERS);
+    }
+
+    public boolean hasClimbed() {
+        return state == ClimbState.CLIMBED;
     }
 }

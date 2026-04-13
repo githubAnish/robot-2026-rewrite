@@ -20,7 +20,7 @@ public class LowerClimber extends Command {
 
     @Override
     public void initialize() {
-        climber.setHeight(ClimberConstants.minHeight);
+        climber.setHeight(ClimberConstants.LOWER);
         
         if (RobotBase.isSimulation()) {
             gameViz.startClimb();
@@ -49,6 +49,6 @@ public class LowerClimber extends Command {
     }
 
     private boolean climberAtGoal() {
-        return climber.isAtHeight(ClimberConstants.minHeight, ClimberConstants.tolerance);
+        return climber.isAtHeight(ClimberConstants.LOWER, ClimberConstants.tolerance);
     }
 }

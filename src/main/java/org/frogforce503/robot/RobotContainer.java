@@ -208,6 +208,8 @@ public class RobotContainer {
             Constants.isPracticeMatch
                 ? new PracticeMatchViz(drive, intakePivot, intakeRoller, hood, flywheels, climber, visionViz)
                 : new GameViz(drive, intakePivot, intakeRoller, hood, flywheels, climber, visionViz);
+        
+        drive.setTrenchCollisionSim(gameViz.getTrenchCollisionSim());
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz);

@@ -158,8 +158,8 @@ public class FieldConstants {
             blue = new Zone(blueBackLeftCorner, blueFrontRightCorner);
 
             // Climb Poses
-            final double towerCornerToRobotClimbPoseOffset = Units.inchesToMeters(20);
-            final double preClimbtoClimbPoseOffset = Units.inchesToMeters(5);
+            final double towerCornerToRobotClimbPoseOffset = Units.inchesToMeters(15);
+            final double preClimbtoClimbPoseOffset = Units.inchesToMeters(10);
 
             blueLeftClimbPose =
                 new Pose2d(blue.getFrontLeftCorner(), Rotation2d.kZero)

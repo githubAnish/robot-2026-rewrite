@@ -26,15 +26,15 @@ public class SuperstructureViz {
     public static final double verticalHopperExtenderMaxLift   = Units.inchesToMeters(5);
 
     // ── Ball-count thresholds (tune here) ───────────────────────────────────────
-    public static final int DIAGONAL_PRESSURE_START_BALLS = 45; // was 6
+    public static final int DIAGONAL_PRESSURE_START_BALLS = 35; // was 6
     public static final int DIAGONAL_PRESSURE_FULL_BALLS  = 70; // was 16
-    public static final int VERTICAL_LIFT_START_BALLS     = 45;
+    public static final int VERTICAL_LIFT_START_BALLS     = 35;
     public static final int VERTICAL_LIFT_FULL_BALLS      = 70;
 
     // ── Physics rates (tune here) ────────────────────────────────────────────────
     // How fast the vertical extender rises/falls (meters per second)
-    private static final double VERTICAL_RISE_RATE   = Units.inchesToMeters(1.5); // per second, driven by balls
-    private static final double VERTICAL_GRAVITY_RATE = Units.inchesToMeters(4); // was 1.5 — gravity is fast
+    private static final double VERTICAL_RISE_RATE   = Units.inchesToMeters(2); // per second, driven by balls
+    private static final double VERTICAL_GRAVITY_RATE = Units.inchesToMeters(5); // was 1.5 — gravity is fast
 
     // How fast diagonal angle changes (radians per second)
     private static final double DIAGONAL_RISE_RATE   = Units.degreesToRadians(10.0);
@@ -48,7 +48,7 @@ public class SuperstructureViz {
     private final Timer updateTimer = new Timer();
     private boolean timerStarted = false;
 
-    public void update(Pose3d drivePose3d, double hoodAngleRad, double intakePivotAngleRad, int numFuelInRobot) {
+    public void update(Pose3d drivePose3d, double hoodAngleRad, double intakePivotAngleRad, double climberHeightMeters, int numFuelInRobot) {
         // ── Delta time ────────────────────────────────────────────────────────────
         double dt;
         if (!timerStarted) {
@@ -137,7 +137,7 @@ public class SuperstructureViz {
         var climberPose =
             Pose3d.kZero
                 .plus(robotToClimber)
-                .plus(new Transform3d(new Translation3d(0, 0, 0.0), Rotation3d.kZero));
+                .plus(new Transform3d(new Translation3d(0, 0, climberHeightMeters * 0.53), Rotation3d.kZero));
 
         Logger.recordOutput(
             "SuperstructureViz/Components",

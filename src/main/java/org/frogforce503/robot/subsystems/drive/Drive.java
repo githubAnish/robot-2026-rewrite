@@ -1,6 +1,7 @@
 package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
+import org.frogforce503.lib.rebuilt.TrenchCollisionSim;
 import org.frogforce503.lib.logging.LoggerUtil;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +23,8 @@ import lombok.experimental.Accessors;
 public class Drive extends SubsystemBase {
     private final DriveIO io;
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
+
+    private TrenchCollisionSim trenchCollisionSim;
 
     @Getter private final DriveViz viz = new DriveViz();
 
@@ -84,11 +88,21 @@ public class Drive extends SubsystemBase {
     }
 
     // Control Methods
+    public void setTrenchCollisionSim(TrenchCollisionSim sim) {
+        this.trenchCollisionSim = sim;
+    }
+
     public void runVelocity(ChassisSpeeds speeds) {
+        if (RobotBase.isSimulation()) {
+            speeds = trenchCollisionSim.filterSpeeds(speeds, getPose(), getRotation());
+        }
         io.runVelocity(speeds);
     }
 
     public void runVelocity(ChassisSpeeds speeds, double[] moduleForcesX, double[] moduleForcesY) {
+        if (RobotBase.isSimulation()) {
+            speeds = trenchCollisionSim.filterSpeeds(speeds, getPose(), getRotation());
+        }
         io.runVelocity(speeds, moduleForcesX, moduleForcesY);
     }
 

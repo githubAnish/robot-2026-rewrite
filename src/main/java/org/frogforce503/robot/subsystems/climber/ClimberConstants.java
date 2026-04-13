@@ -28,4 +28,6 @@ public class ClimberConstants {
     public static final double tolerance = Units.inchesToMeters(1);
 
     public static final double START = minHeight;
+    public static final double RAISE = Units.inchesToMeters(13.4);
+    public static final double LOWER = Units.inchesToMeters(10.4);
 }

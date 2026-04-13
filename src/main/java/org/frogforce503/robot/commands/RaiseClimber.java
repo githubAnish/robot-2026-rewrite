@@ -16,7 +16,7 @@ public class RaiseClimber extends Command {
 
     @Override
     public void initialize() {
-        climber.setHeight(ClimberConstants.maxHeight);
+        climber.setHeight(ClimberConstants.RAISE);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class RaiseClimber extends Command {
 
     @Override
     public boolean isFinished() {
-        return climber.isAtHeight(ClimberConstants.maxHeight, ClimberConstants.tolerance);
+        return climber.isAtHeight(ClimberConstants.RAISE, ClimberConstants.tolerance);
     }
 
     @Override

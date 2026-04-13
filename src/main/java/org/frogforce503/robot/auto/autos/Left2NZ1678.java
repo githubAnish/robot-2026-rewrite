@@ -47,7 +47,7 @@ public class Left2NZ1678 extends AutoMode {
                 drive(firstTimeToNZAndBack),
                 intake()
             ),
-            shoot().withTimeout(3.5),
+            shoot().withTimeout(4.0),
             Commands.deadline(
                 drive(secondTimeToNZAndBack),
                 Commands.waitSeconds(1.5).andThen(intake())

@@ -4,10 +4,12 @@ import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.ClimbPhysicsSim;
 import org.frogforce503.lib.rebuilt.FuelShotQuantityCalculator;
 import org.frogforce503.lib.rebuilt.FuelViz;
+import org.frogforce503.lib.rebuilt.TrenchCollisionSim;
 import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
+import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
@@ -18,10 +20,13 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import lombok.Getter;
 
 public class GameViz {
     private final Drive drive;
@@ -29,11 +34,13 @@ public class GameViz {
     private final IntakeRoller intakeRoller;
     private final Hood hood;
     private final Flywheels flywheels;
+    private final Climber climber;
 
     private final VisionSimulator visionViz;
     private final SuperstructureViz superstructureViz = new SuperstructureViz();
     private final BumpPhysicsSim bumpSim;
-    private final ClimbPhysicsSim climbSim;
+    @Getter private final TrenchCollisionSim trenchCollisionSim;
+    protected final ClimbPhysicsSim climbSim;
 
     private IntakeSimulation intakeSimulation;
 
@@ -57,9 +64,11 @@ public class GameViz {
         this.intakeRoller = intakeRoller;
         this.hood = hood;
         this.flywheels = flywheels;
-        this.visionViz = visionViz;
+        this.climber = climber;
 
+        this.visionViz = visionViz;
         this.bumpSim = new BumpPhysicsSim(drive);
+        this.trenchCollisionSim = new TrenchCollisionSim(superstructureViz);
         this.climbSim = new ClimbPhysicsSim(drive, climber);
 
         if (RobotBase.isSimulation() && Constants.usingMapleSim) {
@@ -84,7 +93,7 @@ public class GameViz {
 
         // Update visualizers
         visionViz.update(drive.getPose());
-        superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad(), fuelInRobot);
+        superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad(), climber.getHeightMeters(), fuelInRobot);
 
         // Visualize fuel
         Translation3d[] fuelInHopper =

@@ -9,6 +9,8 @@ import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
 import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.RobotState;
+
 /** Adds practice match elements, including score tracking and Hub shifts, to GameViz. */
 public class PracticeMatchViz extends GameViz {
     private int score = 0;
@@ -68,6 +70,14 @@ public class PracticeMatchViz extends GameViz {
                     score++;
                 }
             });
+    }
+
+    public void stopClimb() {
+        super.stopClimb();
+
+        if (climbSim.hasClimbed() && !isMatchEnded()) {
+            score += RobotState.isAutonomous() ? 15 : 10;
+        }
     }
 
     private boolean isMatchEnded() {
