@@ -75,7 +75,7 @@ public abstract class AutoMode {
             Commands.parallel(
                 new AimAndPrepShot(drive, feeder, hood, flywheels),
                 new ShootFuel(indexer, gameViz),
-                new PutIntakeUpForShoot(intakePivot, intakeRoller));
+                new PutIntakeUpForShoot(intakePivot, intakeRoller, gameViz));
     }
 
     protected Command autoClimb() {

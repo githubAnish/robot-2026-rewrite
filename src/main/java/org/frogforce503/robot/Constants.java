@@ -9,9 +9,11 @@ import lombok.Getter;
 public class Constants {
     @Getter private static RobotType robot = RobotType.SimBot;
 
+    public static final boolean usingMapleSim = true;
+    public static final boolean isPracticeMatch = true;
+
     public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
     public static final double loopPeriodWatchdogSecs = 0.2;
-    public static final boolean isPracticeMatch = true;
 
     public static Mode getMode() {
         return switch (robot) {

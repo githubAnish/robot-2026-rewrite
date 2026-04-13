@@ -6,6 +6,7 @@ import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.littletonrobotics.junction.Logger;
 
 /** Adds practice match elements, including score tracking and Hub shifts, to GameViz. */
@@ -15,12 +16,13 @@ public class PracticeMatchViz extends GameViz {
     public PracticeMatchViz(
         Drive drive,
         IntakePivot intakePivot,
+        IntakeRoller intakeRoller,
         Hood hood,
         Flywheels flywheels,
         Climber climber,
         VisionSimulator visionViz
     ) {
-        super(drive, intakePivot, hood, flywheels, climber, visionViz);
+        super(drive, intakePivot, intakeRoller, hood, flywheels, climber, visionViz);
     }
 
     @Override

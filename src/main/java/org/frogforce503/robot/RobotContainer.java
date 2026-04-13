@@ -22,6 +22,7 @@ import org.frogforce503.robot.subsystems.climber.io.ClimberIOSim;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
+import org.frogforce503.robot.subsystems.drive.io.DriveIOBasicSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
@@ -133,7 +134,7 @@ public class RobotContainer {
                     // Not implemented
                 }
                 case SimBot -> {
-                    drive = new Drive(new DriveIOMapleSim());
+                    drive = new Drive(Constants.usingMapleSim ? new DriveIOMapleSim() : new DriveIOBasicSim());
 
                     intakePivot = new IntakePivot(new IntakePivotIOSim());
                     intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
@@ -205,8 +206,8 @@ public class RobotContainer {
         // Create sim requirements
         gameViz =
             Constants.isPracticeMatch
-                ? new PracticeMatchViz(drive, intakePivot, hood, flywheels, climber, visionViz)
-                : new GameViz(drive, intakePivot, hood, flywheels, climber, visionViz);
+                ? new PracticeMatchViz(drive, intakePivot, intakeRoller, hood, flywheels, climber, visionViz)
+                : new GameViz(drive, intakePivot, intakeRoller, hood, flywheels, climber, visionViz);
 
         // Create auto requirements
         autoChooser = new AutoChooser(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz);
@@ -242,7 +243,7 @@ public class RobotContainer {
         shootHubOrLob
             .whileTrue(new ShootFuel(indexer, gameViz))
             .and(intakeGround.negate())
-            .whileTrue(new PutIntakeUpForShoot(intakePivot, intakeRoller));
+            .whileTrue(new PutIntakeUpForShoot(intakePivot, intakeRoller, gameViz));
 
         aimHubOrLob
             .whileTrue(new AimAndPrepShot(drive, feeder, hood, flywheels, driverXbox));
@@ -342,8 +343,10 @@ public class RobotContainer {
     }
 
     public void simulationInit() {
-        for (int i = 0; i < 2; i++) { // Do twice to counteract MapleSim arena initialization effects
-            drive.setPose(AllianceFlipUtil.apply(new Pose2d(1.889, 4.002, Rotation2d.kZero)));
+        if (Constants.usingMapleSim) {
+            for (int i = 0; i < 2; i++) { // Do twice to counteract MapleSim arena initialization effects
+                drive.setPose(AllianceFlipUtil.apply(new Pose2d(1.889, 4.002, Rotation2d.kZero)));
+            }
         }
     }
 
@@ -352,18 +355,18 @@ public class RobotContainer {
     }
 
     public void test() {
-        RobotModeTriggers.teleop().onTrue(Commands.run(() -> {
-            // MapleSimUtil.logObstaclesInArena(drive.getViz());
+        // RobotModeTriggers.teleop().onTrue(Commands.run(() -> {
+        //     // MapleSimUtil.logObstaclesInArena(drive.getViz());
 
-            // drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
-            // Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+        //     // drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
+        //     // Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
 
-            // drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
-            // Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
+        //     // drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
+        //     // Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
 
-            // FieldConstants.Tower.blue.log("asdausd", drive.getViz());
+        //     // FieldConstants.Tower.blue.log("asdausd", drive.getViz());
 
-            // new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
-        }));
+        //     // new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
+        // }));
     }
 }

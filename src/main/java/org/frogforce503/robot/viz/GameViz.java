@@ -5,11 +5,13 @@ import org.frogforce503.lib.rebuilt.ClimbPhysicsSim;
 import org.frogforce503.lib.rebuilt.FuelShotQuantityCalculator;
 import org.frogforce503.lib.rebuilt.FuelViz;
 import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
+import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,6 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class GameViz {
     private final Drive drive;
     private final IntakePivot intakePivot;
+    private final IntakeRoller intakeRoller;
     private final Hood hood;
     private final Flywheels flywheels;
 
@@ -43,6 +46,7 @@ public class GameViz {
     public GameViz(
         Drive drive,
         IntakePivot intakePivot,
+        IntakeRoller intakeRoller,
         Hood hood,
         Flywheels flywheels,
         Climber climber,
@@ -50,16 +54,18 @@ public class GameViz {
     ) {
         this.drive = drive;
         this.intakePivot = intakePivot;
+        this.intakeRoller = intakeRoller;
         this.hood = hood;
         this.flywheels = flywheels;
         this.visionViz = visionViz;
 
         this.bumpSim = new BumpPhysicsSim(drive);
-        this.climbSim = new ClimbPhysicsSim(drive, climber);  // ADD
+        this.climbSim = new ClimbPhysicsSim(drive, climber);
 
-        if (RobotBase.isSimulation()) {
+        if (RobotBase.isSimulation() && Constants.usingMapleSim) {
             intakeSimulation = MapleSimUtil.createIntake(drive.getMapleSimDrive().mapleSimDrive);
             
+            // Fill preload fuel
             for (int i = 0; i < 8; i++) {
                 intakeSimulation.addGamePieceToIntake();
             }
@@ -73,21 +79,27 @@ public class GameViz {
         // Apply climb physics
         drivePose3d = climbSim.update(drivePose3d);
 
+        // Check fuel in robot
+        int fuelInRobot = getFuelInRobot();
+
         // Update visualizers
         visionViz.update(drive.getPose());
-        superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad());
+        superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad(), fuelInRobot);
 
         // Visualize fuel
         Translation3d[] fuelInHopper =
-            FuelViz.visualizeFuelInHopper(drivePose3d, intakeSimulation.getGamePiecesAmount());
-
-        Translation3d[] fuelTranslations =
-            FuelViz.visualizeFuelInField();
+            FuelViz.visualizeFuelInHopper(
+                drivePose3d,
+                fuelInRobot,
+                superstructureViz.getCurrentLinearExtensionX(),
+                superstructureViz.getCurrentVerticalLift(),
+                superstructureViz.getCurrentDiagonalAngleRad(),
+                intakeRoller.getVelocityRadPerSec() > 1e-9);
 
         // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
-        Logger.recordOutput("GameViz/FuelTranslations", fuelTranslations);
-        Logger.recordOutput("GameViz/NumFuelInRobot", intakeSimulation.getGamePiecesAmount());
+        Logger.recordOutput("GameViz/FuelTranslations", FuelViz.visualizeFuelInField());
+        Logger.recordOutput("GameViz/NumFuelInRobot", fuelInRobot);
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
     }
 
@@ -154,5 +166,10 @@ public class GameViz {
 
     public void stopClimb() {
         climbSim.stopClimb();
+    }
+
+    // In GameViz.java
+    public int getFuelInRobot() {
+        return Constants.usingMapleSim ? intakeSimulation.getGamePiecesAmount() : 0;
     }
 }

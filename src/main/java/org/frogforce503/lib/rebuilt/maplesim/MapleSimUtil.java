@@ -37,7 +37,7 @@ public class MapleSimUtil {
     // Intake Constants
     private static final Distance intakeWidth = Inches.of(25.5);
     private static final Distance intakeLengthExtended = Inches.of(9.5);
-    private static final int fuelCapacity = 40;
+    public static final int fuelCapacity = 70;
 
     // Shoot Constants
     private static final Translation3d shotTolerance = new Translation3d(0.2, 0.2, 0.2);
