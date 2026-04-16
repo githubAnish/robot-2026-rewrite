@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class WheelRadiusCharacterizationDriveStraight extends Command {
     private final Drive drive;
     
-    private static final double driveSpeed = 0.5;
+    private final double driveSpeed = 0.5;
 
     private final WheelRadiusCharacterizationState charState = new WheelRadiusCharacterizationState();
 

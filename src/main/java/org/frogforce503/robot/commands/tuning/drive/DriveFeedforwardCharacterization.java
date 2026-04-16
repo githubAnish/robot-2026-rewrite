@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DriveFeedforwardCharacterization extends Command {
     private final Drive drive;
 
-    private static final double ffStartDelaySec = 2.0;
-    private static final double ffRampRate = 0.1; // Volts/Sec
+    private final double ffStartDelaySec = 2.0;
+    private final double ffRampRateVoltsPerSec = 0.1;
 
     private final List<Double> velocitySamples = new LinkedList<>();
     private final List<Double> voltageSamples = new LinkedList<>();
@@ -60,7 +60,7 @@ public class DriveFeedforwardCharacterization extends Command {
                 break;
 
             case CHARACTERIZING:
-                double voltage = timer.get() * ffRampRate;
+                double voltage = timer.get() * ffRampRateVoltsPerSec;
 
                 drive.runCharacterization(voltage);
 

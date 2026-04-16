@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt;
+package org.frogforce503.lib.rebuilt.sim;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;

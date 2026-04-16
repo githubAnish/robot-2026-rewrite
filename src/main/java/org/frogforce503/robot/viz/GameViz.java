@@ -1,15 +1,14 @@
 package org.frogforce503.robot.viz;
 
-import org.frogforce503.lib.rebuilt.BumpPhysicsSim;
-import org.frogforce503.lib.rebuilt.ClimbPhysicsSim;
-import org.frogforce503.lib.rebuilt.FuelShotQuantityCalculator;
-import org.frogforce503.lib.rebuilt.FuelViz;
-import org.frogforce503.lib.rebuilt.TrenchCollisionSim;
-import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.sim.BumpPhysicsSim;
+import org.frogforce503.lib.rebuilt.sim.ClimbPhysicsSim;
+import org.frogforce503.lib.rebuilt.sim.FuelShotQuantityCalculator;
+import org.frogforce503.lib.rebuilt.sim.FuelViz;
+import org.frogforce503.lib.rebuilt.sim.TrenchCollisionSim;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
@@ -20,9 +19,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -112,6 +109,10 @@ public class GameViz {
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
     }
 
+    public int getFuelInRobot() {
+        return Constants.usingMapleSim ? intakeSimulation.getGamePiecesAmount() : 0;
+    }
+
     public void startIntake() {
         intakeSimulation.startIntake();
     }
@@ -175,10 +176,5 @@ public class GameViz {
 
     public void stopClimb() {
         climbSim.stopClimb();
-    }
-
-    // In GameViz.java
-    public int getFuelInRobot() {
-        return Constants.usingMapleSim ? intakeSimulation.getGamePiecesAmount() : 0;
     }
 }

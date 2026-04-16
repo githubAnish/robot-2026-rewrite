@@ -13,7 +13,7 @@ import org.frogforce503.lib.vision.VisionUtils;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservation;
 import org.frogforce503.lib.vision.apriltagdetection.PoseObservationType;
 import org.frogforce503.lib.vision.apriltagdetection.TrackedAprilTag;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonVision;
@@ -34,7 +34,7 @@ import lombok.Getter;
 public class VisionConstants {
     // Hardware / Configuration
     public static final EnumMap<CameraName, Transform3d> robotToFixedCameraOffsets = new EnumMap<>(CameraName.class);
-    
+
     static {
         robotToFixedCameraOffsets.put(
             CameraName.LEFT_CAMERA,
@@ -51,6 +51,8 @@ public class VisionConstants {
                 )
             )
         );
+
+
        
         robotToFixedCameraOffsets.put(
             CameraName.RIGHT_CAMERA,
@@ -68,6 +70,7 @@ public class VisionConstants {
             )
         );
 
+
         robotToFixedCameraOffsets.put(
             CameraName.BACK_CAMERA,
             new Transform3d(
@@ -83,14 +86,6 @@ public class VisionConstants {
                 )
             )
         );
-
-        robotToFixedCameraOffsets.put(
-            CameraName.FUEL_CAMERA,
-            new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, 0, 0)
-            )
-        );
     }
 
     /**
@@ -104,10 +99,7 @@ public class VisionConstants {
         // AprilTag Detection Cameras
         LEFT_CAMERA,
         RIGHT_CAMERA,
-        BACK_CAMERA,
-
-        // Object Detection Cameras
-        FUEL_CAMERA
+        BACK_CAMERA
     }
 
     public static final Set<Integer> RED_TOWER_TAGS = Set.of(15, 16);
@@ -122,6 +114,26 @@ public class VisionConstants {
 
     public static final Matrix<N3, N1> DEFAULT_STANDARD_DEVIATIONS = VecBuilder.fill(0.8, 0.8, Units.degreesToRadians(30));
 
+    public static final double ABSOLUTE_MAX_AMBIGUITY = 0.25;
+    public static final double ABSOLUTE_MAX_DISTANCE_TO_TAG = Units.feetToMeters(30);
+
+    public static final int POSE_OBSERVATION_LOGGING_FREQUENCY = 2;
+
+
+    public static class VisionLogPaths {
+        public final String inputs, isUsed, poseObservation, robotPose, tags, obsType;
+
+        public VisionLogPaths(CameraName name, boolean isAprilTagCamera) {
+            String base = ((isAprilTagCamera) ? "Vision/AprilTag Detection/" : "Vision/Object Detection/") + name.name();
+            this.inputs = base + "/Inputs";
+            this.isUsed = base + "/Is Vision Measurement Used";
+            this.poseObservation = base + "/Pose Observation";
+            this.robotPose = base + "/Pose Observation/Robot Pose";
+            this.tags = base + "/Pose Observation/Used April Tags";
+            this.obsType = base + "/Pose Observation/Pose Observation Type";
+        }
+    }
+
     /**
      * Enum representing different goals for robot localization with AprilTags.
      * Each goal specifies the cameras to use, a filter to check if a vision measurement is reliable, a configuration for a camera, a standard deviation calculator for fusing vision measurements, and an optional backup goal.
@@ -134,7 +146,7 @@ public class VisionConstants {
         GLOBAL_LOCALIZATION(
             EnumSet.of(
                 CameraName.LEFT_CAMERA, 
-                CameraName.RIGHT_CAMERA,
+                CameraName.RIGHT_CAMERA, 
                 CameraName.BACK_CAMERA
             ),
 
@@ -154,7 +166,7 @@ public class VisionConstants {
                 if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
-                } 
+                }
                 aprilTagIO.setIgnoredAprilTags(new HashSet<Integer>());
             },
 
@@ -162,51 +174,15 @@ public class VisionConstants {
 
             Optional.empty()
         ),
-        TOWER_ALIGNMENT(
-            EnumSet.of(
-                CameraName.LEFT_CAMERA, 
-                CameraName.RIGHT_CAMERA,
-                CameraName.BACK_CAMERA
-            ),
-            poseObservation -> {
-                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
-                
-                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
-                double distance = VisionUtils.getLowestDistanceToCamera(tags);
 
-                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
-                double maxDistance = tags.length > 1 ? Units.feetToMeters(10) : Units.feetToMeters(7); 
 
-                return ambiguity <= maxAmbiguity && distance <= maxDistance;
-            },
-             aprilTagIO -> {
-                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
-                    aprilTagIO.setPoseObservationType(PoseObservationType.PNP_DISTANCE_TRIG_SOLVE);
-                } 
-                Set<Integer> ignoredTags = new HashSet<Integer>();
-                ignoredTags.addAll(RED_HUB_TAGS);
-                ignoredTags.addAll(BLUE_HUB_TAGS);
-                ignoredTags.addAll(RED_OUTPOST_TAGS);
-                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
-                ignoredTags.addAll(RED_TRENCH_TAGS);
-                ignoredTags.addAll(BLUE_TRENCH_TAGS);
-                
-                if (FieldConstants.isRed()) {
-                    ignoredTags.addAll(BLUE_TOWER_TAGS);
-                } else {
-                    ignoredTags.addAll(RED_TOWER_TAGS);
-                }
 
-                aprilTagIO.setIgnoredAprilTags(ignoredTags);
-            },
-
-            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-
-            Optional.of(GLOBAL_LOCALIZATION) 
-        ),
-
-        OUTPOST_ALIGNMENT(
-            EnumSet.of(
+        /**
+         * Uses backup AprilTag cameras for aiming tasks when primary turret cameras are unreliable.
+         * Suitable for fallback scenarios during aiming.
+         */
+        STANDARD_HUB_AIM(
+            EnumSet.of( 
                 CameraName.LEFT_CAMERA,
                 CameraName.RIGHT_CAMERA,
                 CameraName.BACK_CAMERA
@@ -218,7 +194,7 @@ public class VisionConstants {
                 double distance = VisionUtils.getLowestDistanceToCamera(tags);
 
                 double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
-                double maxDistance = tags.length > 1 ? Units.feetToMeters(10) : Units.feetToMeters(7); 
+                double maxDistance = tags.length > 1 ? Units.feetToMeters(21.5) : Units.feetToMeters(15); 
 
                 return ambiguity <= maxAmbiguity && distance <= maxDistance;
             },
@@ -227,13 +203,14 @@ public class VisionConstants {
                     aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
                     aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
                 } 
+
                 Set<Integer> ignoredTags = new HashSet<Integer>();
-                ignoredTags.addAll(RED_HUB_TAGS);
-                ignoredTags.addAll(BLUE_HUB_TAGS);
-                ignoredTags.addAll(RED_OUTPOST_TAGS);
-                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
                 ignoredTags.addAll(RED_TRENCH_TAGS);
                 ignoredTags.addAll(BLUE_TRENCH_TAGS);
+                ignoredTags.addAll(RED_OUTPOST_TAGS);
+                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
+                ignoredTags.addAll(RED_TOWER_TAGS);
+                ignoredTags.addAll(BLUE_TOWER_TAGS);
                 
                 if (FieldConstants.isRed()) {
                     ignoredTags.addAll(BLUE_HUB_TAGS);
@@ -245,9 +222,59 @@ public class VisionConstants {
             },
 
             (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
-            Optional.of(GLOBAL_LOCALIZATION) 
-        );
+            // Optional.of(GLOBAL_LOCALIZATION)
+            Optional.empty() 
+        ),
 
+        /**
+         * Uses only the back camera which is a shooter-mounted AprilTag cameras for precise aiming tasks. 
+         * It only uses hub tags and ignores all the other tags.
+         * Suitable for tasks such as shooting or precise alignment.
+         */
+        SHOOTER_HUB_AIMING(
+            EnumSet.of(
+                CameraName.BACK_CAMERA
+            ),
+
+            poseObservation -> {
+                TrackedAprilTag[] tags = poseObservation.usedAprilTags();
+                
+                double ambiguity = VisionUtils.getLowestAmbiguity(tags);
+                double distance = VisionUtils.getLowestDistanceToCamera(tags);
+
+                double maxAmbiguity = tags.length > 1 ? 0.10 : 0.07;
+                double maxDistance = tags.length > 1 ? Units.feetToMeters(21.5) : Units.feetToMeters(15); 
+
+                return ambiguity <= maxAmbiguity && distance <= maxDistance;
+            },
+
+            aprilTagIO -> {
+                if (aprilTagIO instanceof AprilTagIOPhotonVision || aprilTagIO instanceof AprilTagIOPhotonSim) {
+                    aprilTagIO.setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
+                    aprilTagIO.setSecondaryPoseObservationType(PoseObservationType.LOWEST_AMBIGUITY);
+                }
+                
+                Set<Integer> ignoredTags = new HashSet<Integer>();
+                ignoredTags.addAll(RED_TRENCH_TAGS);
+                ignoredTags.addAll(BLUE_TRENCH_TAGS);
+                ignoredTags.addAll(RED_OUTPOST_TAGS);
+                ignoredTags.addAll(BLUE_OUTPOST_TAGS);
+                ignoredTags.addAll(RED_TOWER_TAGS);
+                ignoredTags.addAll(BLUE_TOWER_TAGS);
+                
+                if (FieldConstants.isRed()) {
+                    ignoredTags.addAll(BLUE_HUB_TAGS);
+                } else {
+                    ignoredTags.addAll(RED_HUB_TAGS);
+                }
+
+                aprilTagIO.setIgnoredAprilTags(ignoredTags);
+            },
+
+            (poseObservation) -> VisionConstants.DEFAULT_STANDARD_DEVIATIONS,
+
+            Optional.of(STANDARD_HUB_AIM)
+        );
         
         @Getter private final EnumSet<CameraName> camerasToUse;
         @Getter private final Predicate<PoseObservation> cameraFilter;

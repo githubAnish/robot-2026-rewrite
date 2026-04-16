@@ -3,7 +3,7 @@ package org.frogforce503.lib.auto.bline;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 

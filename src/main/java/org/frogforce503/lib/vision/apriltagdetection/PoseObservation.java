@@ -1,30 +1,44 @@
 package org.frogforce503.lib.vision.apriltagdetection;
 
+import org.photonvision.EstimatedRobotPose;
+
 import edu.wpi.first.math.geometry.Pose3d;
 
-/**
- * Record representing a pose observation of the robot in 3D space made by an AprilTagIO.
- * 
- * @param timestamp The timestamp of the observation in seconds.
- * @param robotPose The pose of the robot in 3D space.
- * @param poseObservationType The type of pose observation (e.g., single tag, multi-tag, etc.).
- * @param usedAprilTags The AprilTags used in this observation.
- */
+/** Represents a pose observation of the robot in 3D space made by an AprilTagIO. */
 public record PoseObservation (
     double timestamp,
     Pose3d robotPose,
     PoseObservationType poseObservationType,
     TrackedAprilTag[] usedAprilTags
 ) {
-    public PoseObservation() {
-        this(0.0, new Pose3d(), PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR, new TrackedAprilTag[0]);
-    }
+    public static PoseObservation kZero =
+        new PoseObservation(
+            0.0,
+            Pose3d.kZero,
+            PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR,
+            new TrackedAprilTag[0]);
 
-    /**
-     * Returns whether the pose observation is real.
-     * 
-     * @return True if the pose observation uses any tags; otherwise, false.
-     */
+    public PoseObservation(EstimatedRobotPose estimatedRobotPose, PoseObservationType poseObservationType) {
+        this(
+            estimatedRobotPose.timestampSeconds,
+            estimatedRobotPose.estimatedPose,
+            poseObservationType, // Use primary if multiple tags are used, otherwise use secondary
+            estimatedRobotPose.targetsUsed
+                .stream()
+                .map(
+                    tag ->
+                        new TrackedAprilTag(
+                            tag.getFiducialId(),
+                            tag.getPitch(),
+                            tag.getYaw(),
+                            tag.getArea(),
+                            tag.getBestCameraToTarget().getTranslation().getNorm(),
+                            tag.getPoseAmbiguity())
+                )
+                .toArray(TrackedAprilTag[]::new)
+        );
+    }
+    
     public boolean isReal() {
         return usedAprilTags.length > 0;
     }

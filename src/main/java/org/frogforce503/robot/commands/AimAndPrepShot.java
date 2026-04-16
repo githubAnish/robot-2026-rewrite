@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.frogforce503.lib.io.JoystickUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;

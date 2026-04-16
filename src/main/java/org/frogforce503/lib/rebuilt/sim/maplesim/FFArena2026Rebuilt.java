@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt.maplesim;
+package org.frogforce503.lib.rebuilt.sim.maplesim;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
@@ -23,7 +23,7 @@ import java.util.List;
 import org.dyn4j.dynamics.Settings;
 import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.util.Zone;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;

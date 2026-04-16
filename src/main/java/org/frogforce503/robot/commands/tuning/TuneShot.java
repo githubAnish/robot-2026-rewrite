@@ -1,7 +1,6 @@
 package org.frogforce503.robot.commands.tuning;
 
 import org.frogforce503.lib.logging.LoggedTunableNumber;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
@@ -81,7 +80,7 @@ public class TuneShot extends Command {
             return;
         }
 
-        final String prefix = FieldConstants.inAllianceZone(drive.getPose()) ? "hub" : "lob";
+        final String prefix = ShotCalculator.inAllianceZone(drive.getPose()) ? "hub" : "lob";
 
         hoodMapEntries +=
             prefix + "HoodAngleMap.put(" + launcherToTargetDistance + ", Units.degreesToRadians(" + hoodAngleDeg.get() + "));\n";

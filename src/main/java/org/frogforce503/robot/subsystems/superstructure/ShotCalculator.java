@@ -1,10 +1,22 @@
 package org.frogforce503.robot.subsystems.superstructure;
 
+import java.util.Set;
+
+import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.math.GeomUtil;
+import org.frogforce503.robot.Constants;
+import org.frogforce503.robot.FieldConstants;
+import org.frogforce503.robot.FieldConstants.Lines;
+import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,13 +24,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import lombok.Getter;
 import lombok.Setter;
-
-import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.math.MathUtils;
-import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.constants.field.FieldConstants;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.littletonrobotics.junction.Logger;
 
 public class ShotCalculator {
     private static ShotCalculator instance;
@@ -40,11 +45,14 @@ public class ShotCalculator {
 
     private final double phaseDelay = 0.03;
 
-    public final double minDistanceHubShoot = 0.8789512555744705;
-    public final double maxDistanceHubShoot = 6.011086792618746;
+    public static final double minDistanceHubShoot = 0.8789512555744705;
+    public static final double maxDistanceHubShoot = 6.011086792618746;
 
-    public final double minDistanceLobShoot = 4.548765387286399;
-    public final double maxDistanceLobShoot = 15.0;
+    public static final double minDistanceLobShoot = 4.548765387286399;
+    public static final double maxDistanceLobShoot = 15.0;
+
+    private static final Transform2d depotLobPoseOffset = GeomUtil.toTransform2d(Units.inchesToMeters(36), 0);
+    private static final Transform2d outpostLobPoseOffset = GeomUtil.toTransform2d(Units.inchesToMeters(36), Units.inchesToMeters(18));
 
     // Maps
     private final InterpolatingDoubleTreeMap hubHoodAngleMap = new InterpolatingDoubleTreeMap();
@@ -125,11 +133,39 @@ public class ShotCalculator {
         return hubTimeOfFlightMap.get(maxDistanceHubShoot);
     }
 
-    public boolean isShotDistanceValid(Pose2d robotPose) {
+    public static boolean inAllianceZone(Pose2d robotPose) {
+        return AllianceFlipUtil.applyX(robotPose.getX()) < Lines.blueInitLineX;
+    }
+
+    private static Translation2d getDepotLobPose() {
         return
-            FieldConstants.inAllianceZone(robotPose)
-                ? MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceHubShoot, maxDistanceHubShoot)
-                : MathUtils.inRange(latestShotInfo.launcherToTargetDistance(), minDistanceLobShoot, maxDistanceLobShoot);
+            AllianceFlipUtil.apply(
+                FieldConstants.Depot.blue
+                    .getCenter()
+                    .plus(depotLobPoseOffset)
+                    .getTranslation());
+    }
+
+    private static Translation2d getOutpostLobPose() {
+        return
+            AllianceFlipUtil.apply(
+                FieldConstants.Outpost.blue
+                    .plus(outpostLobPoseOffset)
+                    .getTranslation());
+    }
+
+    /**
+     * Returns the hub shot pose when the robot is in the alliance zone;
+     * otherwise returns the nearest lob shot pose (Depot or Outpost).
+     */
+    public static Translation3d getShotTarget(Pose2d robotPose) {
+        return
+            inAllianceZone(robotPose)
+                ? AllianceFlipUtil.apply(FieldConstants.Hub.blueShotPose)
+                : new Translation3d(
+                    robotPose
+                        .getTranslation()
+                        .nearest(Set.of(getDepotLobPose(), getOutpostLobPose())));
     }
 
     public ShotInfo calculateShotInfo(Pose2d robotPose, ChassisSpeeds robotRelativeVelocity, ChassisSpeeds fieldRelativeVelocity) {
@@ -138,11 +174,11 @@ public class ShotCalculator {
         }
 
         // Get inputs
-        final boolean isHubShot = FieldConstants.inAllianceZone(robotPose);
-        final Translation2d target = FieldConstants.getShotTarget(robotPose).toTranslation2d();
-        final InterpolatingDoubleTreeMap hoodAngleMap = isHubShot ? hubHoodAngleMap : lobHoodAngleMap;
-        final InterpolatingDoubleTreeMap flywheelsSpeedMap = isHubShot ? hubFlywheelsSpeedMap : lobFlywheelsSpeedMap;
-        final InterpolatingDoubleTreeMap timeOfFlightMap = isHubShot ? hubTimeOfFlightMap : lobTimeOfFlightMap;
+        boolean isHubShot = inAllianceZone(robotPose);
+        Translation2d target = ShotCalculator.getShotTarget(robotPose).toTranslation2d();
+        InterpolatingDoubleTreeMap hoodAngleMap = isHubShot ? hubHoodAngleMap : lobHoodAngleMap;
+        InterpolatingDoubleTreeMap flywheelsSpeedMap = isHubShot ? hubFlywheelsSpeedMap : lobFlywheelsSpeedMap;
+        InterpolatingDoubleTreeMap timeOfFlightMap = isHubShot ? hubTimeOfFlightMap : lobTimeOfFlightMap;
 
         // Calculate estimated pose while accounting for phase delay
         robotPose =
@@ -164,7 +200,9 @@ public class ShotCalculator {
             DriverStation.isAutonomous()
                 ? robotVelocity
                 : GeomUtil.transformVelocity(
-                        robotVelocity, HoodConstants.robotToHood.getTranslation().toTranslation2d(), robotAngle);
+                        robotVelocity,
+                        HoodConstants.robotToHood.getTranslation().toTranslation2d(),
+                        robotAngle);
 
         // Account for imparted velocity by robot (launcher) to offset
         double timeOfFlight = timeOfFlightMap.get(launcherToTargetDistance);
@@ -187,7 +225,7 @@ public class ShotCalculator {
 
         // Account for launcher being off center
         Pose2d lookaheadRobotPose = lookaheadPose.transformBy(GeomUtil.toTransform2d(HoodConstants.robotToHood).inverse());
-        Rotation2d driveAngle = getDriveAngleWithLauncherOffset(lookaheadRobotPose, target);
+        Rotation2d driveAngle = getDriveAngleWithShooterOffset(lookaheadRobotPose, target);
 
         // Calculate remaining parameters
         double hoodAngle = hoodAngleMap.get(lookaheadLauncherToTargetDistance);
@@ -237,7 +275,7 @@ public class ShotCalculator {
         latestShotInfo = null;
     }
 
-    private static Rotation2d getDriveAngleWithLauncherOffset(Pose2d robotPose, Translation2d target) {
+    private static Rotation2d getDriveAngleWithShooterOffset(Pose2d robotPose, Translation2d target) {
         Rotation2d fieldToTargetAngle =
             target
                 .minus(robotPose.getTranslation())
@@ -265,11 +303,4 @@ public class ShotCalculator {
         double hoodVelocityRadPerSec,
         double flywheelsVelocityRadPerSec,
         double launcherToTargetDistance) {}
-
-    public enum ShotPreset {
-        NONE,
-        BATTER, // Up against hub
-        TRENCH, // Robot center on initiation line
-        TOWER // Near climb positions
-    }
 }

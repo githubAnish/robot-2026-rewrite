@@ -3,7 +3,7 @@ package org.frogforce503.lib.math;
 import java.util.function.UnaryOperator;
 
 import org.frogforce503.lib.util.Zone;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;

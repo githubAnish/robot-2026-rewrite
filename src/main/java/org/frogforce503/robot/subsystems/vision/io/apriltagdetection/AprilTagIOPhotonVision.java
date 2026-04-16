@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.lib.vision.apriltagdetection.*;
@@ -16,75 +17,40 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
 
 import lombok.Getter;
 
-/**
- * An implementation of the AprilTagIO interface.
- * 
- * Represents a camera running PhotonVision for AprilTag detection
- */
 public class AprilTagIOPhotonVision implements AprilTagIO {
-    private CameraName cameraName;
+    @Getter private final PhotonCamera camera;
+    @Getter private final CameraName cameraName;
+    @Getter private Transform3d robotToCameraOffset;
 
-    @Getter private PhotonCamera camera; // Represents the camera used for AprilTag detection.
-    private Transform3d robotToCameraOffset;
+    private final PhotonPoseEstimator poseEstimator;
+    
+    private PhotonPipelineResult latestResult;
+    private List<PhotonTrackedTarget> allTrackedAprilTags;
+    private EstimatedRobotPose lastEstimatedRobotPose;
 
-    private PhotonPoseEstimator poseEstimator; // The PhotonPoseEstimator is used to estimate the robot's pose based on the camera's latest result. It can use different strategies.
-
-    private PhotonPipelineResult latestResult; // The latest result from the PhotonCamera, which contains information about detected AprilTags.
-    private List<PhotonTrackedTarget> allTrackedAprilTags; // The list of tracked april tags from the latest result, including ignored ones.
-    private EstimatedRobotPose lastEstimatedRobotPose; // The last estimated robot pose from the pose estimator.
-
-    // Corresponds to pose strategies used by the PhotonPoseEstimator.
     private PoseObservationType primaryPoseObservationType;
     private PoseObservationType secondaryPoseObservationType;
 
-    Set<Integer> ignoredAprilTagIDs = new HashSet<>(); //Set of AprilTag IDs that should be ignored for pose estimation.
+    private Set<Integer> ignoredAprilTagIDs = new HashSet<>();
     
-    //Constructors
-    /**
-     * @param cameraName The enum representing name of the camera configured in PhotonVision
-     * @param aprilTagFieldLayout The AprilTagFieldLayout to use for pose estimation
-    */
-    public AprilTagIOPhotonVision(CameraName cameraName, AprilTagFieldLayout aprilTagFieldLayout) {
-        this.cameraName = cameraName;
+    public AprilTagIOPhotonVision(CameraName cameraName) {
         this.camera = new PhotonCamera(cameraName.name());
-        if (VisionConstants.robotToFixedCameraOffsets.containsKey(cameraName)) {
-            this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
-        }
+        this.cameraName = cameraName;
+        this.robotToCameraOffset = VisionConstants.robotToFixedCameraOffsets.get(cameraName);
 
-
-        poseEstimator = new PhotonPoseEstimator(
-            aprilTagFieldLayout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            robotToCameraOffset
-        );
+        poseEstimator =
+            new PhotonPoseEstimator(
+                FieldConstants.aprilTagFieldLayout,
+                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                robotToCameraOffset);
 
         setPoseObservationType(PoseObservationType.MULTI_TAG_PNP_ON_COPROCESSOR);
-    }
-
-    /**
-     * @param cameraName The enum representing name of the camera configured in PhotonVision
-    */
-    public AprilTagIOPhotonVision(CameraName cameraName) {
-        this(cameraName,AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField));
-    }
-
-    //VisionIO
-    @Override
-    public CameraName getCameraName() {
-        return cameraName;
-    }
-
-    @Override
-    public Transform3d getRobotToCameraOffset() {
-        return robotToCameraOffset;
     }
 
     @Override
@@ -105,11 +71,10 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
         if (camera.isConnected()) {
             return camera.getPipelineIndex();
         } else {
-            return -1; //Return an invalid index if the camera is not connected
+            return -1;
         }
     }
 
-    // AprilTagIO
     @Override
     public void updateInputs(AprilTagInputs inputs) {
         inputs.connected = camera.isConnected();
@@ -131,15 +96,21 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
             List<PhotonPipelineResult> results = camera.getAllUnreadResults();
 
             if (!results.isEmpty()) {
-                int i = results.size() - 1;
-                PhotonPipelineResult result = results.get(i); // Get the most recent result
+                PhotonPipelineResult result = results.get(results.size() - 1); // Get most recent result
 
-                while (!result.hasTargets() && i > 0) {
-                    i--;
-                    result = results.get(i); // Get the most recent result with targets
+                // Remove tags that are absolutely horrible to detect to avoid unnecessary logging while processing inputs
+                for (int i = result.targets.size() - 1; i >= 0; i--) {
+                    PhotonTrackedTarget aprilTag = result.getTargets().get(i);
+
+                    boolean tooAmbiguous = aprilTag.getPoseAmbiguity() > VisionConstants.ABSOLUTE_MAX_AMBIGUITY;
+                    boolean tooFar = aprilTag.getBestCameraToTarget().getTranslation().getNorm() > VisionConstants.ABSOLUTE_MAX_DISTANCE_TO_TAG;
+
+                    if (tooAmbiguous || tooFar) {
+                        result.targets.remove(i);
+                    }
                 }
 
-                // Don't persist an old result if it doesn't have any targets or if the new result has targets
+                // Don't persist old result if it doesn't have any targets or if the new result has targets
                 if (latestResult == null || !latestResult.hasTargets() || (latestResult.hasTargets() && result.hasTargets())) {
                     latestResult = result;
                     inputs.persistingOldResults = false;
@@ -149,29 +120,34 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
                 allTrackedAprilTags = latestResult.getTargets();
 
                 inputs.hasTargets = latestResult.hasTargets();
-                inputs.trackedAprilTags = latestResult.targets.stream()
-                    .map(tag -> new TrackedAprilTag(
-                            tag.getFiducialId(),
-                            tag.getPitch(),
-                            tag.getYaw(),
-                            tag.getArea(),
-                            tag.getBestCameraToTarget().getTranslation().getNorm(),
-                            tag.getPoseAmbiguity()
-                            )
+                inputs.trackedAprilTags =
+                    latestResult.targets
+                        .stream()
+                        .map(
+                            tag ->
+                                new TrackedAprilTag(
+                                    tag.getFiducialId(),
+                                    tag.getPitch(),
+                                    tag.getYaw(),
+                                    tag.getArea(),
+                                    tag.getBestCameraToTarget().getTranslation().getNorm(),
+                                    tag.getPoseAmbiguity())
                         )
-                    .toArray(TrackedAprilTag[]::new);
+                        .toArray(TrackedAprilTag[]::new);
             }
         }
     }
 
     @Override
     public PoseObservation estimateRobotPose() {
-        PoseObservation poseObservation = new PoseObservation();
+        PoseObservation poseObservation = PoseObservation.kZero;
 
         if (latestResult != null && allTrackedAprilTags != null) { // Only use pose estimator if there are tracked AprilTags
-            latestResult.targets = allTrackedAprilTags.stream()
-                .filter(tag -> !ignoredAprilTagIDs.contains(tag.getFiducialId())) // Filter out ignored tags
-                .toList();
+            latestResult.targets =
+                allTrackedAprilTags
+                    .stream()
+                    .filter(tag -> !ignoredAprilTagIDs.contains(tag.getFiducialId())) // Filter out ignored tags
+                    .toList();
 
             Optional<EstimatedRobotPose> optionalRobotPose = poseEstimator.update(latestResult);
 
@@ -180,25 +156,15 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
             }
 
             if (lastEstimatedRobotPose != null) {
-                poseObservation = new PoseObservation(
-                    lastEstimatedRobotPose.timestampSeconds,
-                    lastEstimatedRobotPose.estimatedPose,
-                    lastEstimatedRobotPose.targetsUsed.size() > 1 ? primaryPoseObservationType : secondaryPoseObservationType, // Use primary if multiple tags are used, otherwise use secondary
-                    lastEstimatedRobotPose.targetsUsed.stream()
-                        .map(tag -> new TrackedAprilTag(
-                                tag.getFiducialId(),
-                                tag.getPitch(),
-                                tag.getYaw(),
-                                tag.getArea(),
-                                tag.getBestCameraToTarget().getTranslation().getNorm(),
-                                tag.getPoseAmbiguity()
-                                )
-                            )
-                        .toArray(TrackedAprilTag[]::new)
-                );
+                poseObservation =
+                    new PoseObservation(
+                        lastEstimatedRobotPose,
+                        lastEstimatedRobotPose.targetsUsed.size() > 1
+                            ? primaryPoseObservationType
+                            : secondaryPoseObservationType);
             }
 
-            latestResult.targets = allTrackedAprilTags.stream().toList(); // Restore the original list of targets
+            latestResult.targets = allTrackedAprilTags.stream().toList(); // Restore original list of targets
         }
 
         return poseObservation;
@@ -210,16 +176,19 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
             case MEGATAG1:
                 System.out.println("Not valid for PhotonVision");
                 break;
+
             case MEGATAG2:
                 System.out.println("Not valid for PhotonVision");
                 break;
-            case MULTI_TAG_PNP_ON_COPROCESSOR: //PhotonVision PoseObservationType that requires a multi-tag fallback
+
+            case MULTI_TAG_PNP_ON_COPROCESSOR: // PhotonVision PoseObservationType that requires a multi-tag fallback
                 poseEstimator.setPrimaryStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR);
-                poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE); //default fallback strategy
+                poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE); // default fallback strategy
 
                 primaryPoseObservationType = poseObservationType;
-                secondaryPoseObservationType = PoseObservationType.CLOSEST_TO_REFERENCE_POSE; //Set the secondary pose observation type to the fallback strategy
+                secondaryPoseObservationType = PoseObservationType.CLOSEST_TO_REFERENCE_POSE; // Set the secondary pose observation type to the fallback strategy
                 break;
+
             default:
                 poseEstimator.setPrimaryStrategy(PoseStrategy.valueOf(poseObservationType.name()));
                 poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.valueOf(poseObservationType.name()));
@@ -238,12 +207,15 @@ public class AprilTagIOPhotonVision implements AprilTagIO {
             case MEGATAG1:
                 System.out.println("Not valid for PhotonVision");
                 break;
+
             case MEGATAG2:
                 System.out.println("Not valid for PhotonVision");
                 break;
+
             case MULTI_TAG_PNP_ON_COPROCESSOR:
                 System.out.println("Not valid for PhotonVision");
                 break;
+
             default: // Secondary PoseObservationType is a multi-tag fallback strategy for PhotonVision.
                 poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.valueOf(poseObservationType.name()));
                 break;

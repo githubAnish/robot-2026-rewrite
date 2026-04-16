@@ -14,7 +14,7 @@ import lombok.experimental.ExtensionMethod;
 import java.util.Optional;
 
 import org.frogforce503.lib.io.JoystickUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;

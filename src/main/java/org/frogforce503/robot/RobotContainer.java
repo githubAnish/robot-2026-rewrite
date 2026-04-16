@@ -3,6 +3,7 @@ package org.frogforce503.robot;
 import java.util.function.Consumer;
 
 import org.frogforce503.lib.math.AllianceFlipUtil;
+import org.frogforce503.lib.math.MathUtils;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
@@ -26,7 +27,7 @@ import org.frogforce503.robot.subsystems.drive.io.DriveIOBasicSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotPreset;
+import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
 import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
 import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
@@ -52,8 +53,6 @@ import org.frogforce503.robot.subsystems.vision.Vision;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
 import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
-import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIO;
-import org.frogforce503.robot.subsystems.vision.io.objectdetection.ObjectDetectionIOPhotonSim;
 import org.frogforce503.robot.viz.GameViz;
 import org.frogforce503.robot.viz.PracticeMatchViz;
 import org.frogforce503.robot.viz.VisionSimulator;
@@ -64,7 +63,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -98,8 +96,8 @@ public class RobotContainer {
     final Trigger intakeGround = driverXbox.leftTrigger();
     final Trigger ejectIntake = driverXbox.leftBumper();
     
-    final Trigger shootHubOrLob = driverXbox.rightTrigger();
-    final Trigger aimHubOrLob = driverXbox.rightBumper();
+    final Trigger shootFuel = driverXbox.rightTrigger();
+    final Trigger aimAndPrepShot = driverXbox.rightBumper();
 
     final Trigger setBatterPreset = driverXbox.y();
     final Trigger setTrenchPreset = driverXbox.x();
@@ -136,15 +134,6 @@ public class RobotContainer {
                 case SimBot -> {
                     drive = new Drive(Constants.usingMapleSim ? new DriveIOMapleSim() : new DriveIOBasicSim());
 
-                    intakePivot = new IntakePivot(new IntakePivotIOSim());
-                    intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
-                    indexer = new Indexer(new IndexerIOSim());
-                    feeder = new Feeder(new FeederIOSim());
-                    hood = new Hood(new HoodIOSim());
-                    flywheels = new Flywheels(new FlywheelsIOSim());
-
-                    climber = new Climber(new ClimberIOSim());
-
                     vision =
                         new Vision(
                             visionEstimateConsumer,
@@ -153,10 +142,16 @@ public class RobotContainer {
                                 new AprilTagIOPhotonSim(CameraName.LEFT_CAMERA, visionViz),
                                 new AprilTagIOPhotonSim(CameraName.RIGHT_CAMERA, visionViz),
                                 new AprilTagIOPhotonSim(CameraName.BACK_CAMERA, visionViz),
-                            },
-                            new ObjectDetectionIO[] {
-                                new ObjectDetectionIOPhotonSim(CameraName.FUEL_CAMERA, visionViz)
                             });
+
+                    intakePivot = new IntakePivot(new IntakePivotIOSim());
+                    intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+                    indexer = new Indexer(new IndexerIOSim());
+                    feeder = new Feeder(new FeederIOSim());
+                    hood = new Hood(new HoodIOSim());
+                    flywheels = new Flywheels(new FlywheelsIOSim());
+
+                    climber = new Climber(new ClimberIOSim());
                 }
             }
         }
@@ -164,6 +159,14 @@ public class RobotContainer {
         // No-op implementations if replay or not defined above
         if (drive == null) {
             drive = new Drive(new DriveIO() {});
+        }
+
+        if (vision == null) {
+            vision =
+                new Vision(
+                    visionEstimateConsumer,
+                    drive::getPose,
+                    new AprilTagIO[] {});
         }
 
         if (intakePivot == null) {
@@ -192,15 +195,6 @@ public class RobotContainer {
 
         if (climber == null) {
             climber = new Climber(new ClimberIO() {});
-        }
-
-        if (vision == null) {
-            vision =
-                new Vision(
-                    visionEstimateConsumer,
-                    drive::getPose,
-                    new AprilTagIO[] {},
-                    new ObjectDetectionIO[] {});
         }
 
         // Create sim requirements
@@ -242,12 +236,12 @@ public class RobotContainer {
         intakeGround
             .whileTrue(new IntakeFuelFromGround(intakePivot, intakeRoller, gameViz));
 
-        shootHubOrLob
+        shootFuel
             .whileTrue(new ShootFuel(indexer, gameViz))
             .and(intakeGround.negate())
             .whileTrue(new PutIntakeUpForShoot(intakePivot, intakeRoller, gameViz));
 
-        aimHubOrLob
+        aimAndPrepShot
             .whileTrue(new AimAndPrepShot(drive, feeder, hood, flywheels, driverXbox));
 
         ejectIntake
@@ -301,7 +295,11 @@ public class RobotContainer {
                 drive.getFieldVelocity());
 
         // Check if shot feasible
-        boolean shotDistanceValid = ShotCalculator.getInstance().isShotDistanceValid(drive.getPose());
+        boolean shotDistanceValid =
+            ShotCalculator.inAllianceZone(drive.getPose())
+                ? MathUtils.inRange(shotInfo.launcherToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot)
+                : MathUtils.inRange(shotInfo.launcherToTargetDistance(), ShotCalculator.minDistanceLobShoot, ShotCalculator.maxDistanceLobShoot);
+                
         boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getRotation().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
         boolean flywheelsAtGoal = flywheels.isAtVelocity(shotInfo.flywheelsVelocityRadPerSec(), FlywheelsConstants.tolerance);
@@ -311,7 +309,7 @@ public class RobotContainer {
 
         ShotCalculator.getInstance().setShotFeasible(
             isCalculatedShotFeasible ||
-            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // shot feasible = true (if using preset)
+            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // shot feasible is true (if using preset)
 
         // Log data
         Logger.recordOutput("ShotCalculator/Shot Distance Valid?", shotDistanceValid);
@@ -357,18 +355,6 @@ public class RobotContainer {
     }
 
     public void test() {
-        // RobotModeTriggers.teleop().onTrue(Commands.run(() -> {
-        //     // MapleSimUtil.logObstaclesInArena(drive.getViz());
-
-        //     // drive.getViz().getObject("ajdoisad").setPose(FieldConstants.Tower.getPreClimbPose(drive.getPose()));
-        //     // Logger.recordOutput("ajdoisad", FieldConstants.Tower.getPreClimbPose(drive.getPose()));
-
-        //     // drive.getViz().getObject("ajdoisad1").setPose(FieldConstants.Tower.getClimbPose(drive.getPose()));
-        //     // Logger.recordOutput("ajdoisad1", FieldConstants.Tower.getClimbPose(drive.getPose()));
-
-        //     // FieldConstants.Tower.blue.log("asdausd", drive.getViz());
-
-        //     // new Zone(drive.getPose(), DriveConstants.bumperLength - Units.inchesToMeters(6), DriveConstants.bumperWidth - Units.inchesToMeters(6)).log("drivepose", drive.getViz());
-        // }));
+        
     }
 }

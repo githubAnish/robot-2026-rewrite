@@ -1,6 +1,6 @@
-package org.frogforce503.lib.rebuilt;
+package org.frogforce503.lib.rebuilt.sim;
 
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.lib.rebuilt.ClimbUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.climber.ClimberConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
@@ -187,7 +187,7 @@ public class ClimbPhysicsSim {
      */
     private void tryLatch() {
         Pose2d robotPose = drive.getPose();
-        Pose2d climbTarget = FieldConstants.Tower.getClimbPose(robotPose);
+        Pose2d climbTarget = ClimbUtil.getClimbPose(robotPose);
 
         double distToClimbPose =
             robotPose.getTranslation().getDistance(climbTarget.getTranslation());

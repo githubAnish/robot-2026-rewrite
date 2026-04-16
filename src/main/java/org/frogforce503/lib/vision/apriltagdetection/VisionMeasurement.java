@@ -15,5 +15,4 @@ import edu.wpi.first.math.numbers.N3;
 public record VisionMeasurement(
     double timestamp,
     Pose2d pose,
-    Matrix<N3, N1> standardDeviations
-) {}
+    Matrix<N3, N1> standardDeviations) {}

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.frogforce503.lib.util.ErrorUtil;
-import org.frogforce503.robot.constants.field.FieldConstants;
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.json.simple.parser.ParseException;

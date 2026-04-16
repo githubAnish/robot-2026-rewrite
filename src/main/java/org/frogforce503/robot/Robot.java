@@ -5,10 +5,9 @@ import java.lang.reflect.Field;
 import org.frogforce503.lib.logging.LoggedJVM;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.NTClientLogger;
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
-import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+import org.frogforce503.lib.rebuilt.sim.HubShiftUtil;
 import org.frogforce503.lib.util.Elastic;
-import org.frogforce503.robot.constants.field.FieldConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -32,8 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
-    private final RobotContainer robotContainer;
     private final LoggedJVM loggedJVM = new LoggedJVM();
+    private final RobotContainer robotContainer;
     
     public Robot() {
         Logger.recordMetadata("ProjectName", "FF2026_" + Constants.getRobot().name().toUpperCase()); // Set a metadata value

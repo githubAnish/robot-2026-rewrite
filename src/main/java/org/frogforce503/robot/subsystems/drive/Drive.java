@@ -1,8 +1,8 @@
 package org.frogforce503.robot.subsystems.drive;
 
 import org.frogforce503.lib.logging.LoggedTracer;
-import org.frogforce503.lib.rebuilt.TrenchCollisionSim;
 import org.frogforce503.lib.logging.LoggerUtil;
+import org.frogforce503.lib.rebuilt.sim.TrenchCollisionSim;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
@@ -24,9 +24,11 @@ public class Drive extends SubsystemBase {
     private final DriveIO io;
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
 
+    @Setter
     private TrenchCollisionSim trenchCollisionSim;
 
-    @Getter private final DriveViz viz = new DriveViz();
+    @Getter
+    private final DriveViz viz = new DriveViz();
 
     @Accessors(fluent = true)
     @Setter
@@ -88,10 +90,6 @@ public class Drive extends SubsystemBase {
     }
 
     // Control Methods
-    public void setTrenchCollisionSim(TrenchCollisionSim sim) {
-        this.trenchCollisionSim = sim;
-    }
-
     public void runVelocity(ChassisSpeeds speeds) {
         if (RobotBase.isSimulation()) {
             speeds = trenchCollisionSim.filterSpeeds(speeds, getPose(), getRotation());

@@ -1,6 +1,6 @@
 package org.frogforce503.robot.viz;
 
-import org.frogforce503.lib.rebuilt.HubShiftUtil;
+import org.frogforce503.lib.rebuilt.sim.HubShiftUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;

@@ -1,5 +1,6 @@
 package org.frogforce503.robot.subsystems.vision.io.apriltagdetection;
 
+import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
 import org.frogforce503.robot.viz.VisionSimulator;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -9,47 +10,26 @@ import org.photonvision.simulation.VisionSystemSim;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 
-/**
- * An implementation of the AprilTagIO interface.
- * 
- * It extends AprilTagIOPhotonVision to simulate AprilTag detection with a PhotonVision camera using PhotonSim.
- */
 public class AprilTagIOPhotonSim extends AprilTagIOPhotonVision {
-    private PhotonCameraSim cameraSim;
-    private VisionSystemSim aprilTagDetectionSimulator;
+    private final PhotonCameraSim cameraSim;
+    private final VisionSystemSim aprilTagDetectionSimulator;
 
-    /**
-     * @param cameraName The enum representing the name of the camera configured in PhotonVision
-     * @param visionSimulator The VisionSimulator that contains the VisionSystemSim instance that the camera will be added – the simulation world for the camera.
-     * @param cameraProperties The SimCameraProperties to configure the camera simulation
-     */
-    public AprilTagIOPhotonSim(
-        CameraName cameraName, 
-        VisionSimulator visionSimulator, 
-        SimCameraProperties cameraProperties
-    ) {
-        super(cameraName, visionSimulator.getAprilTagFieldLayout());
+    public AprilTagIOPhotonSim(CameraName cameraName, VisionSimulator visionSimulator, SimCameraProperties cameraProperties) {
+        super(cameraName);
 
-        cameraSim = new PhotonCameraSim(super.getCamera(), cameraProperties,visionSimulator.getAprilTagFieldLayout());   
+        cameraSim = new PhotonCameraSim(super.getCamera(), cameraProperties, FieldConstants.aprilTagFieldLayout);   
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
         cameraSim.enableDrawWireframe(true);
 
-        this.aprilTagDetectionSimulator = visionSimulator.getAprilTagDetectionSimulator();
+        aprilTagDetectionSimulator = visionSimulator.getAprilTagDetectionSimulator();
         aprilTagDetectionSimulator.addCamera(cameraSim, super.getRobotToCameraOffset());
     }
 
-    /**
-     * @param cameraName The enum representing the name of the camera configured in PhotonVision
-     * @param visionSimulator The VisionSimulator that contains the VisionSystemSim instance that the camera will be added – the simulation world for the camera.
-     */
-    public AprilTagIOPhotonSim(
-        CameraName cameraName, 
-        VisionSimulator visionSimulator
-    ) {
+    public AprilTagIOPhotonSim(CameraName cameraName, VisionSimulator visionSimulator) {
         this(
             cameraName,  
-            visionSimulator, 
+            visionSimulator,
             new SimCameraProperties()
                 .setCalibration(1280, 800, Rotation2d.fromDegrees(78.2))
                 .setCalibError(0.25, 0.08)

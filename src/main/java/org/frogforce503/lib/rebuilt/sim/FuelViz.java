@@ -1,4 +1,4 @@
-package org.frogforce503.lib.rebuilt;
+package org.frogforce503.lib.rebuilt.sim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import org.frogforce503.lib.rebuilt.maplesim.MapleSimUtil;
 import org.ironmaple.simulation.SimulatedArena;
 
 import edu.wpi.first.math.geometry.Pose3d;
