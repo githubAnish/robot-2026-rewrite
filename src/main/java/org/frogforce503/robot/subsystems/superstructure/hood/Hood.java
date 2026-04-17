@@ -30,7 +30,6 @@ public class Hood extends FFSubsystemBase {
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
     @Getter private State setpoint = new State();
-    private boolean atGoal = false;
 
     public Hood(HoodIO io) {
         this.io = io;
@@ -56,7 +55,7 @@ public class Hood extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, HoodConstants.fixedTolerance);
+            boolean atGoal = isAtAngle(goalState.position, HoodConstants.fixedTolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.position, setpoint.velocity, accel));
@@ -87,7 +86,7 @@ public class Hood extends FFSubsystemBase {
         return inputs.positionRad;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -102,6 +101,7 @@ public class Hood extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
         io.runVolts(volts);

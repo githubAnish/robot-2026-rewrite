@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
-/** Use this executor to tune any subsystem (should be a subclass of {@link SubsystemBase}) with SysId. */
+/** Use this executor to tune any subsystem (needs to be subclass of {@link SubsystemBase}) with SysId. */
 public class SysIdExecutor {
     private final Consumer<Voltage> consumer;
     private final SysIdRoutine routine;

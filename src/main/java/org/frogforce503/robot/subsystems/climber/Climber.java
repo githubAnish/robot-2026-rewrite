@@ -29,8 +29,7 @@ public class Climber extends FFSubsystemBase {
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
     @Getter private State setpoint = new State();
-    private boolean atGoal = false;
-
+    
     public Climber(ClimberIO io) {
         this.io = io;
         
@@ -63,7 +62,7 @@ public class Climber extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtHeight(goalState.position, ClimberConstants.tolerance);
+            boolean atGoal = isAtHeight(goalState.position, ClimberConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.velocity, accel));
@@ -99,7 +98,7 @@ public class Climber extends FFSubsystemBase {
         return inputs.velocityMetersPerSec;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -114,6 +113,7 @@ public class Climber extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
 

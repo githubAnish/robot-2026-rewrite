@@ -1,7 +1,6 @@
 package org.frogforce503.robot;
 
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.lib.util.Zone;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -36,7 +35,7 @@ public class FieldConstants {
         return
             aprilTagFieldLayout
                 .getTagPose(tagId)
-                .orElseThrow(() -> new IllegalArgumentException("No tag with ID " + tagId + " found in layout" + ErrorUtil.attachJavaClassName(FieldConstants.class)))
+                .orElseThrow(() -> new IllegalArgumentException("No tag with ID " + tagId + " found in layout."))
                 .toPose2d();
     }
 

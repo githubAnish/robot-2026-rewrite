@@ -22,8 +22,7 @@ public class Indexer extends FFSubsystemBase {
     private double targetVelocityRadPerSec = IndexerConstants.START;
 
     private boolean shouldRunVelocity = false;
-    private boolean atGoal = false;
-
+    
     public Indexer(IndexerIO io) {
         this.io = io;
 
@@ -39,7 +38,7 @@ public class Indexer extends FFSubsystemBase {
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, IndexerConstants.tolerance);
+            boolean atGoal = isAtVelocity(targetVelocityRadPerSec, IndexerConstants.tolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state
@@ -64,7 +63,7 @@ public class Indexer extends FFSubsystemBase {
         return inputs.velocityRadPerSec;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -79,6 +78,7 @@ public class Indexer extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunVelocity = false;
         io.runVolts(volts);

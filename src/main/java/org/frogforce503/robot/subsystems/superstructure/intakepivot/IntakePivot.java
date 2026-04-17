@@ -29,8 +29,7 @@ public class IntakePivot extends FFSubsystemBase {
     private boolean shouldRunProfile = true;
     @Setter private TrapezoidProfile profile;
     @Getter private State setpoint = new State();
-    private boolean atGoal = false;
-
+    
     public IntakePivot(IntakePivotIO io) {
         this.io = io;
 
@@ -55,7 +54,7 @@ public class IntakePivot extends FFSubsystemBase {
             double previousVelocity = setpoint.velocity;
 
             setpoint = profile.calculate(Constants.loopPeriodSecs, setpoint, goalState);
-            atGoal = isAtAngle(goalState.position, IntakePivotConstants.tolerance);
+            boolean atGoal = isAtAngle(goalState.position, IntakePivotConstants.tolerance);
 
             double accel = (setpoint.velocity - previousVelocity) / Constants.loopPeriodSecs;
             io.runPosition(setpoint.position, feedforward.calculate(setpoint.position, setpoint.velocity, accel));
@@ -86,7 +85,7 @@ public class IntakePivot extends FFSubsystemBase {
         return inputs.positionRad;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -101,6 +100,7 @@ public class IntakePivot extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
         io.runVolts(volts);

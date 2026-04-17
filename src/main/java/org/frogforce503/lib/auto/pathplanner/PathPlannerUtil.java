@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.frogforce503.lib.util.ErrorUtil;
 import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
@@ -47,7 +46,7 @@ public final class PathPlannerUtil {
                 drive);
 
         } catch (IOException | ParseException e) {
-            System.out.println("Failed to load PathPlanner config and configure AutoBuilder" + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
+            System.out.println("Failed to load PathPlanner config and configure AutoBuilder.");
             e.printStackTrace();
         }
     }
@@ -64,7 +63,7 @@ public final class PathPlannerUtil {
         try {
             return PathPlannerPath.fromPathFile(name);
         } catch (FileVersionException | IOException | ParseException e) {
-            System.out.println("Error loading path " + name + ErrorUtil.attachJavaClassName(PathPlannerUtil.class));
+            System.out.println("Error loading path " + name + ".");
             e.printStackTrace();
             return null;
         }

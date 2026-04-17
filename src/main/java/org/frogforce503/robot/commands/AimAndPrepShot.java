@@ -141,9 +141,9 @@ public class AimAndPrepShot extends Command {
         }
 
         // Run subsystems
+        feeder.setVelocity(FeederConstants.SHOOT);
         hood.setAngle(hoodAngleRad, hoodVelocityRadPerSec);
         flywheels.setVelocity(flywheelsVelocityRadPerSec);
-        feeder.setVelocity(FeederConstants.SHOOT);
     }
 
     private void aimAtTarget(ShotInfo shotInfo) {

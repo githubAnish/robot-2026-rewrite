@@ -27,8 +27,7 @@ public class Flywheels extends FFSubsystemBase {
     private boolean shouldRunProfile = false;
     @Setter private SlewRateLimiter profile;
     @Getter private double setpoint = 0.0;
-    private boolean atGoal = false;
-
+    
     public Flywheels(FlywheelsIO io) {
         this.io = io;
 
@@ -48,7 +47,7 @@ public class Flywheels extends FFSubsystemBase {
             double previousVelocity = setpoint;
 
             setpoint = profile.calculate(targetVelocityRadPerSec);
-            atGoal = isAtVelocity(targetVelocityRadPerSec, FlywheelsConstants.tolerance);
+            boolean atGoal = isAtVelocity(targetVelocityRadPerSec, FlywheelsConstants.tolerance);
 
             double accel = (setpoint - previousVelocity) / Constants.loopPeriodSecs;
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec, accel));
@@ -78,7 +77,7 @@ public class Flywheels extends FFSubsystemBase {
         return inputs.leaderVelocityRadPerSec;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -93,6 +92,7 @@ public class Flywheels extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
         io.runVolts(volts);

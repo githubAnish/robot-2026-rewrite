@@ -4,10 +4,16 @@ import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
 import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
+import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
 import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
 import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
+import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.viz.GameViz;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -19,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 /** Tunes hood angle and flywheels speed for a specific distance or preset. */
 public class TuneShot extends Command {
     private final Drive drive;
+    private final Indexer indexer;
+    private final Feeder feeder;
     private final Hood hood;
     private final Flywheels flywheels;
     private final GameViz gameViz;
@@ -38,20 +46,24 @@ public class TuneShot extends Command {
     private String hoodMapEntries = "";
     private String flywheelsMapEntries = "";
 
-    public TuneShot(Drive drive, Hood hood, Flywheels flywheels, GameViz gameViz) {
+    public TuneShot(
+        Drive drive,
+        Indexer indexer,
+        Feeder feeder,
+        Hood hood,
+        Flywheels flywheels,
+        GameViz gameViz
+    ) {
         this.drive = drive;
+        this.indexer = indexer;
+        this.feeder = feeder;
         this.hood = hood;
         this.flywheels = flywheels;
         this.gameViz = gameViz;
     }
 
     @Override
-    public void initialize() {
-        super.initialize();
-
-        flywheelsVelocityRpm.setTuningMode(true);
-        hoodAngleDeg.setTuningMode(true);
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
@@ -63,6 +75,8 @@ public class TuneShot extends Command {
                 drive.getFieldVelocity());
 
         // Run subsystems
+        indexer.setVelocity(IndexerConstants.SHOOT);
+        feeder.setVelocity(FeederConstants.SHOOT);
         hood.setAngle(Units.degreesToRadians(hoodAngleDeg.get()), 0.0);
         flywheels.setVelocity(Units.rotationsPerMinuteToRadiansPerSecond(flywheelsVelocityRpm.get()));
 
@@ -72,15 +86,16 @@ public class TuneShot extends Command {
         }
 
         // Record shot
-        recordShot(shotInfo.launcherToTargetDistance());
+        if (recordShot.get()) {
+            recordShot(shotInfo.launcherToTargetDistance());
+
+            recordShot.set(false);
+        }
     }
 
     private void recordShot(double launcherToTargetDistance) {
-        if (!recordShot.get()) {
-            return;
-        }
-
-        final String prefix = ShotCalculator.inAllianceZone(drive.getPose()) ? "hub" : "lob";
+        final String prefix =
+            ShotCalculator.inAllianceZone(drive.getPose()) ? "hub" : "lob";
 
         hoodMapEntries +=
             prefix + "HoodAngleMap.put(" + launcherToTargetDistance + ", Units.degreesToRadians(" + hoodAngleDeg.get() + "));\n";
@@ -89,7 +104,5 @@ public class TuneShot extends Command {
             prefix + "FlywheelSpeedMap.put(" + launcherToTargetDistance + ", Units.rotationsPerMinuteToRadiansPerSecond(" + flywheelsVelocityRpm.get() + "));\n";
 
         Logger.recordOutput("TuneShot/Shot Info (for map)", hoodMapEntries + "\n" + flywheelsMapEntries);
-
-        recordShot.set(false);
     }
 }

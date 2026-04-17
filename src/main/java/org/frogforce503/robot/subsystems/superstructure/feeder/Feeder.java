@@ -23,8 +23,7 @@ public class Feeder extends FFSubsystemBase {
     private double targetVelocityRadPerSec = FeederConstants.START;
 
     private boolean shouldRunVelocity = false;
-    private boolean atGoal = false;
-
+    
     public Feeder(FeederIO io) {
         this.io = io;
 
@@ -40,7 +39,7 @@ public class Feeder extends FFSubsystemBase {
 
         // Run velocity mode unless requested to stop
         if (shouldRunVelocity && RobotState.isEnabled()) {
-            atGoal = isAtVelocity(targetVelocityRadPerSec, FeederConstants.tolerance);
+            boolean atGoal = isAtVelocity(targetVelocityRadPerSec, FeederConstants.tolerance);
             io.runVelocity(targetVelocityRadPerSec, feedforward.calculate(targetVelocityRadPerSec));
 
             // Log state
@@ -65,7 +64,7 @@ public class Feeder extends FFSubsystemBase {
         return inputs.velocityRadPerSec;
     }
 
-    // Actions
+    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -80,6 +79,7 @@ public class Feeder extends FFSubsystemBase {
         io.stop();
     }
 
+    @Override
     public void runVolts(double volts) {
         shouldRunVelocity = false;
         io.runVolts(volts);
