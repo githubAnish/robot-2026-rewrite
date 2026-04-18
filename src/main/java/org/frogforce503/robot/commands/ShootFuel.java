@@ -27,13 +27,11 @@ public class ShootFuel extends Command {
         boolean isShotFeasible = ShotCalculator.getInstance().isShotFeasible();
 
         // Run indexer if shot feasible
-        if (isShotFeasible) {
-            indexer.setVelocity(IndexerConstants.SHOOT);
-        }
+        indexer.setVelocity(isShotFeasible ? IndexerConstants.SHOOT : 0.0);
 
         // Simulate shooting
         if (RobotBase.isSimulation() && isShotFeasible) {
-            gameViz.shootFuel(true);
+            gameViz.shootFuel();
         }
     }
 

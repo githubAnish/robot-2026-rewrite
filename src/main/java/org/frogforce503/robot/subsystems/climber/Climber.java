@@ -98,7 +98,6 @@ public class Climber extends FFSubsystemBase {
         return inputs.velocityMetersPerSec;
     }
 
-    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -113,7 +112,6 @@ public class Climber extends FFSubsystemBase {
         io.stop();
     }
 
-    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
 

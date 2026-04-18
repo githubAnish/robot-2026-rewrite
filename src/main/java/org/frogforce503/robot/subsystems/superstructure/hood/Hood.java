@@ -86,7 +86,6 @@ public class Hood extends FFSubsystemBase {
         return inputs.positionRad;
     }
 
-    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -101,7 +100,6 @@ public class Hood extends FFSubsystemBase {
         io.stop();
     }
 
-    @Override
     public void runVolts(double volts) {
         shouldRunProfile = false;
         io.runVolts(volts);

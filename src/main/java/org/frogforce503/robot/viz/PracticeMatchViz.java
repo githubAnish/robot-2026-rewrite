@@ -58,13 +58,12 @@ public class PracticeMatchViz extends GameViz {
     }
 
     @Override
-    public void shootFuel(boolean needFuelFromIntakeForShoot) {
+    public void shootFuel() {
         if (isMatchEnded()) {
             return;
         }
 
         super.shootFuel(
-            needFuelFromIntakeForShoot,
             () -> {
                 if (HubShiftUtil.getShiftedShiftInfo().active() && !isMatchEnded()) {
                     score++;

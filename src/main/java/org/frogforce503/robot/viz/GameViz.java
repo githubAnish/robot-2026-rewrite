@@ -121,10 +121,10 @@ public class GameViz {
         intakeSimulation.stopIntake();
     }
 
-    public void shootFuel(boolean needFuelFromIntakeForShoot, Runnable onScore) {
+    public void shootFuel(Runnable onScore) {
         int available = intakeSimulation.getGamePiecesAmount();
 
-        if (needFuelFromIntakeForShoot && available <= 0) {
+        if (available <= 0) {
             return; // Don't shoot balls if there are none
         }
 
@@ -162,8 +162,8 @@ public class GameViz {
         shotTimer.restart();
     }
 
-    public void shootFuel(boolean needFuelFromIntakeForShoot) {
-        shootFuel(needFuelFromIntakeForShoot, () -> {});
+    public void shootFuel() {
+        shootFuel(() -> {});
     }
 
     public void startClimb() {

@@ -63,7 +63,6 @@ public class IntakeRoller extends FFSubsystemBase {
         return inputs.velocityRadPerSec;
     }
 
-    @Override
     public void setPID(double kP, double kI, double kD) {
         io.setPID(kP, kI, kD);
     }
@@ -78,7 +77,6 @@ public class IntakeRoller extends FFSubsystemBase {
         io.stop();
     }
 
-    @Override
     public void runVolts(double volts) {
         shouldRunVelocity = false;
         io.runVolts(volts);

@@ -33,10 +33,6 @@ public abstract class FFSubsystemBase extends SubsystemBase {
         coastModeWhileRunning.set(RobotState.isEnabled() && coastOverride.get());
     };
 
-    protected abstract void setPID(double kP, double kI, double kD);
     protected abstract void setBrakeMode(boolean enabled);
-
     public abstract void stop();
-
-    public abstract void runVolts(double volts);
 }

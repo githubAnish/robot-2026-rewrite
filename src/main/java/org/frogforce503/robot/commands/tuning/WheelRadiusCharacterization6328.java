@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands.tuning.drive;
+package org.frogforce503.robot.commands.tuning;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

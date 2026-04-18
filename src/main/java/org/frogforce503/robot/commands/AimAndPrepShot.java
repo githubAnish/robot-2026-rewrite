@@ -152,8 +152,7 @@ public class AimAndPrepShot extends Command {
         double driverOmega = omegaSupplier.getAsDouble();
 
         // Calculate speeds
-        double xVelocity = driverLinearVelocity.getX() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
-        double yVelocity = driverLinearVelocity.getY() * translationScalarShootOnMove * DriveConstants.maxLinearSpeed;
+        Translation2d linearVelocity = driverLinearVelocity.times(translationScalarShootOnMove * DriveConstants.maxLinearSpeed);
         double omega =
             thetaController.calculate(
                 drive.getRotation().getRadians(),
@@ -163,8 +162,11 @@ public class AimAndPrepShot extends Command {
         final double thetaS = Math.abs(driverOmega) * 3.0;
         omega = MathUtil.interpolate(omega, driverOmega * maxDriverOmega, thetaS);
 
-        // Calculate speeds
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
+        ChassisSpeeds speeds =
+            new ChassisSpeeds(
+                linearVelocity.getX(),
+                linearVelocity.getY(),
+                omega);
 
         // Apply speeds
         drive.runVelocity(

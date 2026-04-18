@@ -1,4 +1,4 @@
-package org.frogforce503.robot.commands.tuning.drive;
+package org.frogforce503.robot.commands.tuning;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

@@ -72,14 +72,17 @@ public class TeleopDriveCommand extends Command {
         double rotationScalar = slowMode ? 0.25 : 1.0;
 
         // Calculate speeds
-        double xVelocity = driverLinearVelocity.getX() * DriveConstants.maxLinearSpeed * translationScalar;
-        double yVelocity = driverLinearVelocity.getY() * DriveConstants.maxLinearSpeed * translationScalar;
+        Translation2d linearVelocity = driverLinearVelocity.times(translationScalar * DriveConstants.maxLinearSpeed);
         double omega = driverOmega * DriveConstants.maxOmega * rotationScalar;
 
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, omega);
+        ChassisSpeeds speeds =
+            new ChassisSpeeds(
+                linearVelocity.getX(),
+                linearVelocity.getY(),
+                omega);
 
         // Determine teleop drive state
-        boolean isTranslating = Math.hypot(xVelocity, yVelocity) > translationDeadband;
+        boolean isTranslating = linearVelocity.getNorm() > translationDeadband;
         boolean isRotating = Math.abs(omega) > omegaDeadband;
 
         if (robotRelative) {

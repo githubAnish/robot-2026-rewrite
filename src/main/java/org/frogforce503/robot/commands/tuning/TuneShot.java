@@ -12,8 +12,6 @@ import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
 import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
 import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
 import org.frogforce503.robot.viz.GameViz;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -32,16 +30,24 @@ public class TuneShot extends Command {
     private final GameViz gameViz;
 
     private final LoggedTunableNumber hoodAngleDeg =
-        new LoggedTunableNumber("TuneShot/HoodAngleDeg", Units.radiansToDegrees(HoodConstants.START));
+        new LoggedTunableNumber(
+            "TuneShot/HoodAngleDeg",
+            Units.radiansToDegrees(HoodConstants.START));
 
     private final LoggedTunableNumber flywheelsVelocityRpm =
-        new LoggedTunableNumber("TuneShot/FlywheelsVelocityRpm", Units.radiansPerSecondToRotationsPerMinute(FlywheelsConstants.START));
+        new LoggedTunableNumber(
+            "TuneShot/FlywheelsVelocityRpm",
+            Units.radiansPerSecondToRotationsPerMinute(FlywheelsConstants.START));
 
     private final LoggedNetworkBoolean recordShot =
-        new LoggedNetworkBoolean("Tuning/TuneShot/Record Shot?", false);
+        new LoggedNetworkBoolean(
+            "Tuning/TuneShot/Record Shot?",
+            false);
 
     private final LoggedNetworkBoolean shootInSim =
-        new LoggedNetworkBoolean("Tuning/TuneShot/Shoot in Sim?", false);
+        new LoggedNetworkBoolean(
+            "Tuning/TuneShot/Shoot in Sim?",
+            false);
 
     private String hoodMapEntries = "";
     private String flywheelsMapEntries = "";
@@ -82,7 +88,7 @@ public class TuneShot extends Command {
 
         // Simulate shooting
         if (RobotBase.isSimulation() && shootInSim.getAsBoolean()) {
-            gameViz.shootFuel(false);
+            gameViz.shootFuel();
         }
 
         // Record shot
