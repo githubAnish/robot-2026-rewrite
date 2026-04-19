@@ -245,7 +245,7 @@ public class FFArena2026Rebuilt extends SimulatedArena {
                         .plus(new Translation2d(fuelDiameter.in(Meters) / 2, -(fuelDiameter.in(Meters) + Inches.of(0.5).in(Meters)))) // bottom left corner to bottom left fuel offset
                         .plus(new Translation2d(fuelDiameter.in(Meters) * x, -fuelDiameter.in(Meters) * y));
 
-                Translation2d redFuelPosition = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, blueFuelPosition);
+                Translation2d redFuelPosition = AllianceFlipUtil.flip(AllianceFlipUtil::apply, blueFuelPosition);
 
                 SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(blueFuelPosition));
                 SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(redFuelPosition));

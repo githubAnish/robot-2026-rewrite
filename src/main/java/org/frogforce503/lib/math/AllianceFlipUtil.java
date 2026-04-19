@@ -22,7 +22,7 @@ public class AllianceFlipUtil {
     }
 
     /** Applies a flip without depending on the current alliance. */
-    public static <T> T mirror(UnaryOperator<T> flipFunction, T blueValue) {
+    public static <T> T flip(UnaryOperator<T> flipFunction, T blueValue) {
         try {
             override = true;
             return flipFunction.apply(blueValue);

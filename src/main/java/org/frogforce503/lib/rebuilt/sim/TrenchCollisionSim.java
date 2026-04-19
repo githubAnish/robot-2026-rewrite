@@ -32,8 +32,8 @@ import org.littletonrobotics.junction.Logger;
  * handled independently.
  */
 public class TrenchCollisionSim {
-    private final Zone redLeftTrench = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Trench.blueLeft);
-    private final Zone redRightTrench = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Trench.blueRight);
+    private final Zone redLeftTrench = AllianceFlipUtil.flip(AllianceFlipUtil::apply, FieldConstants.Trench.blueLeft);
+    private final Zone redRightTrench = AllianceFlipUtil.flip(AllianceFlipUtil::apply, FieldConstants.Trench.blueRight);
 
     // ── Threshold ────────────────────────────────────────────────────────────────
 

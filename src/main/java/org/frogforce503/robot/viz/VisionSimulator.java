@@ -7,8 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import lombok.Getter;
 
 public class VisionSimulator {
-    @Getter
-    private final VisionSystemSim aprilTagDetectionSimulator;
+    @Getter private final VisionSystemSim aprilTagDetectionSimulator;
 
     public VisionSimulator() {
         aprilTagDetectionSimulator = new VisionSystemSim("AprilTagSimulator");

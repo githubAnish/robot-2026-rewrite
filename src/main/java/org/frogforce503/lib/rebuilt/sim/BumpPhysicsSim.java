@@ -16,8 +16,8 @@ import edu.wpi.first.math.util.Units;
 public class BumpPhysicsSim {
     private final Drive drive;
 
-    private final Zone redLeftBump = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Bump.blueLeft);
-    private final Zone redRightBump = AllianceFlipUtil.mirror(AllianceFlipUtil::apply, FieldConstants.Bump.blueRight);
+    private final Zone redLeftBump = AllianceFlipUtil.flip(AllianceFlipUtil::apply, FieldConstants.Bump.blueLeft);
+    private final Zone redRightBump = AllianceFlipUtil.flip(AllianceFlipUtil::apply, FieldConstants.Bump.blueRight);
 
     private final double gravity = 9.81;
     private final double bumpKickScalar = 0.2; // Tune this (1.0 = Perfect rigid bounce (lots of air), 0.0 = Magnetically glued to the ramp)
