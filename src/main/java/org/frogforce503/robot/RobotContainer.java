@@ -93,24 +93,24 @@ public class RobotContainer {
     private final CommandXboxController driverXbox = new CommandXboxController(0);
 
     // Main Buttons
-    final Trigger intakeGround = driverXbox.leftTrigger();
-    final Trigger ejectIntake = driverXbox.leftBumper();
+    private final Trigger intakeGround = driverXbox.leftTrigger();
+    private final Trigger ejectIntake = driverXbox.leftBumper();
     
-    final Trigger shootFuel = driverXbox.rightTrigger();
-    final Trigger aimAndPrepShot = driverXbox.rightBumper();
+    private final Trigger shootFuel = driverXbox.rightTrigger();
+    private final Trigger aimAndPrepShot = driverXbox.rightBumper();
 
-    final Trigger setBatterPreset = driverXbox.y();
-    final Trigger setTrenchPreset = driverXbox.x();
-    final Trigger setDepotPreset = driverXbox.a();
+    private final Trigger setBatterPreset = driverXbox.y();
+    private final Trigger setTrenchPreset = driverXbox.x();
+    private final Trigger setDepotPreset = driverXbox.a();
 
-    final Trigger climb = driverXbox.b();
+    private final Trigger climb = driverXbox.b();
 
     // Overrides
-    final Trigger toggleSlowMode = driverXbox.back();
-    final Trigger toggleRobotRelative = driverXbox.start();
-    final Trigger resetRobotRotation = driverXbox.povUp();
-    final Trigger xWheels = driverXbox.povDown();
-    final Trigger alignToClimb = driverXbox.povRight();
+    private final Trigger toggleSlowMode = driverXbox.back();
+    private final Trigger toggleRobotRelative = driverXbox.start();
+    private final Trigger resetRobotRotation = driverXbox.povUp();
+    private final Trigger xWheels = driverXbox.povDown();
+    private final Trigger alignToClimb = driverXbox.povRight();
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
@@ -132,7 +132,11 @@ public class RobotContainer {
                     // Not implemented
                 }
                 case SimBot -> {
-                    drive = new Drive(Constants.usingMapleSim ? new DriveIOMapleSim() : new DriveIOBasicSim());
+                    drive =
+                        new Drive(
+                            Constants.usingMapleSim
+                                ? new DriveIOMapleSim()
+                                : new DriveIOBasicSim());
 
                     vision =
                         new Vision(

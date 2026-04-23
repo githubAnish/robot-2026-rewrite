@@ -51,9 +51,6 @@ public class TrenchCollisionSim {
     private static final double TRENCH_WALL_DIST_X =
             Units.inchesToMeters(120.0) + Units.inchesToMeters(47.0 / 2.0); // ~3.6449 m
 
-    private static final double TRENCH_WALL_DIST_Y =
-            Units.inchesToMeters(73.0) + Units.inchesToMeters(47.0 / 2.0) + Units.inchesToMeters(6.0); // ~2.6035 m
-
     private static final double TRENCH_HALF_HEIGHT_Y = Units.inchesToMeters(53.0) / 2.0; // ~0.6731 m
 
     // Extra margin so we stop a little before the actual wall face

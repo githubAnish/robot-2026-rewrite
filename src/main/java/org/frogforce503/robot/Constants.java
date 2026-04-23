@@ -5,7 +5,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import edu.wpi.first.wpilibj.RobotBase;
 import lombok.Getter;
 
-/** Class containing global configuration variables describing current robot, runtime mode, & field venue. */
+/** Class containing global configuration variables describing current robot and runtime mode. */
 public class Constants {
     @Getter private static RobotType robot = RobotType.SimBot;
 
