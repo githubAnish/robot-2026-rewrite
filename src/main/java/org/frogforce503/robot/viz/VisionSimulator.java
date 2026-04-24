@@ -15,8 +15,6 @@ public class VisionSimulator {
     }
 
     public void update(Pose2d robotPose) {
-        if (aprilTagDetectionSimulator != null) {
-            aprilTagDetectionSimulator.update(robotPose);
-        }
+        aprilTagDetectionSimulator.update(robotPose);
     }
 }

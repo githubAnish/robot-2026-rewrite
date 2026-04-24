@@ -227,10 +227,6 @@ public class RobotContainer {
             Commands.runOnce(() -> hood.setAngle(HoodConstants.DUCK_UNDER_TRENCH, 0.0), hood)
                 .withName("Hood Default Command"));
 
-        flywheels.setDefaultCommand(
-            Commands.runOnce((() -> flywheels.setVelocity(FlywheelsConstants.IDLE)), flywheels)
-                .withName("Flywheels Default Command"));
-
         // Configure button bindings
         configureButtonBindings();
     }

@@ -14,20 +14,6 @@ public record FFConfig(
         this(0.0, 0.0, 0.0, 0.0);
     }
 
-    // From WPILib feedforwards
-    public FFConfig(SimpleMotorFeedforward simpleFF) {
-        this(simpleFF.getKs(), 0.0, simpleFF.getKv(), simpleFF.getKa());
-    }
-
-    public FFConfig(ElevatorFeedforward elevatorFF) {
-        this(elevatorFF.getKs(), elevatorFF.getKg(), elevatorFF.getKv(), elevatorFF.getKa());
-    }
-
-    public FFConfig(ArmFeedforward armFF) {
-        this(armFF.getKs(), armFF.getKg(), armFF.getKv(), armFF.getKa());
-    }
-
-    // To WPILib feedforwards
     public SimpleMotorFeedforward getSimpleMotorFF() {
         return new SimpleMotorFeedforward(kS(), kV(), kA());
     }
