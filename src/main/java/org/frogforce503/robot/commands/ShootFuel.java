@@ -1,8 +1,8 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.indexer.Indexer;
+import org.frogforce503.robot.subsystems.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
 import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.wpilibj.RobotBase;
@@ -24,7 +24,7 @@ public class ShootFuel extends Command {
 
     @Override
     public void execute() {
-        boolean isShotFeasible = ShotCalculator.getInstance().isShotFeasible();
+        boolean isShotFeasible = LaunchCalculator.getInstance().isShotFeasible();
 
         // Run indexer if shot feasible
         indexer.setVelocity(isShotFeasible ? IndexerConstants.SHOOT : 0.0);

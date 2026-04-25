@@ -2,7 +2,7 @@
 package org.frogforce503.robot.viz;
 
 import org.frogforce503.robot.Constants;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;

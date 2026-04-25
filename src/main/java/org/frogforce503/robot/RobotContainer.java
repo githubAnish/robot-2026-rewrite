@@ -1,10 +1,7 @@
 package org.frogforce503.robot;
 
-import java.util.function.Consumer;
-
 import org.frogforce503.lib.math.AllianceFlipUtil;
 import org.frogforce503.lib.math.MathUtils;
-import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.Constants.Mode;
 import org.frogforce503.robot.auto.AutoChooser;
 import org.frogforce503.robot.auto.WarmupExecutor;
@@ -25,34 +22,31 @@ import org.frogforce503.robot.subsystems.drive.DriveConstants;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOBasicSim;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.ShotPreset;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
-import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIO;
-import org.frogforce503.robot.subsystems.superstructure.feeder.io.FeederIOSim;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIO;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.io.FlywheelsIOSim;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIO;
-import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOSim;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIO;
-import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOSim;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIO;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOSim;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIO;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOSim;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.feeder.io.FeederIO;
+import org.frogforce503.robot.subsystems.feeder.io.FeederIOSim;
+import org.frogforce503.robot.subsystems.indexer.Indexer;
+import org.frogforce503.robot.subsystems.indexer.io.IndexerIO;
+import org.frogforce503.robot.subsystems.indexer.io.IndexerIOSim;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakepivot.io.IntakePivotIO;
+import org.frogforce503.robot.subsystems.intakepivot.io.IntakePivotIOSim;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakeroller.io.IntakeRollerIO;
+import org.frogforce503.robot.subsystems.intakeroller.io.IntakeRollerIOSim;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
+import org.frogforce503.robot.subsystems.launcher.LaunchPreset;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.launcher.flywheels.io.FlywheelsIO;
+import org.frogforce503.robot.subsystems.launcher.flywheels.io.FlywheelsIOSim;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIO;
+import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIOSim;
 import org.frogforce503.robot.subsystems.vision.Vision;
-import org.frogforce503.robot.subsystems.vision.VisionConstants.CameraName;
-import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
-import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
 import org.frogforce503.robot.viz.GameViz;
 import org.frogforce503.robot.viz.PracticeMatchViz;
 import org.frogforce503.robot.viz.VisionSimulator;
@@ -114,9 +108,6 @@ public class RobotContainer {
 
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
-
-    // Other
-    private final Consumer<VisionMeasurement> visionEstimateConsumer = visionMeasurement -> drive.addVisionMeasurement(visionMeasurement);
     
     public RobotContainer() {
         // Initialize subsystems based on robot type
@@ -139,14 +130,7 @@ public class RobotContainer {
                                 : new DriveIOBasicSim());
 
                     vision =
-                        new Vision(
-                            visionEstimateConsumer,
-                            drive::getPose,
-                            new AprilTagIO[] {
-                                new AprilTagIOPhotonSim(CameraName.LEFT_CAMERA, visionViz),
-                                new AprilTagIOPhotonSim(CameraName.RIGHT_CAMERA, visionViz),
-                                new AprilTagIOPhotonSim(CameraName.BACK_CAMERA, visionViz),
-                            });
+                        new Vision();
 
                     intakePivot = new IntakePivot(new IntakePivotIOSim());
                     intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
@@ -167,10 +151,7 @@ public class RobotContainer {
 
         if (vision == null) {
             vision =
-                new Vision(
-                    visionEstimateConsumer,
-                    drive::getPose,
-                    new AprilTagIO[] {});
+                new Vision();
         }
 
         if (intakePivot == null) {
@@ -247,9 +228,9 @@ public class RobotContainer {
         ejectIntake
             .whileTrue(new EjectFuelFromIntake(intakePivot, intakeRoller, indexer, feeder));
 
-        bindShotPreset(setBatterPreset, ShotPreset.BATTER);
-        bindShotPreset(setTrenchPreset, ShotPreset.TRENCH);
-        bindShotPreset(setDepotPreset, ShotPreset.TOWER);
+        bindShotPreset(setBatterPreset, LaunchPreset.BATTER);
+        bindShotPreset(setTrenchPreset, LaunchPreset.TRENCH);
+        bindShotPreset(setDepotPreset, LaunchPreset.TOWER);
 
         climb
             .onTrue(new RaiseClimber(climber))
@@ -280,25 +261,25 @@ public class RobotContainer {
             .whileTrue(new AlignToClimb(drive));
     }
 
-    private void bindShotPreset(Trigger trigger, ShotPreset shotPreset) {
+    private void bindShotPreset(Trigger trigger, LaunchPreset shotPreset) {
         trigger
-            .onTrue(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(shotPreset)))
-            .onFalse(Commands.runOnce(() -> ShotCalculator.getInstance().setShotPreset(ShotPreset.NONE)));
+            .onTrue(Commands.runOnce(() -> LaunchCalculator.getInstance().setShotPreset(shotPreset)))
+            .onFalse(Commands.runOnce(() -> LaunchCalculator.getInstance().setShotPreset(LaunchPreset.NONE)));
     }
 
     public void robotPeriodic() {
         // Calculate latest shot info
         ShotInfo shotInfo =
-            ShotCalculator.getInstance().calculateShotInfo(
+            LaunchCalculator.getInstance().calculateShotInfo(
                 drive.getPose(),
                 drive.getRobotVelocity(),
                 drive.getFieldVelocity());
 
         // Check if shot feasible
         boolean shotDistanceValid =
-            ShotCalculator.inAllianceZone(drive.getPose())
-                ? MathUtils.inRange(shotInfo.launcherToTargetDistance(), ShotCalculator.minDistanceHubShoot, ShotCalculator.maxDistanceHubShoot)
-                : MathUtils.inRange(shotInfo.launcherToTargetDistance(), ShotCalculator.minDistanceLobShoot, ShotCalculator.maxDistanceLobShoot);
+            LaunchCalculator.inAllianceZone(drive.getPose())
+                ? MathUtils.inRange(shotInfo.launcherToTargetDistance(), LaunchCalculator.minDistanceHubShoot, LaunchCalculator.maxDistanceHubShoot)
+                : MathUtils.inRange(shotInfo.launcherToTargetDistance(), LaunchCalculator.minDistanceLobShoot, LaunchCalculator.maxDistanceLobShoot);
                 
         boolean driveAtGoal = MathUtil.isNear(shotInfo.driveAngle().getRadians(), drive.getRotation().getRadians(), DriveConstants.aimTolerance);
         boolean hoodAtGoal = hood.isAtAngle(shotInfo.hoodAngleRad(), HoodConstants.shootOnMoveTolerance);
@@ -307,9 +288,9 @@ public class RobotContainer {
         boolean isCalculatedShotFeasible =
             shotDistanceValid && driveAtGoal && hoodAtGoal && flywheelsAtGoal;
 
-        ShotCalculator.getInstance().setShotFeasible(
+        LaunchCalculator.getInstance().setShotFeasible(
             isCalculatedShotFeasible ||
-            ShotCalculator.getInstance().getShotPreset() != ShotPreset.NONE); // shot feasible is true (if using preset)
+            LaunchCalculator.getInstance().getShotPreset() != LaunchPreset.NONE); // shot feasible is true (if using preset)
 
         // Log data
         Logger.recordOutput("ShotCalculator/Shot Distance Valid?", shotDistanceValid);
@@ -318,7 +299,7 @@ public class RobotContainer {
         Logger.recordOutput("ShotCalculator/Flywheels At Goal?", flywheelsAtGoal);
 
         // Clear latest shot info
-        ShotCalculator.getInstance().clearLatestShotInfo();
+        LaunchCalculator.getInstance().clearLatestShotInfo();
     }
 
     public void autonomousInit() {        

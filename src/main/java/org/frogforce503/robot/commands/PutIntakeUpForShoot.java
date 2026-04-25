@@ -1,9 +1,9 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivotConstants;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRollerConstants;
 import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.math.MathUtil;
@@ -19,8 +19,8 @@ public class PutIntakeUpForShoot extends Command {
     private final GameViz gameViz;
 
     private final double maxAngleWithFuelPressure = Units.degreesToRadians(30.0);
-    private final int fuelThresholdForNoPressure = 8;  // below this, no resistance
-    private final int fuelThresholdForFullPressure = 20; // above this, max resistance
+    private final int fuelThresholdForNoPressure = 8;
+    private final int fuelThresholdForFullPressure = 20;
 
     public PutIntakeUpForShoot(IntakePivot intakePivot, IntakeRoller intakeRoller, GameViz gameViz) {
         this.intakePivot = intakePivot;
@@ -41,10 +41,11 @@ public class PutIntakeUpForShoot extends Command {
         double intakePivotAngleRad = IntakePivotConstants.SHOOT;
 
         if (RobotBase.isSimulation()) {
-            intakePivotAngleRad = MathUtil.interpolate(
-                IntakePivotConstants.SHOOT,
-                maxAngleWithFuelPressure,
-                getSimPressureFactor());
+            intakePivotAngleRad =
+                MathUtil.interpolate(
+                    IntakePivotConstants.SHOOT,
+                    maxAngleWithFuelPressure,
+                    getSimPressureFactor());
         }
 
         intakePivot.setAngle(intakePivotAngleRad);
@@ -58,22 +59,20 @@ public class PutIntakeUpForShoot extends Command {
     @Override
     public void end(boolean interrupted) {
         intakePivot.setProfile(new TrapezoidProfile(IntakePivotConstants.kConstraints));
+        intakePivot.stop();
         intakeRoller.stop();
     }
 
     private double getSimPressureFactor() {
-        int numFuel = gameViz.getFuelInRobot();
-
-        if (numFuel >= fuelThresholdForFullPressure) {
-            return 1.0;
-
-        } else if (numFuel > fuelThresholdForNoPressure) {
-            return
-                (double) (numFuel - fuelThresholdForNoPressure) /
-                (fuelThresholdForFullPressure - fuelThresholdForNoPressure);
-                
-        } else {
-            return 0.0;
-        }
+        return
+            MathUtil.clamp(
+                MathUtil.inverseInterpolate(
+                    fuelThresholdForNoPressure,
+                    fuelThresholdForFullPressure,
+                    gameViz.getFuelInRobot()
+                ),
+                0.0,
+                1.0
+            );
     }
 }

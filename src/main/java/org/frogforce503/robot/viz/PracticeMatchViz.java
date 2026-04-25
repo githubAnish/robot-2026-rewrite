@@ -3,10 +3,10 @@ package org.frogforce503.robot.viz;
 import org.frogforce503.lib.rebuilt.sim.HubShiftUtil;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.RobotState;

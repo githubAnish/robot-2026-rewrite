@@ -31,7 +31,6 @@ public class DriveConstants {
     public static final double maxLinearSpeed;
     public static final double maxOmega;
 
-    public static final double mass = Units.lbsToKilograms(87.4200862); // from CAD
     public static final double wheelCOF = 1.9;
 
     public static final Translation2d[] moduleTranslations;

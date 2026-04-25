@@ -3,8 +3,8 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.flywheels.FlywheelsConstants;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;

@@ -1,13 +1,13 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.indexer.Indexer;
+import org.frogforce503.robot.subsystems.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivotConstants;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRollerConstants;
 
 import edu.wpi.first.wpilibj2.command.Command;
 

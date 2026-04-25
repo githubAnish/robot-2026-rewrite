@@ -3,8 +3,8 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.feeder.FeederConstants;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.util.Units;

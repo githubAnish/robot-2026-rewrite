@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
 
 public final class HubShiftUtil {
     private static final Timer shiftTimer = new Timer();
@@ -19,8 +19,8 @@ public final class HubShiftUtil {
     private static final double minFuelCountDelay = 1.0;
     private static final double maxFuelCountDelay = 2.0;
     private static final double shiftEndFuelCountExtension = 3.0;
-    private static final double minTimeOfFlight = ShotCalculator.getInstance().getMinTimeOfFlight();
-    private static final double maxTimeOfFlight = ShotCalculator.getInstance().getMaxTimeOfFlight();
+    private static final double minTimeOfFlight = LaunchCalculator.getInstance().getMinTimeOfFlight();
+    private static final double maxTimeOfFlight = LaunchCalculator.getInstance().getMaxTimeOfFlight();
     private static final double approachingActiveFudge = -1 * (minTimeOfFlight + minFuelCountDelay);
     private static final double endingActiveFudge = shiftEndFuelCountExtension + -1 * (maxTimeOfFlight + maxFuelCountDelay);
 

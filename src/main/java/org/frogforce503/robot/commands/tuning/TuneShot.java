@@ -2,16 +2,16 @@ package org.frogforce503.robot.commands.tuning;
 
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.indexer.Indexer;
+import org.frogforce503.robot.subsystems.indexer.IndexerConstants;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 import org.frogforce503.robot.viz.GameViz;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -75,7 +75,7 @@ public class TuneShot extends Command {
     public void execute() {
         // Get latest shot info
         ShotInfo shotInfo =
-            ShotCalculator.getInstance().calculateShotInfo(
+            LaunchCalculator.getInstance().calculateShotInfo(
                 drive.getPose(),
                 drive.getRobotVelocity(),
                 drive.getFieldVelocity());
@@ -101,7 +101,7 @@ public class TuneShot extends Command {
 
     private void recordShot(double launcherToTargetDistance) {
         final String prefix =
-            ShotCalculator.inAllianceZone(drive.getPose()) ? "hub" : "lob";
+            LaunchCalculator.inAllianceZone(drive.getPose()) ? "hub" : "lob";
 
         hoodMapEntries +=
             prefix + "HoodAngleMap.put(" + launcherToTargetDistance + ", Units.degreesToRadians(" + hoodAngleDeg.get() + "));\n";

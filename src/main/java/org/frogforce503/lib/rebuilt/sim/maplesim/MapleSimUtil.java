@@ -5,9 +5,9 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import org.frogforce503.lib.math.GeomUtil;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
+import org.frogforce503.robot.subsystems.launcher.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -93,7 +93,7 @@ public class MapleSimUtil {
                 Radians.of(Units.degreesToRadians(90) - hoodAngleRad)); // 0 deg hood = 90 deg shot angle (since shots have to go up) & vice versa
 
         fuel
-            .withTargetPosition(() -> ShotCalculator.getShotTarget(robotPose))
+            .withTargetPosition(() -> LaunchCalculator.getShotTarget(robotPose))
             .withTargetTolerance(shotTolerance)
             .setHitTargetCallBack(addScore);
 

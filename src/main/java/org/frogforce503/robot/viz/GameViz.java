@@ -1,19 +1,23 @@
 package org.frogforce503.robot.viz;
 
 import org.frogforce503.lib.rebuilt.sim.maplesim.MapleSimUtil;
+
+import java.util.Arrays;
+
 import org.frogforce503.lib.rebuilt.sim.BumpPhysicsSim;
 import org.frogforce503.lib.rebuilt.sim.ClimbPhysicsSim;
 import org.frogforce503.lib.rebuilt.sim.FuelShotQuantityCalculator;
-import org.frogforce503.lib.rebuilt.sim.FuelViz;
+import org.frogforce503.lib.rebuilt.sim.HopperFuelViz;
 import org.frogforce503.lib.rebuilt.sim.TrenchCollisionSim;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
 import org.ironmaple.simulation.IntakeSimulation;
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -44,7 +48,7 @@ public class GameViz {
     // Shoot Constants
     private final double leftMostFuelPositionOffset = Units.inchesToMeters(-8);
     private final double rightMostFuelPositionOffset = Units.inchesToMeters(10);
-    private final double shooterFireRateBallsPerSec = 7; // How many balls can shooter fire within 1 sec?
+    private final double launcherFireRateBallsPerSec = 7; // How many balls can launcher fire within 1 sec?
     private final Timer shotTimer = new Timer();
 
     public GameViz(
@@ -93,8 +97,14 @@ public class GameViz {
         superstructureViz.update(drivePose3d, hood.getAngleRad(), intakePivot.getAngleRad(), climber.getHeightMeters(), fuelInRobot);
 
         // Visualize fuel
+        Translation3d[] fuelInField =
+            Arrays
+                .stream(SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"))
+                .map(Pose3d::getTranslation)
+                .toArray(Translation3d[]::new);
+
         Translation3d[] fuelInHopper =
-            FuelViz.visualizeFuelInHopper(
+            HopperFuelViz.visualizeFuelInHopper(
                 drivePose3d,
                 fuelInRobot,
                 superstructureViz.getCurrentLinearExtensionX(),
@@ -104,7 +114,7 @@ public class GameViz {
 
         // Log data
         Logger.recordOutput("GameViz/DrivePose3d", drivePose3d);
-        Logger.recordOutput("GameViz/FuelTranslations", FuelViz.visualizeFuelInField());
+        Logger.recordOutput("GameViz/FuelTranslations", fuelInField);
         Logger.recordOutput("GameViz/NumFuelInRobot", fuelInRobot);
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
     }
@@ -128,7 +138,7 @@ public class GameViz {
             return; // Don't shoot balls if there are none
         }
 
-        double shotDelaySec = 1.0 / shooterFireRateBallsPerSec;
+        double shotDelaySec = 1.0 / launcherFireRateBallsPerSec;
 
         // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
         if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {

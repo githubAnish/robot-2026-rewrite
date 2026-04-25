@@ -3,8 +3,8 @@ package org.frogforce503.robot.commands.tuning;
 import org.frogforce503.lib.logging.LoggedTunableNumber;
 import org.frogforce503.lib.motorcontrol.FFConfig;
 import org.frogforce503.lib.motorcontrol.PIDConfig;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;

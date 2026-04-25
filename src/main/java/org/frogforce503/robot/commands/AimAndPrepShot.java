@@ -7,14 +7,14 @@ import org.frogforce503.lib.io.JoystickUtil;
 import org.frogforce503.robot.FieldConstants;
 import org.frogforce503.robot.subsystems.drive.Drive;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator.ShotInfo;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.feeder.FeederConstants;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.FlywheelsConstants;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.hood.HoodConstants;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.feeder.FeederConstants;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator.ShotInfo;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.flywheels.FlywheelsConstants;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
+import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -88,7 +88,7 @@ public class AimAndPrepShot extends Command {
     public void execute() {
         // Get latest shot info
         ShotInfo shotInfo =
-            ShotCalculator.getInstance().calculateShotInfo(
+            LaunchCalculator.getInstance().calculateShotInfo(
                 drive.getPose(),
                 drive.getRobotVelocity(),
                 drive.getFieldVelocity());
@@ -117,7 +117,7 @@ public class AimAndPrepShot extends Command {
         double hoodVelocityRadPerSec = 0.0;
         double flywheelsVelocityRadPerSec = 0.0;
 
-        switch (ShotCalculator.getInstance().getShotPreset()) {
+        switch (LaunchCalculator.getInstance().getShotPreset()) {
             case NONE:
                 hoodAngleRad = shotInfo.hoodAngleRad();
                 hoodVelocityRadPerSec = shotInfo.hoodVelocityRadPerSec();

@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.frogforce503.lib.auto.pathplanner.PathPlannerUtil;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.ShotCalculator;
+import org.frogforce503.robot.subsystems.launcher.LaunchCalculator;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -55,7 +55,7 @@ public final class WarmupExecutor {
     }
 
     private void warmupShotCalculator() {
-        ShotCalculator.getInstance().calculateShotInfo(
+        LaunchCalculator.getInstance().calculateShotInfo(
             drive.getPose(),
             drive.getRobotVelocity(),
             drive.getFieldVelocity()

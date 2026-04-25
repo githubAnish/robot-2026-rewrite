@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
 import org.frogforce503.robot.subsystems.drive.DriveConstants;
+import org.frogforce503.robot.viz.SimConstants;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -31,7 +32,7 @@ public class DriveIOMapleSim extends DriveIOPhoenix {
         drivetrain =
             new MapleSimSwerveDrivetrain(
                 Seconds.of(kSimLoopPeriod),
-                Kilograms.of(DriveConstants.mass),
+                Kilograms.of(SimConstants.mass),
                 Meters.of(DriveConstants.bumperLength),
                 Meters.of(DriveConstants.bumperWidth),
                 DCMotor.getKrakenX60Foc(1),

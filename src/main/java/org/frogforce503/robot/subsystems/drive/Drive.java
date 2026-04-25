@@ -4,7 +4,6 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.logging.LoggerUtil;
 import org.frogforce503.lib.rebuilt.sim.TrenchCollisionSim;
 import org.frogforce503.lib.swerve.MapleSimSwerveDrivetrain;
-import org.frogforce503.lib.vision.apriltagdetection.VisionMeasurement;
 import org.frogforce503.robot.subsystems.drive.io.DriveIO;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOInputsAutoLogged;
 import org.frogforce503.robot.subsystems.drive.io.DriveIOMapleSim;
@@ -80,13 +79,6 @@ public class Drive extends SubsystemBase {
 
     public void setAngle(Rotation2d rotation) {
         io.setAngle(rotation);
-    }
-
-    public void addVisionMeasurement(VisionMeasurement measurement) {
-        io.addVisionMeasurement(
-            measurement.pose(),
-            measurement.timestamp(),
-            measurement.standardDeviations());
     }
 
     // Control Methods

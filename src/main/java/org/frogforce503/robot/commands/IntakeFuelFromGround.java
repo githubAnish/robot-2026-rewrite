@@ -1,9 +1,9 @@
 package org.frogforce503.robot.commands;
 
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivotConstants;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRollerConstants;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivotConstants;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRollerConstants;
 import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.wpilibj.RobotBase;

@@ -2,7 +2,7 @@ package org.frogforce503.robot.subsystems.climber.io;
 
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.climber.ClimberConstants;
-import org.frogforce503.robot.subsystems.drive.DriveConstants;
+import org.frogforce503.robot.viz.SimConstants;
 
 import com.revrobotics.sim.SparkMaxSim;
 
@@ -17,7 +17,7 @@ public class ClimberIOSim extends ClimberIOSpark {
 
     // Constants
     private final DCMotor motorModel = DCMotor.getNEO(1);
-    private final double simCarriageMass = DriveConstants.mass; // has to lift robot weight
+    private final double simCarriageMass = SimConstants.mass; // has to lift robot weight
 
     public ClimberIOSim() {
         motorSim = new SparkMaxSim(super.getMotor(), motorModel);

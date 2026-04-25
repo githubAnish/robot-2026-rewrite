@@ -13,7 +13,6 @@ public class Constants {
     public static final boolean isPracticeMatch = true;
 
     public static final double loopPeriodSecs = LoggedRobot.defaultPeriodSecs;
-    public static final double loopPeriodWatchdogSecs = 0.2;
 
     public static Mode getMode() {
         return switch (robot) {

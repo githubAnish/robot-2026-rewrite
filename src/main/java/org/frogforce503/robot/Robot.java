@@ -31,6 +31,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends LoggedRobot {
+    private final double loopPeriodWatchdogSecs = 0.2;
+
     private final LoggedJVM loggedJVM = new LoggedJVM();
     private final RobotContainer robotContainer;
     
@@ -75,11 +77,11 @@ public class Robot extends LoggedRobot {
             Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
             watchdogField.setAccessible(true);
             Watchdog watchdog = (Watchdog) watchdogField.get(this);
-            watchdog.setTimeout(Constants.loopPeriodWatchdogSecs);
+            watchdog.setTimeout(loopPeriodWatchdogSecs);
         } catch (Exception e) {
             DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
         }
-        CommandScheduler.getInstance().setPeriod(Constants.loopPeriodWatchdogSecs);
+        CommandScheduler.getInstance().setPeriod(loopPeriodWatchdogSecs);
 
         // Configure brownout voltage
         RobotController.setBrownoutVoltage(6.0);

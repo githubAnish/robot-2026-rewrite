@@ -30,8 +30,8 @@ public class TeleopDriveCommand extends Command {
     private final double headingHoldDelay = 0.25;
     private final Timer headingHoldTimer = new Timer();
 
-    private static final double translationDeadband = 0.02;
-    private static final double omegaDeadband = 0.05;
+    private final double translationDeadband = 0.02;
+    private final double omegaDeadband = 0.05;
 
     // State
     private TeleopDriveState currentState = TeleopDriveState.IDLE;

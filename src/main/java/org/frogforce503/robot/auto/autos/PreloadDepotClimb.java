@@ -4,12 +4,12 @@ import org.frogforce503.lib.auto.bline.BLineUtil;
 import org.frogforce503.robot.auto.AutoMode;
 import org.frogforce503.robot.subsystems.climber.Climber;
 import org.frogforce503.robot.subsystems.drive.Drive;
-import org.frogforce503.robot.subsystems.superstructure.feeder.Feeder;
-import org.frogforce503.robot.subsystems.superstructure.flywheels.Flywheels;
-import org.frogforce503.robot.subsystems.superstructure.hood.Hood;
-import org.frogforce503.robot.subsystems.superstructure.indexer.Indexer;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.IntakePivot;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.feeder.Feeder;
+import org.frogforce503.robot.subsystems.indexer.Indexer;
+import org.frogforce503.robot.subsystems.intakepivot.IntakePivot;
+import org.frogforce503.robot.subsystems.intakeroller.IntakeRoller;
+import org.frogforce503.robot.subsystems.launcher.flywheels.Flywheels;
+import org.frogforce503.robot.subsystems.launcher.hood.Hood;
 import org.frogforce503.robot.viz.GameViz;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +19,8 @@ import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
 public class PreloadDepotClimb extends AutoMode {
-    private final Path initToDepotShotPose;
+    private final Path initToDepot;
+    private final Path depotToShotPose;
 
     public PreloadDepotClimb(
         Drive drive,
@@ -35,14 +36,18 @@ public class PreloadDepotClimb extends AutoMode {
     ) {
         super(drive, intakePivot, intakeRoller, indexer, feeder, hood, flywheels, climber, gameViz, autoBuilder);
 
-        initToDepotShotPose = new Path("InitToDepotShotPose");
+        initToDepot = new Path("InitToDepot");
+        depotToShotPose = new Path("DepotToShotPose");
     }
 
     @Override
     public Command getCommand() {
         return Commands.sequence(
             Commands.deadline(
-                drive(initToDepotShotPose),
+                Commands.sequence(
+                    drive(initToDepot),
+                    drive(depotToShotPose)
+                ),
                 intake()
             ),
             shoot().withTimeout(5),
@@ -52,6 +57,6 @@ public class PreloadDepotClimb extends AutoMode {
 
     @Override
     public Pose2d[] getPoses() {
-        return BLineUtil.getPoses(initToDepotShotPose);
+        return BLineUtil.getPoses(initToDepot, depotToShotPose);
     }
 }
