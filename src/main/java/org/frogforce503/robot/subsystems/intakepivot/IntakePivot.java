@@ -14,7 +14,7 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.intakepivot.io.IntakePivotIO;
-import org.frogforce503.robot.subsystems.superstructure.intakepivot.io.IntakePivotIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.intakepivot.io.IntakePivotIOInputsAutoLogged;
 
 public class IntakePivot extends FFSubsystemBase {
     private final IntakePivotIO io;

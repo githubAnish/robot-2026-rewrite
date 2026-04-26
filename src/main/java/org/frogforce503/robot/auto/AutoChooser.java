@@ -29,6 +29,7 @@ import lombok.Getter;
 
 public class AutoChooser {
     private final Drive drive;
+    private final GameViz gameViz;
     @Getter private final FollowPath.Builder blineAutoBuilder;
 
     private final LoggedDashboardChooser<AutoMode> routineChooser = new LoggedDashboardChooser<>("Auto");
@@ -50,6 +51,7 @@ public class AutoChooser {
         GameViz gameViz
     ) {
         this.drive = drive;
+        this.gameViz = gameViz;
 
         // Configure PathPlanner
         PathPlannerUtil.configureAutoBuilder(drive);
@@ -116,7 +118,7 @@ public class AutoChooser {
     }
 
     private void logTrajectory(Pose2d... trajectory) {
-        drive.getViz().getObject("Trajectory").setPoses(trajectory);
+        gameViz.getField2d().getObject("Trajectory").setPoses(trajectory);
         Logger.recordOutput("Drive/Trajectory", trajectory);
     }
 }

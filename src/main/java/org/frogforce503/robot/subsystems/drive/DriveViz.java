@@ -4,8 +4,6 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
@@ -13,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
-public class DriveViz extends Field2d {
+public class DriveViz {
     private final boolean logModules = false;
 
     private final LoggedMechanism2d[] moduleMechanisms;
@@ -21,8 +19,6 @@ public class DriveViz extends Field2d {
     private final LoggedMechanismLigament2d[] moduleDirections;
 
     public DriveViz() {
-        SmartDashboard.putData("Field", this);
-
         moduleMechanisms =
             new LoggedMechanism2d[] {
                 new LoggedMechanism2d(1, 1),
@@ -57,7 +53,6 @@ public class DriveViz extends Field2d {
 
         // Log robot pose
         Logger.recordOutput("Drive/Pose", pose);
-        setRobotPose(pose);
 
         // Log robot velocities
         Translation2d robotRelativeVelocity = new Translation2d(robotRelativeSpeeds.vxMetersPerSecond, robotRelativeSpeeds.vyMetersPerSecond);

@@ -54,8 +54,8 @@ public class DriveFeedforwardCharacterization extends Command {
                 drive.runCharacterization(0.0);
                 
                 if (timer.hasElapsed(ffStartDelaySec)) {
-                    currentState = CharacterizationState.CHARACTERIZING;
                     timer.restart();
+                    currentState = CharacterizationState.CHARACTERIZING;
                 }
                 break;
 

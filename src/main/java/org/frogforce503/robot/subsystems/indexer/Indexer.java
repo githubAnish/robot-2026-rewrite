@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.indexer;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.subsystems.indexer.io.IndexerIO;
-import org.frogforce503.robot.subsystems.superstructure.indexer.io.IndexerIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.indexer.io.IndexerIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;

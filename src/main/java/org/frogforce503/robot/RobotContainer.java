@@ -47,6 +47,10 @@ import org.frogforce503.robot.subsystems.launcher.hood.HoodConstants;
 import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIO;
 import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIOSim;
 import org.frogforce503.robot.subsystems.vision.Vision;
+import org.frogforce503.robot.subsystems.vision.VisionConstants;
+import org.frogforce503.robot.subsystems.vision.VisionConstants.VisionEstimateConsumer;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIO;
+import org.frogforce503.robot.subsystems.vision.io.apriltagdetection.AprilTagIOPhotonSim;
 import org.frogforce503.robot.viz.GameViz;
 import org.frogforce503.robot.viz.PracticeMatchViz;
 import org.frogforce503.robot.viz.VisionSimulator;
@@ -109,6 +113,9 @@ public class RobotContainer {
     // Commands
     private final TeleopDriveCommand teleopDriveCommand;
     
+    // Other
+    private final VisionEstimateConsumer visionEstimateConsumer = drive::addVisionMeasurement;
+
     public RobotContainer() {
         // Initialize subsystems based on robot type
         if (Constants.getMode() != Mode.REPLAY) {
@@ -130,7 +137,15 @@ public class RobotContainer {
                                 : new DriveIOBasicSim());
 
                     vision =
-                        new Vision();
+                        new Vision(
+                            visionEstimateConsumer,
+                            new AprilTagIO[] {
+                                new AprilTagIOPhotonSim(VisionConstants.leftCameraConfig),
+                                new AprilTagIOPhotonSim(VisionConstants.rightCameraConfig),
+                                new AprilTagIOPhotonSim(VisionConstants.backCameraConfig),
+                                new AprilTagIOPhotonSim(VisionConstants.backLeftCameraConfig)
+                            }
+                        );
 
                     intakePivot = new IntakePivot(new IntakePivotIOSim());
                     intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
@@ -150,8 +165,7 @@ public class RobotContainer {
         }
 
         if (vision == null) {
-            vision =
-                new Vision();
+            vision = new Vision(visionEstimateConsumer, new AprilTagIO[] {});
         }
 
         if (intakePivot == null) {

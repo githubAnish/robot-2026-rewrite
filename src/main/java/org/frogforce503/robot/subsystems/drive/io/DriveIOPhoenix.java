@@ -94,13 +94,13 @@ public class DriveIOPhoenix extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     }
 
     @Override
-    public void addVisionMeasurement(Pose2d poseEstimate, double timestamp, Matrix<N3, N1> stdDevs) {
+    public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {
         double newTimestamp = Utils.fpgaToCurrentTime(timestamp);
 
         if (stdDevs != null) {
-            super.addVisionMeasurement(poseEstimate, newTimestamp, stdDevs);
+            super.addVisionMeasurement(pose, newTimestamp, stdDevs);
         } else {
-            super.addVisionMeasurement(poseEstimate, newTimestamp);
+            super.addVisionMeasurement(pose, newTimestamp);
         }
     }
 

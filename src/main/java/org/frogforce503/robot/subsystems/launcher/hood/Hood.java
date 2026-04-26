@@ -14,7 +14,7 @@ import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.Constants;
 import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIO;
-import org.frogforce503.robot.subsystems.superstructure.hood.io.HoodIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.launcher.hood.io.HoodIOInputsAutoLogged;
 
 public class Hood extends FFSubsystemBase {
     private final HoodIO io;

@@ -3,7 +3,7 @@ package org.frogforce503.robot.subsystems.intakeroller;
 import org.frogforce503.lib.logging.LoggedTracer;
 import org.frogforce503.lib.subsystem.FFSubsystemBase;
 import org.frogforce503.robot.subsystems.intakeroller.io.IntakeRollerIO;
-import org.frogforce503.robot.subsystems.superstructure.intakeroller.io.IntakeRollerIOInputsAutoLogged;
+import org.frogforce503.robot.subsystems.intakeroller.io.IntakeRollerIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;

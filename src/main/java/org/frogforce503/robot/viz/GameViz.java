@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import lombok.Getter;
 
 public class GameViz {
@@ -119,6 +120,10 @@ public class GameViz {
         Logger.recordOutput("GameViz/FuelInHopper", fuelInHopper);
     }
 
+    public Field2d getField2d() {
+        return visionViz.getAprilTagDetectionSimulator().getDebugField();
+    }
+
     public int getFuelInRobot() {
         return Constants.usingMapleSim ? intakeSimulation.getGamePiecesAmount() : 0;
     }
@@ -138,11 +143,16 @@ public class GameViz {
             return; // Don't shoot balls if there are none
         }
 
+        // Ensure timer is running
+        if (!shotTimer.isRunning()) {
+            shotTimer.start();
+        }
+
         double shotDelaySec = 1.0 / launcherFireRateBallsPerSec;
 
-        // Allow very first shot (timer not used yet, get() == 0.0), or when cooldown has elapsed
-        if (shotTimer.isRunning() && !shotTimer.hasElapsed(shotDelaySec)) {
-            return; // Cooldown not done; skip creating new projectile
+        // Proceed if enough time has passed
+        if (!shotTimer.advanceIfElapsed(shotDelaySec)) {
+            return;
         }
 
         // Check fuel amount
@@ -167,9 +177,6 @@ public class GameViz {
                 new Transform2d(0.0, offset, Rotation2d.kZero),
                 onScore);
         }
-
-        // Restart cooldown timer after firing
-        shotTimer.restart();
     }
 
     public void shootFuel() {
