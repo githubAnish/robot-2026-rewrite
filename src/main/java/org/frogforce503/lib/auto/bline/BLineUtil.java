@@ -59,4 +59,72 @@ public final class BLineUtil {
 
         return poses.toArray(Pose2d[]::new);
     }
+
+    public static Pose2d[] simulateTrail(
+        List<Translation2d> waypoints,
+        double handoffRadius,
+        double maxVel,
+        double maxAcc,
+        double dt
+    ) {
+        List<Pose2d> trail = new ArrayList<>();
+
+        if (waypoints.size() < 2) return new Pose2d[0];
+
+        Translation2d pos = waypoints.get(0);
+        trail.add(new Pose2d(pos, new Rotation2d()));
+
+        double vel = 0.0;
+        int currentTarget = 1;
+
+        while (currentTarget < waypoints.size()) {
+            Translation2d target = waypoints.get(currentTarget);
+            boolean isLast = (currentTarget == waypoints.size() - 1);
+            double distToTarget = pos.getDistance(target);
+
+            // Handoff — advance target early if within radius and not last
+            if (!isLast && distToTarget < handoffRadius) {
+                currentTarget++;
+                continue;
+            }
+
+            // Remaining distance through all upcoming waypoints
+            double remaining = distToTarget;
+            for (int i = currentTarget; i < waypoints.size() - 1; i++) {
+                remaining += waypoints.get(i).getDistance(waypoints.get(i + 1));
+            }
+
+            // Speed from kinematic formula, rate limited
+            double desiredVel = Math.min(maxVel, Math.sqrt(2.0 * maxAcc * remaining));
+            double maxDelta = maxAcc * dt;
+            vel = Math.clamp(desiredVel, vel - maxDelta, vel + maxDelta);
+
+            // Step toward target
+            Translation2d dir = target.minus(pos);
+            double dist = dir.getNorm();
+
+            if (dist < 1e-6) {
+                currentTarget++;
+                continue;
+            }
+
+            Translation2d unitDir = dir.div(dist);
+            double step = vel * dt;
+
+            if (step >= dist) {
+                pos = target;
+                if (isLast) {
+                    trail.add(new Pose2d(pos, new Rotation2d()));
+                    break;
+                }
+                currentTarget++;
+            } else {
+                pos = pos.plus(unitDir.times(step));
+            }
+
+            trail.add(new Pose2d(pos, new Rotation2d()));
+        }
+
+        return trail.toArray(new Pose2d[0]);
+    }
 }
